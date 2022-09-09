@@ -6,7 +6,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 const port = process.env.PORT || 1337;
-
+console.log(process.env.SQL_AZURE_USERNAME);
 app.use(express.json());
 
 app.use((req, res, next) => {
