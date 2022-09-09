@@ -16,7 +16,11 @@ app.use((req, res, next) => {
 app.use("/", HomeRoute);
 
 app.get("/", (req, res) => {
-  return res.send("Hello World! I am from Backend");
+  const time = new Date().getTime();
+  const date = new Date().toDateString();
+  return res.send({
+    success: `The server is working fine on the date ${date} and ${time}`,
+  });
 });
 app.listen(port, () => {
   console.log(`The server is listening on ${port}`);
