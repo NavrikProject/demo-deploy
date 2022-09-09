@@ -5,7 +5,7 @@ import HomeRoute from "./routes/indexRoute.js";
 dotenv.config();
 const app = express();
 app.use(cors());
-const port = process.env.PORT || 1300;
+const port = process.env.PORT || 1337;
 
 app.use(express.json());
 
