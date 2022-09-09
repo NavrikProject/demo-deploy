@@ -1,8 +1,8 @@
 import express from "express";
-import { homeRoute } from "../controllers/indexController.js";
+import { getUsers, homeRoute } from "../controllers/indexController.js";
 
 let router = express.Router();
 
 router.get("/home", homeRoute);
-
+router.get("/users", getUsers);
 export default router;
