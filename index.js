@@ -14,6 +14,10 @@ app.use((req, res, next) => {
   next();
 });
 app.use("/", HomeRoute);
+
+app.get("/", (req, res) => {
+  return res.send("Hello World! I am from Backend");
+});
 app.listen(port, () => {
   console.log(`The server is listening on ${port}`);
 });
