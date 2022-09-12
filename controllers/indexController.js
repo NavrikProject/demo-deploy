@@ -9,23 +9,19 @@ export const homeRoute = (req, res) => {
   // return res.send({
   //   message: `The server is working on fine with this time ${time} and date ${new Date().toDateString()}`,
   // });
-  fs.writeFile(
-    `${__dirname}/mnt/testing/mynewfile2.txt`,
-    "Hello world",
-    (err) => {
-      if (err) return res.send({ err: err.message });
-    }
-  );
-  fs.close();
-  fs.readFile(
-    `${__dirname}/mnt/testing/mynewfile2.txt`,
-    "utf8",
-    function (err, result) {
-      return res.json(result);
-    }
-  );
+  fs.writeFileSync(`${__dirname}/mnt/testing/mynewfile2.txt`, "Hello world");
 };
-
+export const getData = (req, res) => {
+  try {
+    const data = fs.readFileSync(
+      `${__dirname}/mnt/testing/mynewfile2.txt`,
+      "utf8"
+    );
+    return res.send(data);
+  } catch (err) {
+    return res.send(err);
+  }
+};
 export const getUsers = (req, res) => {
   try {
     sql.connect(config, (err, connection) => {
