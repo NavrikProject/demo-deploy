@@ -1,4 +1,5 @@
 {
   "appService.defaultWebAppToDeploy": "/subscriptions/c3dca57b-cdcc-4d36-a1c8-3f6304b89937/microsoft.web/sites/subscriptions/c3dca57b-cdcc-4d36-a1c8-3f6304b89937/resourceGroups/Navrik-RG/providers/Microsoft.Web/sites/testing-practiwiz",
-  "appService.deploySubpath": "."
+  "appService.deploySubpath": ".",
+  "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"]
 }

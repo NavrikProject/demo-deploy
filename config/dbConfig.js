@@ -7,6 +7,7 @@ const config = {
   password: process.env.SQL_AZURE_PWD,
   database: process.env.SQL_AZURE_DATABASE,
   server: process.env.SQL_AZURE_SERVER,
+
   // authentication: {
   //   options: {
   //     userName: process.env.SQL_AZURE_USERNAME, // update me
