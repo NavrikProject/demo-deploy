@@ -1,19 +1,23 @@
 import config from "../config/dbConfig.js";
 import sql from "mssql";
+import fs from "fs";
+import path from "path";
+const __dirname = path.resolve();
 
 export const homeRoute = (req, res) => {
   const time = new Date().getTime();
   // return res.send({
   //   message: `The server is working on fine with this time ${time} and date ${new Date().toDateString()}`,
   // });
-  fs.writeFileSync(
+  fs.writeFile(
     `${__dirname}/mnt/testing/mynewfile2.txt`,
-    "w",
-    "Hello world"
+    "Hello world",
+    (err) => {
+      if (err) return res.send({ err: err.message });
+    }
   );
-
   fs.close();
-  fs.readFileSync(
+  fs.readFile(
     `${__dirname}/mnt/testing/mynewfile2.txt`,
     "utf8",
     function (err, result) {
