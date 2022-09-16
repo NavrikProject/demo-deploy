@@ -4,7 +4,6 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
-import sql from "mssql/msnodesqlv8.js";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import authRouter from "./routes/authRoute.js";
