@@ -982,7 +982,7 @@ export async function getAllRefundedSessions(req, res, next) {
 function sentEmailRemainderBeforeOneDayToTrainee(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return console.log(err.message);
+      if (err) return res.send(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const traineeSessionStatus = "upcoming";
@@ -1027,7 +1027,7 @@ function sentEmailRemainderBeforeOneDayToTrainee(req, res) {
 function sentEmailRemainderOnTheDayToTrainee(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return console.log(err.message);
+      if (err) return res.send(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const traineeSessionStatus = "upcoming";
@@ -1071,7 +1071,7 @@ function sentEmailRemainderOnTheDayToTrainee(req, res) {
 function sentEmailRemainderToTraineeBefore10Min(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return console.log(err.message);
+      if (err) return res.send(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const traineeSessionStatus = "upcoming";
@@ -1109,6 +1109,26 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                   });
               });
             }
+            if (min === "15") {
+              const date = new Date(year, month, day, hour, 5, 0);
+              schedule.scheduleJob(date, function () {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = sendRemainderOnTheDay(
+                  traineeEmail,
+                  "Remainder for the session will start in 10 minutes",
+                  traineeJoinUrl,
+                  "Join Meeting"
+                );
+                sgMail
+                  .send(msg)
+                  .then(() => {
+                    console.log("Sent");
+                  })
+                  .catch((error) => {
+                    console.log(error.message);
+                  });
+              });
+            }
             if (min === "30") {
               min = min - 10;
               const date = new Date(year, month, day, hour, min, 0);
@@ -1118,7 +1138,27 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                   traineeEmail,
                   "Remainder for the session will start in 10 minutes",
                   traineeJoinUrl,
-                  "Start Meeting"
+                  "Join Meeting"
+                );
+                sgMail
+                  .send(msg)
+                  .then(() => {
+                    console.log("Sent");
+                  })
+                  .catch((error) => {
+                    console.log(error.message);
+                  });
+              });
+            }
+            if (min === "45") {
+              const date = new Date(year, month, day, hour, 35, 0);
+              schedule.scheduleJob(date, function () {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = sendRemainderOnTheDay(
+                  traineeEmail,
+                  "Remainder for the session will start in 10 minutes",
+                  traineeJoinUrl,
+                  "Join Meeting"
                 );
                 sgMail
                   .send(msg)
@@ -1141,7 +1181,7 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
 function sentEmailRemainderToTraineeBefore5Min(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return console.log(err.message);
+      if (err) return res.send(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const traineeSessionStatus = "upcoming";
@@ -1165,7 +1205,27 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = sendRemainderOnTheDay(
                   traineeEmail,
-                  "Remainder for the session will start in 5 minutes",
+                  "Remainder for the session will start in 10 minutes",
+                  traineeJoinUrl,
+                  "Join Meeting"
+                );
+                sgMail
+                  .send(msg)
+                  .then(() => {
+                    console.log("Sent");
+                  })
+                  .catch((error) => {
+                    console.log(error.message);
+                  });
+              });
+            }
+            if (min === "15") {
+              const date = new Date(year, month, day, hour, 10, 0);
+              schedule.scheduleJob(date, function () {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = sendRemainderOnTheDay(
+                  traineeEmail,
+                  "Remainder for the session will start in 10 minutes",
                   traineeJoinUrl,
                   "Join Meeting"
                 );
@@ -1180,13 +1240,32 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
               });
             }
             if (min === "30") {
-              min = min - 5;
-              const date = new Date(year, month, day, hour, min, 0);
+              const date = new Date(year, month, day, hour, 25, 0);
               schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = sendRemainderOnTheDay(
                   traineeEmail,
-                  "Remainder for the session will start in 5 minutes",
+                  "Remainder for the session will start in 10 minutes",
+                  traineeJoinUrl,
+                  "Join Meeting"
+                );
+                sgMail
+                  .send(msg)
+                  .then(() => {
+                    console.log("Sent");
+                  })
+                  .catch((error) => {
+                    console.log(error.message);
+                  });
+              });
+            }
+            if (min === "45") {
+              const date = new Date(year, month, day, hour, 40, 0);
+              schedule.scheduleJob(date, function () {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = sendRemainderOnTheDay(
+                  traineeEmail,
+                  "Remainder for the session will start in 10 minutes",
                   traineeJoinUrl,
                   "Join Meeting"
                 );
@@ -1210,7 +1289,7 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
 function sentEmailRemainderToTraineeToStart(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return console.log(err.message);
+      if (err) return res.send(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const traineeSessionStatus = "upcoming";
@@ -1255,7 +1334,7 @@ function sentEmailRemainderToTraineeToStart(req, res) {
 function sentEmailRemainderToFillFeedback(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return console.log(err.message);
+      if (err) return res.send(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const traineeSessionStatus = "attended";
@@ -1270,8 +1349,8 @@ function sentEmailRemainderToFillFeedback(req, res) {
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_end_time.split(":")[0];
-            console.log(hour);
-            const date = new Date(year, month, day, hour, 0, 0);
+            let min = res.booking_end_time.split(":")[1];
+            const date = new Date(year, month, day, hour, min, 0);
             schedule.scheduleJob(date, function () {
               sgMail.setApiKey(process.env.SENDGRID_API_KEY);
               const msg = sendRemainderOnTheDay(

@@ -13,7 +13,7 @@ export async function emailRegister(req, res, next) {
   const email = req.body.email;
   const firstName = req.body.firstName;
   const lastName = req.body.lastName;
-  const type = req.body.radio;
+  const type = req.body.type;
   const lowEmail = email.toLowerCase();
   const password = req.body.password;
 

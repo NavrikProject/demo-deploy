@@ -3,8 +3,44 @@ import config from "../config/dbconfig.js";
 import sgMail from "@sendgrid/mail";
 import { sendFeedbackEmail } from "../middleware/sendRemainder.js";
 import path from "path";
-import fs from "fs";
+import BlobServiceClient from "@azure/storage-blob";
+
 const __dirname = path.resolve();
+
+let blobServiceClient;
+async function getBlobServiceClient() {
+  if (!blobServiceClient) {
+    blobServiceClient = await BlobServiceClient.fromConnectionString(
+      process.env.AZURE_STORAGE_CONNECTION_STRING
+    );
+  }
+  return blobServiceClient;
+}
+export async function imageHandler(req, res) {
+  const bsClient = await getBlobServiceClient();
+
+  // const blobName = new Date().getTime() + "-" + req.files.image.name;
+
+  // let fileName = `https://navrik.blob.core.windows.net/navrikimage/${blobName}`;
+  // const stream = intoStream(req.files.image.data);
+  // const streamLength = req.files.image.data.length;
+
+  // try {
+  //   blobService.createBlockBlobFromStream(
+  //     containerName,
+  //     blobName,
+  //     stream,
+  //     streamLength,
+  //     (err) => {
+  //       if (err) {
+  //         res.send({ error: err.message });
+  //       }
+  //     }
+  //   );
+  // } catch (error) {
+  //   console.log(err.message);
+  // }
+}
 
 export async function insertFeedBackController(req, res) {
   let {
@@ -290,7 +326,6 @@ export async function uploadImage(req, res, next) {
     return res.status(480).send(" No files were uploaded . ");
   }
   const file = req.files.image;
-
   file.mv(
     `${__dirname}/mnt/testing/${new Date().getTime() + file.name}`,
     (err) => {
@@ -299,13 +334,4 @@ export async function uploadImage(req, res, next) {
       return res.send({ message: "The file was uploaded successfully" });
     }
   );
-}
-
-export async function getTheImage() {
-  fs.writeFileSync(
-    `${__dirname}/mnt/testing/mynewfile2.txt`,
-    "w",
-    "Hello world"
-  );
-  fs.close();
 }

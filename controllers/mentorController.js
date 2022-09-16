@@ -19,15 +19,15 @@ const blobService = azureStorage.createBlobService(
 );
 
 // to join as a mentor
-export async function registerMentor(req, res) {
+export async function fillAdditionalMentorDetails(req, res) {
   let {
     email,
-    password,
     firstname,
     lastname,
     bio,
     experience,
     skills,
+    otherSkills,
     firm,
     currentRole,
     previousRole,
@@ -38,29 +38,26 @@ export async function registerMentor(req, res) {
     mentorshipArea,
     website,
     linkedInProfile,
+    phoneNumber,
   } = req.body;
 
   firstname = firstname.toLowerCase();
   lastname = lastname.toLowerCase();
   if (
-    !email &&
-    experience &&
-    skills &&
-    specialty &&
-    password &&
-    firstname &&
-    lastname &&
-    mentorshipArea &&
-    from &&
-    to &&
-    req.files.image
+    !experience &&
+    !skills &&
+    !specialty &&
+    !firstname &&
+    !lastname &&
+    !mentorshipArea &&
+    !startTime &&
+    !endTime &&
+    !req.files.image
   ) {
     return res.send({
       error: "All details must be required",
     });
   }
-  let saltRounds = await bcrypt.genSalt(12);
-  let hashedPassword = await bcrypt.hash(password, saltRounds);
   const blobName = new Date().getTime() + "-" + req.files.image.name;
   const lowEmail = email.toLowerCase();
 
@@ -70,147 +67,83 @@ export async function registerMentor(req, res) {
 
   try {
     sql.connect(config, async (err) => {
-      if (err) {
-        return res.send(err.message);
-      }
+      let startDate = new Date().toISOString().substring(0, 10);
+      let endDate = addMonths(new Date(startDate), 3);
+      var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+      endDate = endDate.toISOString().substring(0, 10);
+      if (err) res.send(err.message);
       const request = new sql.Request();
-      request.input("email", sql.VarChar, lowEmail);
       request.query(
-        "select * from users_dtls where user_email = @email",
-        (err, result) => {
-          if (err) return res.send(err.message);
-          if (result.recordset.length > 0) {
-            return res.send({
-              error:
-                "This email address is already in use, Please use another email address",
-            });
-          } else {
-            sql.connect(config, async (err) => {
-              if (err) res.send(err.message);
-              var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-              const type = "mentor";
-              const request = new sql.Request();
-              request.query(
-                "insert into users_dtls (user_email,user_pwd,user_logindate,user_logintime,user_firstname,user_lastname,user_creation,user_type) VALUES('" +
-                  email +
-                  "','" +
-                  hashedPassword +
-                  "','" +
-                  timestamp +
-                  "','" +
-                  timestamp +
-                  "','" +
-                  firstname +
-                  "','" +
-                  lastname +
-                  "','" +
-                  timestamp +
-                  "','" +
-                  type +
-                  "' )",
-                (err, success) => {
-                  if (err) {
-                    return res.send({ error: err.message });
-                  }
-                  if (success) {
-                    sql.connect(config, async (err) => {
-                      let startDate = new Date().toISOString().substring(0, 10);
-                      let endDate = addMonths(new Date(startDate), 3);
-                      endDate = endDate.toISOString().substring(0, 10);
-                      if (err) res.send(err.message);
-                      const request = new sql.Request();
-                      request.query(
-                        "insert into mentor_dtls (mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_website,mentor_linkedin_profile, mentor_sessions_conducted,mentor_image) VALUES('" +
-                          email +
-                          "','" +
-                          firstname +
-                          "','" +
-                          lastname +
-                          "','" +
-                          startDate +
-                          "','" +
-                          endDate +
-                          "','" +
-                          mentorAvailability +
-                          "','" +
-                          startTime +
-                          "','" +
-                          endTime +
-                          "','" +
-                          timestamp +
-                          "','" +
-                          experience +
-                          "','" +
-                          skills +
-                          "','" +
-                          mentorshipArea +
-                          "','" +
-                          specialty +
-                          "','" +
-                          bio +
-                          "','" +
-                          currentRole +
-                          "','" +
-                          previousRole +
-                          "','" +
-                          firm +
-                          "','" +
-                          website +
-                          "','" +
-                          linkedInProfile +
-                          "','" +
-                          1 +
-                          "','" +
-                          fileName +
-                          "')",
-                        (err, success) => {
-                          if (err) {
-                            return res.send({ error: err.message });
-                          }
-                          if (success) {
-                            blobService.createBlockBlobFromStream(
-                              containerName,
-                              blobName,
-                              stream,
-                              streamLength,
-                              (err) => {
-                                if (err) {
-                                  res.send({ error: err.message });
-                                }
-                                if (!err) {
-                                  sgMail.setApiKey(
-                                    process.env.SENDGRID_API_KEY
-                                  );
-                                  const msg = updateEmail(
-                                    email,
-                                    "Mentor form successfully",
-                                    "Successfully submitted the application for a mentor.We will review all your application and get back to you with update,Thanks."
-                                  );
-                                  sgMail
-                                    .send(msg)
-                                    .then(() => {
-                                      return res.send({
-                                        success:
-                                          "Successfully submitted the mentor we will get back to you once, We review your application.",
-                                      });
-                                    })
-                                    .catch((error) => {
-                                      return res.send({
-                                        error:
-                                          "There was an error while submitting the details please try again later",
-                                      });
-                                    });
-                                }
-                              }
-                            );
-                          }
-                        }
-                      );
-                    });
-                  }
-                }
-              );
-            });
+        "insert into mentor_dtls(mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_otherSkills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_phone_number,mentor_website,mentor_linkedin_profile,mentor_image) VALUES('" +
+          lowEmail +
+          "','" +
+          firstname +
+          "','" +
+          lastname +
+          "','" +
+          startDate +
+          "','" +
+          endDate +
+          "','" +
+          mentorAvailability +
+          "','" +
+          startTime +
+          "','" +
+          endTime +
+          "','" +
+          timestamp +
+          "','" +
+          experience +
+          "','" +
+          skills +
+          "','" +
+          otherSkills +
+          "','" +
+          mentorshipArea +
+          "','" +
+          specialty +
+          "','" +
+          bio +
+          "','" +
+          currentRole +
+          "','" +
+          previousRole +
+          "','" +
+          firm +
+          "','" +
+          phoneNumber +
+          "','" +
+          website +
+          "','" +
+          linkedInProfile +
+          "','" +
+          fileName +
+          "')",
+        (err, success) => {
+          if (err) {
+            return res.send({ error: err.message });
+          }
+          if (success) {
+            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+            const msg = updateEmail(
+              email,
+              "Mentor form successfully",
+              "Successfully submitted the application for a mentor.We will review all your application and get back to you with update,Thanks."
+            );
+            sgMail
+              .send(msg)
+              .then(() => {
+                return res.send({
+                  success:
+                    "Successfully submitted the mentor we will get back to you once, We review your application.",
+                });
+              })
+              .catch((error) => {
+                return res.send({
+                  error:
+                    "There was an error while submitting the details please try again later",
+                });
+              });
           }
         }
       );
@@ -218,6 +151,29 @@ export async function registerMentor(req, res) {
   } catch (error) {
     console.log(err.message);
   }
+}
+
+// get mentor full details in profile page
+export async function getMentorProfileDetails(req, res, next) {
+  const email = req.params.id;
+  try {
+    sql.connect(config, (err) => {
+      if (err) return res.send({ err: err.message });
+      const request = new sql.Request();
+      request.input("email", sql.VarChar, email);
+      request.query(
+        "select * from mentor_dtls where mentor_email = @email",
+        (err, results) => {
+          if (err) return res.send({ err: err.message });
+          if (results.recordset.length > 0) {
+            return res.send({ success: results.recordset });
+          } else {
+            return;
+          }
+        }
+      );
+    });
+  } catch (error) {}
 }
 
 // in dashboard

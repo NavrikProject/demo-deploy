@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import path from "path";
+import sql from "mssql/msnodesqlv8.js";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import authRouter from "./routes/authRoute.js";
@@ -19,32 +21,34 @@ import TraineeBookingProfileRoute from "./routes/traineeBookingProfileRoute.js";
 import mentorBookingRoute from "./routes/MentorBookingRoute.js";
 import FeedbackRoute from "./routes/feedbackRoute.js";
 import ContributersRoute from "./routes/contributersRoute.js";
-import appConfig from "@azure/app-configuration";
+import googleRoute from "./routes/googleRoute.js";
+import config from "./config/dbconfig.js";
 import fs from "fs";
-
-import path from "path";
+import masterRoute from "./routes/masterRoute.js";
+import BlobServiceClient from "@azure/storage-blob";
 import HomeRoute from "./routes/indexRoute.js";
 const __dirname = path.resolve();
 
-dotenv.config();
 const app = express();
+dotenv.config();
 app.use(express.json());
 app.use(morgan("common"));
 app.use(cookieParser());
 app.use(cors());
 app.use(helmet());
 
+app.use("/images", express.static(path.join(__dirname, "/mnt/testing")));
+
 app.use(
   fileUpload({
     createParentPath: true,
   })
 );
+const port = process.env.PORT || 1337;
 
 app.get("/api/get-razorpay-key", (req, res) => {
   res.send({ key: process.env.RAZORPAY_KEY_ID });
 });
-const port = process.env.PORT || 1337;
-app.use(express.json());
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -65,6 +69,9 @@ app.use("/api/mentor/profile", TraineeBookingProfileRoute);
 app.use("/api/mentor/bookings", mentorBookingRoute);
 app.use("/api/feedback", FeedbackRoute);
 app.use("/api/contributers", ContributersRoute);
+app.use("/api/google", googleRoute);
+app.use("/api", masterRoute);
+
 app.get("/", (req, res) => {
   const time = new Date().getTime();
   const date = new Date().toDateString();
@@ -73,11 +80,6 @@ app.get("/", (req, res) => {
   });
 });
 
-// fs.open(`${__dirname}/mnt/testing/mynewfile2.txt`, "w", function (err, file) {
-//   if (err) console.log(err.message);
-//   console.log("Saved!");
-//   console.log(file);
-// });
-app.listen(port, () => {
-  console.log(`The server is listening on ${port}`);
+app.listen(port, (req, res) => {
+  console.log("listening on port " + port);
 });

@@ -1,6 +1,5 @@
 import routers from "express";
 import {
-  registerMentor,
   getAllMentorDetails,
   updateMentorApprove,
   updateMentorDisapprove,
@@ -11,12 +10,17 @@ import {
   getBookingDates,
   createMentorRazorPayOrder,
   getIndividualMentorDetails,
+  fillAdditionalMentorDetails,
+  getMentorProfileDetails,
 } from "../controllers/mentorController.js";
 import { verifyTokenAndAuthorization } from "../middleware/verifyToken.js";
 let router = routers.Router();
 
 //to register for a new mentor route
-router.post("/register/apply-now", registerMentor);
+router.post("/register/additional-details", fillAdditionalMentorDetails);
+
+// get all mentor details in profile pages
+router.get("/get/full-details/:id", getMentorProfileDetails);
 
 // to get all the mentors in dashboard
 router.get("/get", verifyTokenAndAuthorization, getAllMentorDetails);
