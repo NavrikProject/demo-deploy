@@ -27,7 +27,6 @@
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.29.3",
     "morgan": "^1.10.0",
-    "msnodesqlv8": "^2.4.6",
     "mssql": "^8.0.2",
     "node-fetch": "^3.2.0",
     "node-schedule": "^2.1.0",
