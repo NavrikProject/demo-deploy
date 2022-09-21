@@ -71,7 +71,7 @@ export async function fillAdditionalMentorDetails(req, res) {
       let endDate = addMonths(new Date(startDate), 3);
       var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
       endDate = endDate.toISOString().substring(0, 10);
-      if (err) res.send(err.message);
+      if (err) res.send({ error: err.message });
       const request = new sql.Request();
       request.query(
         "insert into mentor_dtls(mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_otherSkills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_phone_number,mentor_website,mentor_linkedin_profile,mentor_image) VALUES('" +
@@ -140,8 +140,7 @@ export async function fillAdditionalMentorDetails(req, res) {
               })
               .catch((error) => {
                 return res.send({
-                  error:
-                    "There was an error while submitting the details please try again later",
+                  error: error.message,
                 });
               });
           }
@@ -149,7 +148,7 @@ export async function fillAdditionalMentorDetails(req, res) {
       );
     });
   } catch (error) {
-    console.log(err.message);
+    return res.send({ error: error.message });
   }
 }
 
@@ -207,9 +206,9 @@ export async function getMentorBySearch(req, res) {
       request.query(searchQuery, (err, result) => {
         if (err) return res.send(err.message);
         if (result.recordset.length > 0) {
-          return res.send(result.recordset);
+          return res.send({ mentors: result.recordset });
         } else {
-          res.send("Not found");
+          res.send({ error: "Not found" });
         }
       });
     });
