@@ -66,89 +66,111 @@ export async function fillAdditionalMentorDetails(req, res) {
   const streamLength = req.files.image.data.length;
 
   try {
-    sql.connect(config, async (err) => {
-      let startDate = new Date().toISOString().substring(0, 10);
-      let endDate = addMonths(new Date(startDate), 3);
-      var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-      endDate = endDate.toISOString().substring(0, 10);
-      if (err) res.send({ error: err.message });
+    sql.connect(config, (err) => {
+      if (err) return res.send({ error: err.message });
       const request = new sql.Request();
+      request.input("email", sql.VarChar, email);
       request.query(
-        "insert into mentor_dtls(mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_otherSkills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_phone_number,mentor_website,mentor_linkedin_profile,mentor_image) VALUES('" +
-          lowEmail +
-          "','" +
-          firstname +
-          "','" +
-          lastname +
-          "','" +
-          startDate +
-          "','" +
-          endDate +
-          "','" +
-          mentorAvailability +
-          "','" +
-          startTime +
-          "','" +
-          endTime +
-          "','" +
-          timestamp +
-          "','" +
-          experience +
-          "','" +
-          skills +
-          "','" +
-          otherSkills +
-          "','" +
-          mentorshipArea +
-          "','" +
-          specialty +
-          "','" +
-          bio +
-          "','" +
-          currentRole +
-          "','" +
-          previousRole +
-          "','" +
-          firm +
-          "','" +
-          phoneNumber +
-          "','" +
-          website +
-          "','" +
-          linkedInProfile +
-          "','" +
-          fileName +
-          "')",
-        (err, success) => {
-          if (err) {
-            return res.send({ error: err.message });
-          }
-          if (success) {
-            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-            const msg = updateEmail(
-              email,
-              "Mentor form successfully",
-              "Successfully submitted the application for a mentor.We will review all your application and get back to you with update,Thanks."
-            );
-            sgMail
-              .send(msg)
-              .then(() => {
-                return res.send({
-                  success:
-                    "Successfully submitted the mentor we will get back to you once, We review your application.",
-                });
-              })
-              .catch((error) => {
-                return res.send({
-                  error: error.message,
-                });
-              });
+        "select * from mentor_dtls where mentor_email = @email",
+        (err, result) => {
+          if (err)
+            return res.send({
+              error: "There was an error while submitting the application",
+            });
+          if (result.recordset.length > 0) {
+            return res.send({
+              success:
+                "You have all ready submitted the mentor application we will get back to you once, We review your application.",
+            });
+          } else {
+            sql.connect(config, async (err) => {
+              let startDate = new Date().toISOString().substring(0, 10);
+              let endDate = addMonths(new Date(startDate), 3);
+              var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+              endDate = endDate.toISOString().substring(0, 10);
+              if (err) res.send(err.message);
+              const request = new sql.Request();
+              request.query(
+                "insert into mentor_dtls(mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_otherSkills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_phone_number,mentor_website,mentor_linkedin_profile,mentor_image) VALUES('" +
+                  lowEmail +
+                  "','" +
+                  firstname +
+                  "','" +
+                  lastname +
+                  "','" +
+                  startDate +
+                  "','" +
+                  endDate +
+                  "','" +
+                  mentorAvailability +
+                  "','" +
+                  startTime +
+                  "','" +
+                  endTime +
+                  "','" +
+                  timestamp +
+                  "','" +
+                  experience +
+                  "','" +
+                  skills +
+                  "','" +
+                  otherSkills +
+                  "','" +
+                  mentorshipArea +
+                  "','" +
+                  specialty +
+                  "','" +
+                  bio +
+                  "','" +
+                  currentRole +
+                  "','" +
+                  previousRole +
+                  "','" +
+                  firm +
+                  "','" +
+                  phoneNumber +
+                  "','" +
+                  website +
+                  "','" +
+                  linkedInProfile +
+                  "','" +
+                  fileName +
+                  "')",
+                (err, success) => {
+                  if (err) {
+                    return res.send({ error: err.message });
+                  }
+                  if (success) {
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = updateEmail(
+                      email,
+                      "Mentor form successfully",
+                      "Successfully submitted the application for a mentor.We will review all your application and get back to you with update,Thanks."
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        return res.send({
+                          success:
+                            "Successfully submitted the mentor we will get back to you once, We review your application.",
+                        });
+                      })
+                      .catch((error) => {
+                        return res.send({
+                          error:
+                            "There was an error while submitting the details please try again later",
+                        });
+                      });
+                  }
+                }
+              );
+            });
           }
         }
       );
     });
   } catch (error) {
-    return res.send({ error: error.message });
+    console.log(err.message);
   }
 }
 
