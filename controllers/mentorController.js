@@ -88,7 +88,7 @@ export async function fillAdditionalMentorDetails(req, res) {
               let endDate = addMonths(new Date(startDate), 3);
               var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
               endDate = endDate.toISOString().substring(0, 10);
-              if (err) res.send(err.message);
+              if (err) res.send({ error: err.message });
               const request = new sql.Request();
               request.query(
                 "insert into mentor_dtls(mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_otherSkills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_phone_number,mentor_website,mentor_linkedin_profile,mentor_image) VALUES('" +
@@ -170,7 +170,7 @@ export async function fillAdditionalMentorDetails(req, res) {
       );
     });
   } catch (error) {
-    console.log(err.message);
+    return res.send({ error: error.message });
   }
 }
 

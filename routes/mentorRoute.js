@@ -12,6 +12,7 @@ import {
   getIndividualMentorDetails,
   fillAdditionalMentorDetails,
   getMentorProfileDetails,
+  addBankAccountDetailsOfMentor,
 } from "../controllers/mentorController.js";
 import { verifyTokenAndAuthorization } from "../middleware/verifyToken.js";
 let router = routers.Router();

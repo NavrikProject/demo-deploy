@@ -1357,7 +1357,8 @@ function sentEmailRemainderToFillFeedback(req, res) {
                 traineeEmail,
                 "Remainder for to fill the feedback form",
                 "http://localhost:3000/trainee/profile/bookings",
-                "Give feedback"
+                "Give feedback",
+                "https://docs.google.com/forms/d/e/1FAIpQLSelTbmSfmdojU6wHvO17L4UUemYlpnufWaXMcSXI4YXkkxhXA/viewforms"
               );
               sgMail
                 .send(msg)
