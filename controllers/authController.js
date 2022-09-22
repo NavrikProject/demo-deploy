@@ -164,7 +164,7 @@ export async function emailAccountActivation(req, res) {
       }
     );
   } else {
-    return res.send("invalid");
+    return res.send({ error: "There is something went wrong." });
   }
 }
 

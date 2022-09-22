@@ -690,6 +690,173 @@ export async function getIndividualMentorDetails(req, res) {
   }
 }
 
+// fill mentor bank account details.
+
+export async function addBankAccountDetailsOfMentor(req, res, next) {
+  const id = req.params.id;
+  let { accountNumber, ifscCode, fullName } = req.body;
+  fullName = fullName.toUpperCase();
+  const hashedIfscCode = await bcrypt.hash(ifscCode, 12);
+  const hashedAccountNumber = await bcrypt.hash(accountNumber, 12);
+
+  try {
+    sql.connect(config, (err) => {
+      if (err) return res.send({ error: err.message });
+      const request = new sql.Request();
+      request.input("id", sql.Int, id);
+      request.query(
+        "SELECT * FROM users_dtls WHERE user_dtls_id = @id",
+        (err, result) => {
+          if (err) return res.send({ error: err.message });
+          if (result.recordset.length > 0) {
+            const email = result.recordset[0].user_email;
+            const userId = result.recordset[0].user_dtls_id;
+            sql.connect(config, (err) => {
+              if (err) return res.send({ error: err.message });
+              const request = new sql.Request();
+              request.input("email", sql.VarChar, email);
+              const approved = "Yes";
+              request.input("approved", sql.VarChar, approved);
+              request.query(
+                "select * from mentor_dtls where mentor_email = @email and mentor_approved = @approved",
+                (err, result) => {
+                  if (err) return res.send({ error: err.message });
+                  if (result.recordset.length > 0) {
+                    sql.connect(config, (err) => {
+                      if (err) return res.send({ error: err.message });
+                      const request = new sql.Request();
+                      request.input("email", sql.VarChar, email);
+                      request.query(
+                        "SELECT * FROM mentor_dtls WHERE mentor_email= @email",
+                        (err, result) => {
+                          if (err) return res.send({ error: err.message });
+                          if (result.recordset.length > 0) {
+                            const mentorProfileId =
+                              result.recordset[0].mentor_dtls_id;
+                            var timestamp = moment(Date.now()).format(
+                              "YYYY-MM-DD HH:mm:ss"
+                            );
+                            sql.connect(config, (err) => {
+                              if (err)
+                                return res.send({
+                                  error: err.message,
+                                });
+                              const request = new sql.Request();
+                              request.input("email", sql.VarChar, email);
+                              request.input("userId", sql.Int, userId);
+                              request.input(
+                                "mentorProfileId",
+                                sql.Int,
+                                mentorProfileId
+                              );
+                              request.query(
+                                "SELECT * FROM mentor_bank_ac_dtls WHERE mentor_bank_ac_user_id = @userId AND  mentor_bank_ac_mentor_profile_id= @mentorProfileId AND mentor_bank_ac_mentor_email= @email",
+                                (err, result) => {
+                                  if (err)
+                                    return res.send({
+                                      error:
+                                        "There was and was an error while uploading the account details",
+                                    });
+                                  if (result.recordset.length > 0) {
+                                    return res.send({
+                                      success:
+                                        "You have all ready fill this bank account details",
+                                    });
+                                  } else {
+                                    sql.connect(config, (err) => {
+                                      if (err)
+                                        return res.send({
+                                          error: err.message,
+                                        });
+                                      const request = new sql.Request();
+                                      var timestamp = moment(Date.now()).format(
+                                        "YYYY-MM-DD HH:mm:ss"
+                                      );
+                                      request.query(
+                                        "INSERT INTO mentor_bank_ac_dtls (mentor_bank_ac_user_id, mentor_bank_ac_mentor_profile_id,mentor_bank_ac_mentor_email,mentor_bank_ac_fullname, mentor_bank_ac_number,mentor_bank_ac_ifsc,mentor_bank_ac_cr_date) VALUES('" +
+                                          userId +
+                                          "','" +
+                                          mentorProfileId +
+                                          "','" +
+                                          email +
+                                          "','" +
+                                          fullName +
+                                          "','" +
+                                          hashedAccountNumber +
+                                          "', '" +
+                                          hashedIfscCode +
+                                          "','" +
+                                          timestamp +
+                                          "' )",
+                                        (err, result) => {
+                                          if (err) return res.send(err.message);
+                                          if (result) {
+                                            sgMail.setApiKey(
+                                              process.env.SENDGRID_API_KEY
+                                            );
+
+                                            const msg = updateEmail(
+                                              email,
+                                              "Added bank details successfully",
+                                              "Added bank details"
+                                            );
+                                            sgMail
+                                              .send(msg)
+                                              .then(() => {
+                                                return res.send({
+                                                  success:
+                                                    "Bank account details added successfully,Thank You!",
+                                                });
+                                              })
+                                              .catch((error) => {
+                                                return res.send({
+                                                  error:
+                                                    "There was and was an error while uploading the account details",
+                                                });
+                                              });
+                                          } else {
+                                            return res.send({
+                                              error:
+                                                "There was and was an error while uploading the account details",
+                                            });
+                                          }
+                                        }
+                                      );
+                                    });
+                                  }
+                                }
+                              );
+                            });
+                          } else {
+                            res.send({
+                              error:
+                                "No user found Please update the profile details",
+                            });
+                          }
+                        }
+                      );
+                    });
+                  } else {
+                    return res.send({
+                      error:
+                        "Sorry, You can not add the bank account details, your application is under verification.",
+                    });
+                  }
+                }
+              );
+            });
+          } else {
+            res.send({
+              error: "No user found Please update the profile details",
+            });
+          }
+        }
+      );
+    });
+  } catch (error) {
+    res.send({ error: error.message });
+  }
+}
 // function to create add the Three months to joining date
 function addMonths(date, months) {
   var d = date.getDate();

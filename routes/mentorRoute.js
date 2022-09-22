@@ -55,4 +55,6 @@ router.post("/create/appointment/create-order", createMentorRazorPayOrder);
 // to get only appointment dates in booking table
 router.get("/get/booking", getBookingDates);
 
+// to add bank details
+router.post("/profile/bank/details/add/:id", addBankAccountDetailsOfMentor);
 export default router;
