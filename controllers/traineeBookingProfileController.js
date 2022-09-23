@@ -1083,7 +1083,7 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
           result.recordset.forEach((res) => {
             let traineeEmail = res.user_email;
             let traineeJoinUrl = res.trainee_join_url;
-            let year = new Date(res.booking_mentor_date).getDay();
+            let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
@@ -1193,7 +1193,7 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
           result.recordset.forEach((res) => {
             let traineeEmail = res.user_email;
             let traineeJoinUrl = res.trainee_join_url;
-            let year = new Date(res.booking_mentor_date).getDay();
+            let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
@@ -1301,7 +1301,7 @@ function sentEmailRemainderToTraineeToStart(req, res) {
           result.recordset.forEach((res) => {
             let traineeEmail = res.user_email;
             let traineeJoinUrl = res.trainee_join_url;
-            let year = new Date(res.booking_mentor_date).getDay();
+            let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
@@ -1345,7 +1345,7 @@ function sentEmailRemainderToFillFeedback(req, res) {
         (err, result) => {
           result.recordset.forEach((res) => {
             let traineeEmail = res.user_email;
-            let year = new Date(res.booking_mentor_date).getDay();
+            let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_end_time.split(":")[0];
@@ -1356,7 +1356,7 @@ function sentEmailRemainderToFillFeedback(req, res) {
               const msg = sendRemainderOnTheDay(
                 traineeEmail,
                 "Remainder for to fill the feedback form",
-                "http://localhost:3000/trainee/profile/bookings",
+                "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/bookings",
                 "Give feedback",
                 "https://docs.google.com/forms/d/e/1FAIpQLSelTbmSfmdojU6wHvO17L4UUemYlpnufWaXMcSXI4YXkkxhXA/viewforms"
               );

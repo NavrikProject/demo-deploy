@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import Razorpay from "razorpay";
 import schedule from "node-schedule";
 import updateEmail from "../middleware/updateEmail.js";
+import { sendRemainderOnTheDay } from "../middleware/sendRemainder.js";
 
 export async function getAllMentorBookingsInProfile(req, res, next) {
   const { mentorEmail } = req.body;
@@ -647,7 +648,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
           result.recordset.forEach((res) => {
             let mentorEmail = res.mentor_email;
             let mentorHostUrl = res.mentor_host_url;
-            let year = new Date(res.booking_mentor_date).getDay();
+            let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
@@ -756,7 +757,7 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
           result.recordset.forEach((res) => {
             let mentorEmail = res.mentor_email;
             let mentorHostUrl = res.mentor_host_url;
-            let year = new Date(res.booking_mentor_date).getDay();
+            let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
@@ -864,7 +865,7 @@ function sentEmailRemainderToMentorToStart(req, res) {
           result.recordset.forEach((res) => {
             let mentorEmail = res.mentor_email;
             let mentorHostUrl = res.mentor_host_url;
-            let year = new Date(res.booking_mentor_date).getDay();
+            let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
