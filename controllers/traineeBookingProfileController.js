@@ -1376,18 +1376,20 @@ function sentEmailRemainderToFillFeedback(req, res) {
   } catch (error) {}
 }
 
-sentEmailRemainderToFillFeedback();
-//remainder email will be sent before one day function call
-sentEmailRemainderBeforeOneDayToTrainee();
+setInterval(() => {
+  sentEmailRemainderToFillFeedback();
+  //remainder email will be sent before one day function call
+  sentEmailRemainderBeforeOneDayToTrainee();
 
-// remainder will be sent on the day function call
-sentEmailRemainderOnTheDayToTrainee();
+  // remainder will be sent on the day function call
+  sentEmailRemainderOnTheDayToTrainee();
 
-// remainder will be sent on before 10 minutes function call
-sentEmailRemainderToTraineeBefore10Min();
+  // remainder will be sent on before 10 minutes function call
+  sentEmailRemainderToTraineeBefore10Min();
 
-// remainder will be sent on before 5 minutes function call
-sentEmailRemainderToTraineeBefore5Min();
+  // remainder will be sent on before 5 minutes function call
+  sentEmailRemainderToTraineeBefore5Min();
 
-// remainder will be sent to start or join meeting function call
-sentEmailRemainderToTraineeToStart();
+  // remainder will be sent to start or join meeting function call
+  sentEmailRemainderToTraineeToStart();
+}, 60000);

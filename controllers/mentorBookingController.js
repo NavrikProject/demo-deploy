@@ -702,7 +702,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                 const msg = sendRemainderOnTheDay(
                   mentorEmail,
                   "Remainder for the session will start in 10 minutes",
-                  joinUrl,
+                  mentorHostUrl,
                   "Start Meeting"
                 );
                 sgMail
@@ -722,7 +722,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                 const msg = sendRemainderOnTheDay(
                   mentorEmail,
                   "Remainder for the session will start in 10 minutes",
-                  joinUrl,
+                  mentorHostUrl,
                   "Start Meeting"
                 );
                 sgMail
@@ -810,7 +810,7 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                 const msg = sendRemainderOnTheDay(
                   mentorEmail,
                   "Remainder for the session will start in 10 minutes",
-                  joinUrl,
+                  mentorHostUrl,
                   "Start Meeting"
                 );
                 sgMail
@@ -830,7 +830,7 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                 const msg = sendRemainderOnTheDay(
                   mentorEmail,
                   "Remainder for the session will start in 10 minutes",
-                  joinUrl,
+                  mentorHostUrl,
                   "Start Meeting"
                 );
                 sgMail
@@ -895,17 +895,19 @@ function sentEmailRemainderToMentorToStart(req, res) {
   } catch (error) {}
 }
 
-//remainder email will be sent before one day function call
-sentEmailRemainderBeforeOneDayToMentor();
+setInterval(() => {
+  //remainder email will be sent before one day function call
+  sentEmailRemainderBeforeOneDayToMentor();
 
-// remainder will be sent on the day function call
-sentEmailRemainderOnTheDayToMentor();
+  // remainder will be sent on the day function call
+  sentEmailRemainderOnTheDayToMentor();
 
-// remainder will be sent on before 10 minutes function call
-sentEmailRemainderToMentorBefore10Min();
+  // remainder will be sent on before 10 minutes function call
+  sentEmailRemainderToMentorBefore10Min();
 
-// remainder will be sent on before 5 minutes function call
-sentEmailRemainderToMentorBefore5Min();
+  // remainder will be sent on before 5 minutes function call
+  sentEmailRemainderToMentorBefore5Min();
 
-// remainder will be sent to start or join meeting function call
-sentEmailRemainderToMentorToStart();
+  // remainder will be sent to start or join meeting function call
+  sentEmailRemainderToMentorToStart();
+}, 60000);
