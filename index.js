@@ -26,6 +26,8 @@ import fs from "fs";
 import masterRoute from "./routes/masterRoute.js";
 import BlobServiceClient from "@azure/storage-blob";
 import HomeRoute from "./routes/indexRoute.js";
+import rescheduleRoute from "./routes/rescheduleRoute.js";
+
 const __dirname = path.resolve();
 
 const app = express();
@@ -70,6 +72,7 @@ app.use("/api/feedback", FeedbackRoute);
 app.use("/api/contributers", ContributersRoute);
 app.use("/api/google", googleRoute);
 app.use("/api", masterRoute);
+app.use("/api/reschedule", rescheduleRoute);
 
 app.get("/", (req, res) => {
   const time = new Date().getTime();

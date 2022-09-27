@@ -10,13 +10,13 @@ import updateEmail from "../middleware/updateEmail.js";
 dotenv.config();
 
 export async function emailRegister(req, res, next) {
-  const email = req.body.email;
-  const firstName = req.body.firstName;
-  const lastName = req.body.lastName;
-  const type = req.body.type;
+  const email = req.body.data.email;
+  const firstName = req.body.data.firstName;
+  const lastName = req.body.data.lastName;
+  const type = req.body.data.type;
   const lowEmail = email.toLowerCase();
-  const password = req.body.password;
-
+  const password = req.body.data.password;
+  const phoneNumber = req.body.phoneNumber;
   if (!lowEmail && !password && firstName && !lastName && !type) {
     return res.json({
       required: "ALl details must be required",
@@ -47,6 +47,7 @@ export async function emailRegister(req, res, next) {
               lastName: lastName,
               type: type,
               password: hashedPassword,
+              phoneNumber: phoneNumber,
             },
             process.env.JWT_EMAIL_ACTIVATION_KEY,
             { expiresIn: "30m" }
@@ -90,7 +91,8 @@ export async function emailAccountActivation(req, res) {
         if (err) {
           return res.send(err.status);
         } else {
-          const { email, firstName, lastName, type, password } = decodedToken;
+          const { email, firstName, lastName, type, password, phoneNumber } =
+            decodedToken;
           var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
           sql.connect(config, async (err) => {
             if (err) {
@@ -110,7 +112,7 @@ export async function emailAccountActivation(req, res) {
                     if (err) res.send(err.message);
                     const request = new sql.Request();
                     request.query(
-                      "insert into users_dtls (user_email,user_pwd,user_logindate,user_logintime,user_firstname,user_lastname,user_creation,user_type) VALUES('" +
+                      "insert into users_dtls (user_email,user_pwd,user_logindate,user_logintime,user_firstname,user_lastname,user_phone_number,user_creation,user_type) VALUES('" +
                         email +
                         "','" +
                         password +
@@ -122,6 +124,8 @@ export async function emailAccountActivation(req, res) {
                         firstName +
                         "','" +
                         lastName +
+                        "','" +
+                        phoneNumber +
                         "','" +
                         timestamp +
                         "','" +

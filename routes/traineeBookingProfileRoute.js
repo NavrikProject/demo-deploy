@@ -3,6 +3,7 @@ import {
   getAllAttendedSessions,
   getAllCompletedSessions,
   getAllMentorBookings,
+  getAllNotAttendedSessions,
   getAllRefundedSessions,
   getAllUpcomingSessions,
   getBookingDatesOfOnlyMentor,
@@ -11,6 +12,7 @@ import {
   modifyAppointmentAndMakePayment,
   modifyBookingDate,
   modifyCreateOrder,
+  rescheduleBookingDate,
   updateAttendedSessions,
 } from "../controllers/traineeBookingProfileController.js";
 import { verifyToken } from "../middleware/verifyToken.js";
@@ -24,6 +26,8 @@ router.post("/get/bookings/onlymentor", getBookingDatesOfOnlyMentor);
 router.post("/get/bookings/availability", getMentorAvailability);
 
 router.put("/update/bookings/:id", modifyBookingDate);
+
+router.put("/reschedule/bookings/:id", rescheduleBookingDate);
 
 router.post("/update/bookings/modify-order", modifyCreateOrder);
 
@@ -41,6 +45,7 @@ router.post(
 router.post("/get/bookings/attended", getAllAttendedSessions);
 router.post("/get/bookings/completed", getAllCompletedSessions);
 router.post("/get/bookings/refunded", getAllRefundedSessions);
+router.post("/get/bookings/not-attended", getAllNotAttendedSessions);
 
 router.post("/update/bookings/issue-refund", issueRefundForBooking);
 

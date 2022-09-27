@@ -133,7 +133,6 @@ export async function cancelAppointmentWithTrainee(req, res, next) {
             let email = result.recordset[0].user_email;
             const paymentId = result.recordset[0].mentor_razorpay_payment_id;
             var refundAmount = amount;
-            console.log(email);
             const instance = new Razorpay({
               key_id: process.env.RAZORPAY_KEY_ID,
               key_secret: process.env.RAZORPAY_KEY_SECRET_STRING,
@@ -556,7 +555,7 @@ function sentEmailRemainderBeforeOneDayToMentor(req, res) {
       request.query(
         "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
         (err, result) => {
-          result.recordset.forEach((res) => {
+          result?.recordset.forEach((res) => {
             let mentorEmail = res.mentor_email;
             let mentorHostUrl = res.mentor_host_url;
             let year = new Date(res.booking_mentor_date).getFullYear();
@@ -601,7 +600,7 @@ function sentEmailRemainderOnTheDayToMentor(req, res) {
       request.query(
         "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
         (err, result) => {
-          result.recordset.forEach((res) => {
+          result?.recordset.forEach((res) => {
             let mentorEmail = res.mentor_email;
             let mentorHostUrl = res.mentor_host_url;
             let year = new Date(res.booking_mentor_date).getFullYear();
@@ -645,7 +644,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
       request.query(
         "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
         (err, result) => {
-          result.recordset.forEach((res) => {
+          result?.recordset.forEach((res) => {
             let mentorEmail = res.mentor_email;
             let mentorHostUrl = res.mentor_host_url;
             let year = new Date(res.booking_mentor_date).getFullYear();
@@ -709,6 +708,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                   .send(msg)
                   .then(() => {
                     console.log("Sent");
+                    console.log("Email sent");
                   })
                   .catch((error) => {
                     console.log(error.message);
@@ -754,7 +754,7 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
       request.query(
         "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
         (err, result) => {
-          result.recordset.forEach((res) => {
+          result?.recordset.forEach((res) => {
             let mentorEmail = res.mentor_email;
             let mentorHostUrl = res.mentor_host_url;
             let year = new Date(res.booking_mentor_date).getFullYear();
@@ -817,6 +817,7 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                   .send(msg)
                   .then(() => {
                     console.log("Sent");
+                    console.log("Called this 5 minutes function");
                   })
                   .catch((error) => {
                     console.log(error.message);
@@ -862,7 +863,7 @@ function sentEmailRemainderToMentorToStart(req, res) {
       request.query(
         "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
         (err, result) => {
-          result.recordset.forEach((res) => {
+          result?.recordset.forEach((res) => {
             let mentorEmail = res.mentor_email;
             let mentorHostUrl = res.mentor_host_url;
             let year = new Date(res.booking_mentor_date).getFullYear();
@@ -872,6 +873,7 @@ function sentEmailRemainderToMentorToStart(req, res) {
             let min = res.booking_starts_time.split(":")[1];
             const date = new Date(year, month, day, hour, min, 0);
             schedule.scheduleJob(date, function () {
+              console.log("Entered this final call function");
               sgMail.setApiKey(process.env.SENDGRID_API_KEY);
               const msg = sendRemainderOnTheDay(
                 mentorEmail,
@@ -894,6 +896,57 @@ function sentEmailRemainderToMentorToStart(req, res) {
     });
   } catch (error) {}
 }
+
+// function sentEmail(req, res) {
+//   try {
+//     sql.connect(config, (err) => {
+//       if (err) return res.send(err.message);
+//       const request = new sql.Request();
+//       const amountPaidStatus = "Paid";
+//       const mentorSessionsStatus = "upcoming";
+//       request.input("amountPaidStatus", sql.VarChar, amountPaidStatus);
+//       request.input("mentorSessionsStatus", sql.VarChar, mentorSessionsStatus);
+//       request.query(
+//         "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
+//         (err, result) => {
+//           result?.recordset.forEach((res) => {
+//             let mentorEmail = res.mentor_email;
+//             let mentorHostUrl = res.mentor_host_url;
+//             let year = new Date(res.booking_mentor_date).getFullYear();
+//             let month = new Date(res.booking_mentor_date).getMonth();
+//             let day = new Date(res.booking_mentor_date).getDate();
+//             let hour = res.booking_starts_time.split(":")[0];
+//             let min = res.booking_starts_time.split(":")[1];
+//             console.log(hour, min);
+//             const date = new Date(year, month, day, hour, min, 0);
+//             schedule.scheduleJob(date, function () {
+//               console.log("Entered this final call function");
+//               sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+//               const msg = sendRemainderOnTheDay(
+//                 mentorEmail,
+//                 "Remainder for the session is stared",
+//                 mentorHostUrl,
+//                 "Start Meeting"
+//               );
+//               sgMail
+//                 .send(msg)
+//                 .then(() => {
+//                   console.log("Sent");
+//                 })
+//                 .catch((error) => {
+//                   console.log(error.message);
+//                 });
+//             });
+//           });
+//         }
+//       );
+//     });
+//   } catch (error) {}
+// }
+// setInterval(() => {
+//   sentEmailRemainderToMentorBefore10Min();
+//   sentEmailRemainderToMentorToStart();
+// }, 10000);
 
 setInterval(() => {
   //remainder email will be sent before one day function call
