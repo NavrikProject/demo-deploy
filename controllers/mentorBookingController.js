@@ -176,7 +176,7 @@ export async function cancelAppointmentWithTrainee(req, res, next) {
                             newModifyDate
                           );
                           request.input("reason", sql.VarChar, reason);
-                          request.input("reasonExp", sql.Text, reasonExp);
+                          request.input("reasonExp", sql.VarChar, reasonExp);
                           const sqlUpdate =
                             "UPDATE modify_and_refund_payment_dtls SET mentor_reason= @reason, mentor_reason_explain = @reasonExp, refund_date = @newModifyDate,refund_payment_amount = @newRefundAmount, refund_razorpay_payment_id= @refundId WHERE booking_appt_id= @bookingId";
                           request.query(sqlUpdate, (err, result) => {
