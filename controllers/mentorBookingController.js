@@ -7,7 +7,15 @@ import Razorpay from "razorpay";
 import schedule from "node-schedule";
 import updateEmail from "../middleware/updateEmail.js";
 import { sendRemainderOnTheDay } from "../middleware/sendRemainder.js";
+import jwt from "jsonwebtoken";
+import rp from "request-promise";
+dotenv.config();
+const payload = {
+  iss: process.env.ZOOM_APP_API_KEY,
+  exp: new Date().getTime() + 5000,
+};
 
+const token = jwt.sign(payload, process.env.ZOOM_APP_API_SECRET_KEY);
 export async function getAllMentorBookingsInProfile(req, res, next) {
   const { mentorEmail } = req.body;
   try {
@@ -541,7 +549,174 @@ export async function getMentorAllCancelledSessions(req, res, next) {
     res.send(error.message);
   }
 }
+export async function getMentorAllNotAttendedSessions(req, res, next) {
+  const { userEmail } = req.body;
+  try {
+    sql.connect(config, (err) => {
+      if (err) return res.send(err.message);
+      const request = new sql.Request();
+      const unattended = "unattended";
+      const paid = "Paid";
+      request.input("userEmail", sql.VarChar, userEmail);
+      request.input("unattended", sql.VarChar, unattended);
+      request.input("paid", sql.VarChar, paid);
+      request.query(
+        "select * from booking_appointments_dtls where mentor_email = @userEmail AND mentor_session_status = @unattended AND mentor_amount_paid_status = @paid ORDER BY booking_appt_id DESC",
+        (err, result) => {
+          if (err) return res.send(err.message);
+          if (result.recordset.length > 0) {
+            let mentorArray = [];
+            result.recordset.forEach((mentor) => {
+              let data = {
+                bookingId: mentor.booking_appt_id,
+                mentorEmail: mentor.mentor_email,
+                mentorFullName: mentor.mentor_name,
+                bookingDate: mentor.booking_mentor_date,
+                time: mentor.booking_time,
+                mentorId: mentor.mentor_dtls_id,
+                userEmail: mentor.user_email,
+                sessionStatus: mentor.mentor_session_status,
+                rescheduleTimes: mentor.mentor_rescheduled_times,
+              };
+              mentorArray.push(data);
+            });
+            return res.send({ details: mentorArray });
+          } else {
+            return res.send();
+          }
+        }
+      );
+    });
+  } catch (error) {
+    res.send(error.message);
+  }
+}
 
+export async function rescheduleBookingDateOfMentor(req, res) {
+  let bookingId = req.params.id;
+  let date = req.body.date;
+  let userEmail = req.body.userEmail;
+  date = new Date(new Date(date).setDate(new Date(date).getDate() + 1));
+
+  try {
+    var options = {
+      method: "POST",
+      uri: "https://api.zoom.us/v2/users/me/meetings",
+      body: {
+        topic: "Appointment rescheduling booking",
+        type: 1,
+        start_time: new Date(date),
+        contact_email: userEmail,
+        registrants_email_notification: true,
+        calendar_type: 2,
+        recurrence: {
+          end_date_time: new Date(date),
+          end_times: 7,
+          monthly_day: 1,
+          monthly_week: 1,
+          monthly_week_day: 1,
+          repeat_interval: 1,
+          type: 1,
+          weekly_days: "1",
+        },
+        settings: {
+          host_video: "true",
+          participant_video: "true",
+        },
+      },
+      auth: {
+        bearer: token,
+      },
+      headers: {
+        "User-Agent": "Zoom-api-Jwt-Request",
+        "content-type": "application/json",
+      },
+      json: true, //Parse the JSON string in the response
+    };
+    rp(options)
+      .then(function (response) {
+        let mentorHostUrl = response.start_url;
+        let traineeJoinUrl = response.join_url;
+        sql.connect(config, (err) => {
+          if (err) return res.send(err.message);
+          const request = new sql.Request();
+          request.input("bookingId", sql.Int, bookingId);
+          request.query(
+            "select * from booking_appointments_dtls where booking_appt_id = @bookingId",
+            (err, result) => {
+              if (err) return res.send(err.message);
+              if (result.recordset.length > 0) {
+                const bookingId = result.recordset[0].booking_appt_id;
+                let mentorEmail = result.recordset[0].mentor_email;
+                const bookingChanges = 1;
+                const request = new sql.Request();
+                request.input("bookingChanges", sql.Int, bookingChanges);
+                request.input("bookingId", sql.Int, bookingId);
+                request.input("date", sql.Date, date);
+                request.input("mentorHostUrl", sql.VarChar, mentorHostUrl);
+                request.input("traineeJoinUrl", sql.VarChar, traineeJoinUrl);
+                const newDate = new Date();
+                request.input("newDate", sql.Date, newDate);
+                const sqlUpdate =
+                  "UPDATE booking_appointments_dtls SET booking_mentor_date = @date, booking_date = @newDate,trainee_session_status = 'upcoming',mentor_session_status = 'upcoming', mentor_rescheduled_times = @bookingChanges, mentor_host_url = @mentorHostUrl, trainee_join_url = @traineeJoinUrl WHERE booking_appt_id= @bookingId";
+                request.query(sqlUpdate, (err, result) => {
+                  if (err) return res.send(err.message);
+                  if (result) {
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = updateEmail(
+                      userEmail,
+                      "Reschedule appointment",
+                      "Successfully appointment booking date is changed, "
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        const msg = updateEmail(
+                          mentorEmail,
+                          "Reschedule appointment",
+                          "You have rescheduled your appointment"
+                        );
+                        sgMail
+                          .send(msg)
+                          .then(() => {
+                            res.send({
+                              success:
+                                "Successfully appointment booking date is changed",
+                            });
+                          })
+                          .catch((error) => {
+                            res.send({
+                              error:
+                                "There was an error while booking the appointment",
+                            });
+                          });
+                      })
+                      .catch((error) => {
+                        res.send({
+                          error:
+                            "There was an error while booking the appointment",
+                        });
+                      });
+                  } else {
+                    res.send({
+                      error: err.message,
+                    });
+                  }
+                });
+              } else {
+                return res.send({ error: "Couldn't find booking'" });
+              }
+            }
+          );
+        });
+      })
+      .catch(function (err) {
+        return res.send({ error: err.message });
+      });
+  } catch (error) {
+    console.log(error.message);
+  }
+}
 //remainder email will be sent before one day to mentor
 function sentEmailRemainderBeforeOneDayToMentor(req, res) {
   try {

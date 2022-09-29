@@ -5,7 +5,9 @@ import {
   getMentorAllAttendedSessions,
   getMentorAllCancelledSessions,
   getMentorAllCompletedSessions,
+  getMentorAllNotAttendedSessions,
   getMentorAllUpcomingSessions,
+  rescheduleBookingDateOfMentor,
   updateMentorAttendedSessions,
   updateTheConfirmAppointment,
 } from "../controllers/mentorBookingController.js";
@@ -31,4 +33,7 @@ router.post(
 router.post("/get/all-bookings/attended", getMentorAllAttendedSessions);
 router.post("/get/all-bookings/completed", getMentorAllCompletedSessions);
 router.post("/get/all-bookings/cancelled", getMentorAllCancelledSessions);
+router.post("/get/all-bookings/not-attended", getMentorAllNotAttendedSessions);
+router.put("/get/all-bookings/reschedule/:id", rescheduleBookingDateOfMentor);
+
 export default router;
