@@ -361,7 +361,7 @@ export async function rescheduleBookingDate(req, res) {
                       });
                   } else {
                     res.send({
-                      error: error.message,
+                      error: err.message,
                     });
                   }
                 });
@@ -926,6 +926,7 @@ export async function getAllUpcomingSessions(req, res, next) {
                 traineeJoinUrl: mentor.trainee_join_url,
                 sessionStatus: mentor.trainee_session_status,
                 rewardPoints: mentor.trainee_and_mentor_reward_points,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });
@@ -1003,6 +1004,7 @@ export async function getAllAttendedSessions(req, res, next) {
                 sessionStatus: mentor.trainee_session_status,
                 paymentStatus: mentor.mentor_amount_paid_status,
                 rewardPoints: mentor.trainee_and_mentor_reward_points,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });
@@ -1042,6 +1044,7 @@ export async function getAllCompletedSessions(req, res, next) {
                 mentorFullName: mentor.mentor_name,
                 paymentStatus: mentor.mentor_amount_paid_status,
                 rewardPoints: mentor.trainee_and_mentor_reward_points,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });
@@ -1081,6 +1084,7 @@ export async function getAllRefundedSessions(req, res, next) {
                 time: mentor.booking_time,
                 paymentStatus: mentor.mentor_amount_paid_status,
                 mentorId: mentor.mentor_dtls_id,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });
@@ -1127,6 +1131,7 @@ export async function getAllNotAttendedSessions(req, res, next) {
                 sessionStatus: mentor.trainee_session_status,
                 rewardPoints: mentor.trainee_and_mentor_reward_points,
                 rescheduleTimes: mentor.trainee_rescheduled_times,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });
@@ -1265,7 +1270,7 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Sent");
+                    console.log("Email Sent before 10 minutes");
                   })
                   .catch((error) => {
                     console.log(error.message);
@@ -1278,14 +1283,14 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = sendRemainderOnTheDay(
                   traineeEmail,
-                  "Remainder for the session will start in 10 minutes",
+                  "Remainder for the session will start in 15 minutes",
                   traineeJoinUrl,
                   "Join Meeting"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Sent");
+                    console.log("Email Sent before 10 minutes");
                   })
                   .catch((error) => {
                     console.log(error.message);
@@ -1294,6 +1299,7 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
             }
             if (min === "30") {
               min = min - 10;
+
               const date = new Date(year, month, day, hour, min, 0);
               schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -1306,7 +1312,7 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Sent");
+                    console.log("Email Sent before 10 minutes");
                   })
                   .catch((error) => {
                     console.log(error.message);
@@ -1326,7 +1332,7 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Sent");
+                    console.log("Email Sent before 10 minutes");
                   })
                   .catch((error) => {
                     console.log(error.message);
@@ -1361,6 +1367,7 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
             let min = res.booking_starts_time.split(":")[1];
+
             if (min === "00") {
               hour = hour - 1;
               const date = new Date(year, month, day, hour, 55, 0);
@@ -1368,14 +1375,14 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = sendRemainderOnTheDay(
                   traineeEmail,
-                  "Remainder for the session will start in 10 minutes",
+                  "Remainder for the session will start in 5 minutes",
                   traineeJoinUrl,
                   "Join Meeting"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Sent");
+                    console.log("email Sent before 5 minutes");
                   })
                   .catch((error) => {
                     console.log(error.message);
@@ -1428,7 +1435,7 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = sendRemainderOnTheDay(
                   traineeEmail,
-                  "Remainder for the session will start in 10 minutes",
+                  "Remainder for the session will start in 5 minutes",
                   traineeJoinUrl,
                   "Join Meeting"
                 );
@@ -1470,7 +1477,6 @@ function sentEmailRemainderToTraineeToStart(req, res) {
             let hour = res.booking_starts_time.split(":")[0];
             let min = res.booking_starts_time.split(":")[1];
             const date = new Date(year, month, day, hour, min, 0);
-
             schedule.scheduleJob(date, function () {
               sgMail.setApiKey(process.env.SENDGRID_API_KEY);
               const msg = sendRemainderOnTheDay(
@@ -1556,5 +1562,5 @@ setInterval(() => {
 
   // remainder will be sent to start or join meeting function call
   sentEmailRemainderToTraineeToStart();
-  console.log("Logged after a one minute");
+  console.log("logged after one minute");
 }, 60000);

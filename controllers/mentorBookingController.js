@@ -377,6 +377,7 @@ export async function getMentorAllUpcomingSessions(req, res, next) {
                 mentorId: mentor.mentor_dtls_id,
                 hostUrl: mentor.mentor_host_url,
                 sessionStatus: mentor.mentor_session_status,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });
@@ -456,6 +457,7 @@ export async function getMentorAllAttendedSessions(req, res, next) {
                 mentorId: mentor.mentor_dtls_id,
                 userEmail: mentor.user_email,
                 sessionStatus: mentor.mentor_session_status,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });
@@ -496,6 +498,7 @@ export async function getMentorAllCompletedSessions(req, res, next) {
                 mentorId: mentor.mentor_dtls_id,
                 mentorFullName: mentor.mentor_name,
                 paymentStatus: mentor.mentor_amount_paid_status,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });
@@ -535,6 +538,7 @@ export async function getMentorAllCancelledSessions(req, res, next) {
                 time: mentor.booking_time,
                 paymentStatus: mentor.mentor_amount_paid_status,
                 mentorId: mentor.mentor_dtls_id,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });
@@ -577,6 +581,7 @@ export async function getMentorAllNotAttendedSessions(req, res, next) {
                 userEmail: mentor.user_email,
                 sessionStatus: mentor.mentor_session_status,
                 rescheduleTimes: mentor.mentor_rescheduled_times,
+                username: mentor.user_fullname,
               };
               mentorArray.push(data);
             });

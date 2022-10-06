@@ -10,6 +10,10 @@ import bcrypt from "bcrypt";
 import Razorpay from "razorpay";
 import jwt from "jsonwebtoken";
 import rp from "request-promise";
+import {
+  appointmentBookedMentorEmailTemplate,
+  appointmentBookedTraineeEmailTemplate,
+} from "../middleware/emailTemplate.js";
 const containerName = "navrikimage";
 
 dotenv.config();
@@ -466,6 +470,7 @@ export async function createMentorAppointment(req, res, next) {
     razorpaySignature,
     date,
     mentorName,
+    username,
   } = req.body;
   const { selected, questions } = req.body.data;
   const timeSlot = from + " " + "to" + " " + to;
@@ -515,7 +520,7 @@ export async function createMentorAppointment(req, res, next) {
           const request = new sql.Request();
           let amountPaid = "Paid";
           request.query(
-            "insert into booking_appointments_dtls (mentor_dtls_id,mentor_email,mentor_name,user_email,booking_mentor_date,booking_date,booking_starts_time,booking_end_time,booking_time,mentor_amount,mentor_options,mentor_questions,mentor_razorpay_payment_id,mentor_razorpay_order_id,mentor_razorpay_signature,mentor_host_url,trainee_join_url,mentor_amount_paid_status) VALUES('" +
+            "insert into booking_appointments_dtls (mentor_dtls_id,mentor_email,mentor_name,user_email,user_fullname,booking_mentor_date,booking_date,booking_starts_time,booking_end_time,booking_time,mentor_amount,mentor_options,mentor_questions,mentor_razorpay_payment_id,mentor_razorpay_order_id,mentor_razorpay_signature,mentor_host_url,trainee_join_url,mentor_amount_paid_status) VALUES('" +
               mentorId +
               "','" +
               mentorEmail +
@@ -523,6 +528,8 @@ export async function createMentorAppointment(req, res, next) {
               mentorName +
               "','" +
               userEmail +
+              "','" +
+              username +
               "','" +
               date +
               "','" +
@@ -558,19 +565,22 @@ export async function createMentorAppointment(req, res, next) {
               }
               if (success) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-                const msg = updateEmail(
+                const msg = appointmentBookedTraineeEmailTemplate(
                   userEmail,
-                  "Appointment Booking Confirmation",
-                  "Successfully appointment is booked and mentor will be available on the same day with respective time!, " +
-                    " "
+                  username,
+                  mentorName,
+                  date,
+                  timeSlot
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    const msg = updateEmail(
+                    const msg = appointmentBookedMentorEmailTemplate(
                       mentorEmail,
-                      "Appointment Booking Confirmation",
-                      "Some one has booked the appointment and the joining url is "
+                      mentorName,
+                      username,
+                      date,
+                      timeSlot
                     );
                     sgMail
                       .send(msg)
@@ -599,10 +609,10 @@ export async function createMentorAppointment(req, res, next) {
       })
       .catch(function (err) {
         // API call failed...
-        console.log("API call failed, reason ", err.message);
+        return res.send({ error: err.message });
       });
   } catch (error) {
-    console.log(err.message);
+    return res.send({ error: error.message });
   }
 }
 
