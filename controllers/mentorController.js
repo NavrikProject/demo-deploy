@@ -219,7 +219,6 @@ export async function getAllMentorDetails(req, res) {
   } catch (error) {}
 }
 
-//get mentor search by the search
 export async function getMentorBySearch(req, res) {
   let searchItem = req.query.name;
   try {
@@ -228,7 +227,7 @@ export async function getMentorBySearch(req, res) {
       const request = new sql.Request();
       request.input("searchItem", sql.VarChar, searchItem);
       const searchQuery =
-        "SELECT * FROM mentor_dtls WHERE mentor_skills = @searchItem OR mentor_mentorship_area = @searchItem";
+        "SELECT * FROM mentor_dtls WHERE mentor_speciality = @searchItem";
       request.query(searchQuery, (err, result) => {
         if (err) return res.send(err.message);
         if (result.recordset.length > 0) {
@@ -238,6 +237,112 @@ export async function getMentorBySearch(req, res) {
         }
       });
     });
+  } catch (error) {
+    res.send(error.message);
+  }
+}
+export async function getMentorByFiltering(req, res) {
+  let category = req.query.category;
+  let skill = req.query.skill;
+  let area = req.query.area;
+  let availability = req.query.availability;
+  console.log(category, skill, area, availability);
+  try {
+    if (category && !skill && !availability && !area) {
+      console.log(category);
+      sql.connect(config, (err) => {
+        if (err) return res.send(err.message);
+        const request = new sql.Request();
+        request.input("category", sql.VarChar, category);
+        const searchQuery =
+          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category";
+        request.query(searchQuery, (err, result) => {
+          if (err) return res.send(err.message);
+          if (result.recordset.length > 0) {
+            return res.send({ mentors: result.recordset });
+          } else {
+            res.send({ error: "Not found" });
+          }
+        });
+      });
+    } else if (category && skill && !availability && !area) {
+      console.log(category, skill);
+      sql.connect(config, (err) => {
+        if (err) return res.send(err.message);
+        const request = new sql.Request();
+        request.input("category", sql.VarChar, category);
+        request.input("skill", sql.VarChar, skill);
+        request.input("area", sql.VarChar, area);
+        request.input("availability", sql.VarChar, availability);
+        const searchQuery =
+          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category AND mentor_skills = @skill ";
+        request.query(searchQuery, (err, result) => {
+          if (err) return res.send(err.message);
+          if (result.recordset.length > 0) {
+            return res.send({ mentors: result.recordset });
+          } else {
+            res.send({ error: "Not found" });
+          }
+        });
+      });
+    } else if (category && skill && availability && !area) {
+      sql.connect(config, (err) => {
+        if (err) return res.send(err.message);
+        const request = new sql.Request();
+        request.input("category", sql.VarChar, category);
+        request.input("skill", sql.VarChar, skill);
+        request.input("area", sql.VarChar, area);
+        request.input("availability", sql.VarChar, availability);
+        const searchQuery =
+          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category AND mentor_mentorship_area = @area AND mentor_skills = @skill ";
+        request.query(searchQuery, (err, result) => {
+          if (err) return res.send(err.message);
+          if (result.recordset.length > 0) {
+            return res.send({ mentors: result.recordset });
+          } else {
+            res.send({ error: "Not found" });
+          }
+        });
+      });
+    } else if (category && skill && area && availability) {
+      sql.connect(config, (err) => {
+        if (err) return res.send(err.message);
+        const request = new sql.Request();
+        request.input("category", sql.VarChar, category);
+        request.input("skill", sql.VarChar, skill);
+        request.input("area", sql.VarChar, area);
+        request.input("availability", sql.VarChar, availability);
+        const searchQuery =
+          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category AND mentor_mentorship_area = @area AND mentor_skills = @skill AND mentor_availability = @availability";
+        request.query(searchQuery, (err, result) => {
+          if (err) return res.send(err.message);
+          if (result.recordset.length > 0) {
+            return res.send({ mentors: result.recordset });
+          } else {
+            res.send({ error: "Not found" });
+          }
+        });
+      });
+    }
+    // } else {
+    //   sql.connect(config, (err) => {
+    //     if (err) return res.send(err.message);
+    //     const request = new sql.Request();
+    //     request.input("category", sql.VarChar, category);
+    //     request.input("skill", sql.VarChar, skill);
+    //     request.input("area", sql.VarChar, area);
+    //     request.input("availability", sql.VarChar, availability);
+    //     const searchQuery = "SELECT * FROM mentor_dtls";
+    //     request.query(searchQuery, (err, result) => {
+    //       if (err) return res.send(err.message);
+    //       if (result.recordset.length > 0) {
+    //         return res.send({ mentors: result.recordset });
+    //       } else {
+    //         res.send({ error: "Not found" });
+    //       }
+    //     });
+    //   });
+    // }
   } catch (error) {
     res.send(error.message);
   }

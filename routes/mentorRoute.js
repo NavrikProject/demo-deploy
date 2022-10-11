@@ -13,6 +13,7 @@ import {
   fillAdditionalMentorDetails,
   getMentorProfileDetails,
   addBankAccountDetailsOfMentor,
+  getMentorByFiltering,
 } from "../controllers/mentorController.js";
 import { verifyTokenAndAuthorization } from "../middleware/verifyToken.js";
 let router = routers.Router();
@@ -43,7 +44,7 @@ router.put(
 
 // searching the mentor
 router.get("/get/mentors", getMentorBySearch);
-
+router.get("/get/mentors/filter", getMentorByFiltering);
 // get all mentor individual mentor details
 router.get("/get/individual/mentors", getIndividualMentorDetails);
 
