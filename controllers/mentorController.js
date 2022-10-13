@@ -285,7 +285,8 @@ export async function getMentorByFiltering(req, res) {
           }
         });
       });
-    } else if (category && skill && availability && !area) {
+    } else if (category && skill && area && !availability) {
+      console.log("entered this function");
       sql.connect(config, (err) => {
         if (err) return res.send(err.message);
         const request = new sql.Request();
