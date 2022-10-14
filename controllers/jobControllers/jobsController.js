@@ -1,4 +1,4 @@
-import sql from "mssql/msnodesqlv8.js";
+import sql from "mssql";
 import config from "../../config/dbconfig.js";
 
 export async function getAllJobDetails(req, res) {
