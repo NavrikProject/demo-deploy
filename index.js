@@ -29,6 +29,8 @@ import HomeRoute from "./routes/indexRoute.js";
 import rescheduleRoute from "./routes/rescheduleRoute.js";
 import recruiterRoute from "./routes/jobRoutes/recruiterRoute.js";
 import jobsRoute from "./routes/jobRoutes/jobRoute.js";
+import traineeCourseRoute from "./routes/traineeCourseRoute.js";
+
 const __dirname = path.resolve();
 
 const app = express();
@@ -76,6 +78,7 @@ app.use("/api", masterRoute);
 app.use("/api/reschedule", rescheduleRoute);
 app.use("/api/recruiter", recruiterRoute);
 app.use("/api/jobs", jobsRoute);
+app.use("/api/courses", traineeCourseRoute);
 
 app.get("/", (req, res) => {
   const time = new Date().getTime();
