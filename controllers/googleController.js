@@ -6,7 +6,7 @@ import sql from "mssql";
 import config from "../config/dbconfig.js";
 import sgMail from "@sendgrid/mail";
 import dotenv from "dotenv";
-import updateEmail from "../middleware/updateEmail.js";
+import { accountCreatedEmailTemplate } from "../middleware/authEmailTemplate.js";
 dotenv.config();
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -150,10 +150,9 @@ export async function googleSignUp(req, res, next) {
                                   sgMail.setApiKey(
                                     process.env.SENDGRID_API_KEY
                                   );
-                                  const msg = updateEmail(
+                                  const msg = accountCreatedEmailTemplate(
                                     email,
-                                    "Account created successfully",
-                                    "Created an account, You are ready to start using our platform."
+                                    firstName + " " + lastName
                                   );
                                   sgMail
                                     .send(msg)
@@ -258,9 +257,9 @@ export async function googleSignUp(req, res, next) {
         }
       })
       .catch((err) => {
-        console.log(err.message);
+        return res.send({ error: err.message });
       });
   } catch (error) {
-    console.log(error);
+    return res.send({ error: error.message });
   }
 }
