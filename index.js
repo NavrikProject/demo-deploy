@@ -67,27 +67,48 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   next();
 });
+
 app.use("/", HomeRoute);
+// auth routes
 app.use("/api/auth", authRouter);
-app.use("/api/courses/new", courseRegdRoute);
-app.use("/api/courses", courseRoute);
-app.use("/api/trainee", traineeProfileRoute);
-app.use("/api/earnings", trainerEarningsRoute);
+app.use("/api/users", usersRoute);
+
+// trainee routes
+app.use("/api/trainee/profile/booking", TraineeBookingProfileRoute);
+app.use("/api/trainee/profile", traineeProfileRoute);
+app.use("/api/trainee/courses", traineeCourseRoute);
+
+//trainer routers
+app.use("/api/trainer/earnings", trainerEarningsRoute);
 app.use("/api/trainer/profile", trainerProfileRoute);
 app.use("/api/trainer", trainerRoute);
-app.use("/api/users", usersRoute);
-app.use("/api/corporate", corporateCourseRoute);
-app.use("/api/mentor", mentorRoute);
-app.use("/api/mentor/profile", TraineeBookingProfileRoute);
+
+//mentor routes
 app.use("/api/mentor/bookings", mentorBookingRoute);
-app.use("/api/feedback", FeedbackRoute);
+app.use("/api/mentor", mentorRoute);
+
+//contributers routes
 app.use("/api/contributers", ContributersRoute);
-app.use("/api/google", googleRoute);
-app.use("/api", masterRoute);
-app.use("/api/reschedule", rescheduleRoute);
+
+// courses routes
+app.use("/api/courses/new", courseRegdRoute);
+app.use("/api/courses", courseRoute);
+app.use("/api/corporate", corporateCourseRoute);
+
+// job recruiter routes
 app.use("/api/recruiter", recruiterRoute);
+
+// jobs posts routes
 app.use("/api/jobs", jobsRoute);
-app.use("/api/courses", traineeCourseRoute);
+
+// master routes
+app.use("/api", masterRoute);
+
+// feedback routes
+app.use("/api/feedback", FeedbackRoute);
+app.use("/api/google", googleRoute);
+app.use("/api/notifications", notificationRoute);
+app.use("/api/reschedule", rescheduleRoute);
 
 app.get("/", (req, res) => {
   const time = new Date().getTime();
