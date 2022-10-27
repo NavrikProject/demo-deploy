@@ -50,8 +50,13 @@ export async function addTraineeCourseDetails(req, res, next) {
                         courseName
                       );
                       request.input("traineeCourseId", sql.Int, courseId);
+                      request.input(
+                        "traineeCourseEmail",
+                        sql.VarChar,
+                        userEmail
+                      );
                       request.query(
-                        "select * from trainee_courses_dtls where trainee_course_name = @traineeCourseName and trainee_course_id = @traineeCourseId",
+                        "select * from trainee_courses_dtls where trainee_course_name = @traineeCourseName and trainee_course_id = @traineeCourseId and trainee_course_email = @traineeCourseEmail",
                         (err, result) => {
                           if (err) return res.send({ error: err.message });
                           if (result.recordset.length > 0) {
@@ -165,6 +170,7 @@ export async function updateTraineeCourseProgress(req, res, next) {
     courseProgressStatus,
     courseVideoUploadStatus,
     courseCompletedStatus,
+    traineeCourseStatus,
   } = req.body;
   if (endDate) {
     endDate = new Date(endDate).toISOString().substring(0, 10);
@@ -195,9 +201,14 @@ export async function updateTraineeCourseProgress(req, res, next) {
               sql.VarChar,
               courseCompletedStatus
             );
+            request.input(
+              "traineeCourseStatus",
+              sql.VarChar,
+              traineeCourseStatus
+            );
             if (!endDate) {
               const sqlUpdate =
-                "UPDATE trainee_courses_dtls SET trainee_course_progress_status = @courseProgressStatus,trainee_course_progress_percentage = @coursePercentage, trainee_course_chapter_completed = @courseChapters, trainee_course_chapter_complete_status_dt = @date,trainee_course_status= @courseCompletedStatus WHERE trainee_course_dtls_id = @traineeCourseId";
+                "UPDATE trainee_courses_dtls SET trainee_course_progress_status = @courseProgressStatus,trainee_course_progress_percentage = @coursePercentage, trainee_course_chapter_completed = @courseChapters, trainee_course_chapter_complete_status_dt = @date,trainee_course_status = @traineeCourseStatus, trainee_course_complete_status= @courseCompletedStatus WHERE trainee_course_dtls_id = @traineeCourseId";
               request.query(sqlUpdate, (err, result) => {
                 if (err)
                   return res.send({
@@ -218,7 +229,7 @@ export async function updateTraineeCourseProgress(req, res, next) {
             } else {
               request.input("endDate", sql.Date, endDate);
               const sqlUpdate =
-                "UPDATE trainee_courses_dtls SET trainee_course_progress_status = @courseProgressStatus,trainee_course_progress_percentage = @coursePercentage, trainee_course_chapter_completed = @courseChapters, trainee_course_chapter_complete_status_dt = @date, trainee_course_end_date= @endDate, trainee_course_status= @courseCompletedStatus WHERE trainee_course_dtls_id = @traineeCourseId";
+                "UPDATE trainee_courses_dtls SET trainee_course_progress_status = @courseProgressStatus,trainee_course_progress_percentage = @coursePercentage, trainee_course_chapter_completed = @courseChapters, trainee_course_chapter_complete_status_dt = @date, trainee_course_end_date= @endDate,trainee_course_status= @traineeCourseStatus, trainee_course_complete_status= @courseCompletedStatus WHERE trainee_course_dtls_id = @traineeCourseId";
               request.query(sqlUpdate, (err, result) => {
                 if (err)
                   return res.send({
@@ -329,7 +340,7 @@ function sendFeedBackUploadEmailToTrainee(req, res) {
       if (err) return console.log(err.message);
       const request = new sql.Request();
       request.query(
-        "select * from trainee_courses_dtls where trainee_course_progress_status = 'completed' and trainee_course_status = 'completed' and trainee_course_progress_percentage = 100 and trainee_course_video_upload_email = 'no' ",
+        "select * from trainee_courses_dtls where trainee_course_progress_status = 'completed' and trainee_course_complete_status = 'completed' and trainee_course_progress_percentage = 100 and trainee_course_video_upload_email = 'no' ",
         (err, results) => {
           if (err) return console.log(err.message);
           if (results.recordset.length > 0) {
@@ -391,7 +402,7 @@ function sendMentorEmailToTrainee(req, res) {
       if (err) return console.log(err.message);
       const request = new sql.Request();
       request.query(
-        "select * from trainee_courses_dtls where trainee_course_progress_status = 'completed' and trainee_course_status = 'completed' and trainee_course_progress_percentage = 100 and trainee_course_video_upload_email = 'yes' and  trainee_course_video_upload_status = 'uploaded' and trainee_course_mentor_session_email = 'no' ",
+        "select * from trainee_courses_dtls where trainee_course_progress_status = 'completed' and trainee_course_complete_status = 'completed' and trainee_course_progress_percentage = 100 and trainee_course_video_upload_email = 'yes' and  trainee_course_video_upload_status = 'uploaded' and trainee_course_mentor_session_email = 'no' ",
         (err, results) => {
           if (err) return console.log(err.message);
           if (results.recordset.length > 0) {
@@ -453,7 +464,7 @@ function addTraineeCoursePoints(req, res, next) {
       if (err) return console.log(err.message);
       const request = new sql.Request();
       request.query(
-        "select * from trainee_courses_dtls where trainee_course_progress_status = 'completed' and trainee_course_status = 'completed' and trainee_course_progress_percentage = 100 and trainee_course_video_upload_email = 'yes' and  trainee_course_video_upload_status = 'uploaded' and trainee_course_mentor_session_email = 'yes' and trainee_course_reward_points_status = 'no' ",
+        "select * from trainee_courses_dtls where trainee_course_progress_status = 'completed' and trainee_course_complete_status = 'completed' and trainee_course_progress_percentage = 100 and trainee_course_video_upload_email = 'yes' and  trainee_course_video_upload_status = 'uploaded' and trainee_course_mentor_session_email = 'yes' and trainee_course_reward_points_status = 'no' ",
         (err, results) => {
           if (err) return console.log(err.message);
           if (results.recordset.length > 0) {
