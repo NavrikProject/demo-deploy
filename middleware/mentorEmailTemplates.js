@@ -555,7 +555,6 @@ export const mentorBookingRemainderEmailTemplate = (
           >
         </button>
         <p>or if it doesn't work try the link below</p>
-        <p>${url}</p>
         <p>if you are facing any issue while joining please contact through email.</p>
         <p>
           If you have any questions, reply back to this email and we'll be happy

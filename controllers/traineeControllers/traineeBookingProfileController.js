@@ -1231,7 +1231,7 @@ function sentEmailRemainderBeforeOneDayToTrainee(req, res) {
                 new Date(date).toLocaleDateString(),
                 slotTime,
                 "Tomorrow",
-                traineeJoinUrl
+                "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
               );
 
               sgMail
@@ -1265,13 +1265,13 @@ function sentEmailRemainderOnTheDayToTrainee(req, res) {
         (err, result) => {
           result?.recordset.forEach((res) => {
             let traineeEmail = res.user_email;
-            let traineeJoinUrl = res.trainee_join_url;
             let mentorName = res.mentor_name;
             let traineeName = res.user_fullname;
             let slotTime = res.booking_time;
             let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             var day = new Date(res.booking_mentor_date).getDate();
+            let bookingDate = new Date(res.booking_mentor_date).toDateString();
             const date = new Date(year, month, day, 0, 0, 0);
             schedule.scheduleJob(date, function () {
               sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -1279,10 +1279,10 @@ function sentEmailRemainderOnTheDayToTrainee(req, res) {
                 traineeEmail,
                 traineeName,
                 mentorName,
-                new Date(date).toLocaleDateString(),
+                bookingDate,
                 slotTime,
                 "Today",
-                traineeJoinUrl
+                "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
               );
               sgMail
                 .send(msg)
@@ -1315,7 +1315,6 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
         (err, result) => {
           result?.recordset.forEach((res) => {
             let traineeEmail = res.user_email;
-            let traineeJoinUrl = res.trainee_join_url;
             let mentorName = res.mentor_name;
             let traineeName = res.user_fullname;
             let slotTime = res.booking_time;
@@ -1324,6 +1323,7 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
             let min = res.booking_starts_time.split(":")[1];
+            let bookingDate = new Date(res.booking_mentor_date).toDateString();
             if (min === "00") {
               hour = hour - 1;
               const date = new Date(year, month, day, hour, 50, 0);
@@ -1333,10 +1333,10 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                   traineeEmail,
                   traineeName,
                   mentorName,
-                  new Date(date).toLocaleDateString(),
+                  bookingDate,
                   slotTime,
-                  "10",
-                  traineeJoinUrl
+                  10,
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1356,10 +1356,10 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                   traineeEmail,
                   traineeName,
                   mentorName,
-                  new Date(date).toLocaleDateString(),
+                  bookingDate,
                   slotTime,
-                  "10",
-                  traineeJoinUrl
+                  10,
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1373,7 +1373,6 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
             }
             if (min === "30") {
               min = min - 10;
-
               const date = new Date(year, month, day, hour, min, 0);
               schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -1381,10 +1380,10 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                   traineeEmail,
                   traineeName,
                   mentorName,
-                  new Date(date).toLocaleDateString(),
+                  bookingDate,
                   slotTime,
-                  "10",
-                  traineeJoinUrl
+                  10,
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1404,10 +1403,10 @@ function sentEmailRemainderToTraineeBefore10Min(req, res) {
                   traineeEmail,
                   traineeName,
                   mentorName,
-                  new Date(date).toLocaleDateString(),
+                  bookingDate,
                   slotTime,
-                  "10",
-                  traineeJoinUrl
+                  10,
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1441,7 +1440,6 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
         (err, result) => {
           result?.recordset.forEach((res) => {
             let traineeEmail = res.user_email;
-            let traineeJoinUrl = res.trainee_join_url;
             let mentorName = res.mentor_name;
             let traineeName = res.user_fullname;
             let slotTime = res.booking_time;
@@ -1460,10 +1458,10 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
                   traineeEmail,
                   traineeName,
                   mentorName,
-                  new Date(date).toLocaleDateString(),
+                  new Date(date).toDateString(),
                   slotTime,
-                  "5",
-                  traineeJoinUrl
+                  5,
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1483,10 +1481,10 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
                   traineeEmail,
                   traineeName,
                   mentorName,
-                  new Date(date).toLocaleDateString(),
+                  new Date(date).toDateString(),
                   slotTime,
-                  "5",
-                  traineeJoinUrl
+                  5,
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1506,10 +1504,10 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
                   traineeEmail,
                   traineeName,
                   mentorName,
-                  new Date(date).toLocaleDateString(),
+                  new Date(date).toDateString(),
                   slotTime,
-                  "5",
-                  traineeJoinUrl
+                  5,
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1529,10 +1527,10 @@ function sentEmailRemainderToTraineeBefore5Min(req, res) {
                   traineeEmail,
                   traineeName,
                   mentorName,
-                  new Date(date).toLocaleDateString(),
+                  new Date(date).toDateString(),
                   slotTime,
-                  "5",
-                  traineeJoinUrl
+                  5,
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1574,10 +1572,10 @@ function sentEmailRemainderToTraineeToStart(req, res) {
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
             let min = res.booking_starts_time.split(":")[1];
+            let bookingDate = new Date(res.booking_mentor_date).toDateString();
             const date = new Date(year, month, day, hour, min, 0);
             schedule.scheduleJob(date, function () {
               sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-              let bookingDate = new Date(date).toDateString();
               const msg = traineeBookingRemainderEmailTemplate(
                 traineeEmail,
                 traineeName,
@@ -1585,7 +1583,7 @@ function sentEmailRemainderToTraineeToStart(req, res) {
                 bookingDate,
                 slotTime,
                 0,
-                traineeJoinUrl
+                "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
               );
               sgMail
                 .send(msg)
@@ -1629,7 +1627,7 @@ function sentEmailRemainderToFillFeedback(req, res) {
               const msg = sendRemainderOnTheDay(
                 traineeEmail,
                 "Remainder for to fill the feedback form",
-                "http://localhost:3000/trainee/profile/bookings",
+                "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/bookings",
                 "Give feedback"
               );
               sgMail
@@ -1647,22 +1645,18 @@ function sentEmailRemainderToFillFeedback(req, res) {
     });
   } catch (error) {}
 }
+sentEmailRemainderToFillFeedback();
+//remainder email will be sent before one day function call
+//sentEmailRemainderBeforeOneDayToTrainee();
 
-setInterval(() => {
-  sentEmailRemainderToFillFeedback();
-  //remainder email will be sent before one day function call
-  sentEmailRemainderBeforeOneDayToTrainee();
+// remainder will be sent on the day function call
+sentEmailRemainderOnTheDayToTrainee();
 
-  // remainder will be sent on the day function call
-  sentEmailRemainderOnTheDayToTrainee();
+// remainder will be sent on before 10 minutes function call
+sentEmailRemainderToTraineeBefore10Min();
 
-  // remainder will be sent on before 10 minutes function call
-  sentEmailRemainderToTraineeBefore10Min();
+// remainder will be sent on before 5 minutes function call
+sentEmailRemainderToTraineeBefore5Min();
 
-  // remainder will be sent on before 5 minutes function call
-  sentEmailRemainderToTraineeBefore5Min();
-
-  // remainder will be sent to start or join meeting function call
-  sentEmailRemainderToTraineeToStart();
-}, 60000);
-
+// remainder will be sent to start or join meeting function call
+sentEmailRemainderToTraineeToStart();

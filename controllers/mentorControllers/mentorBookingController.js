@@ -813,11 +813,11 @@ function sentEmailRemainderOnTheDayToMentor(req, res) {
           result?.recordset.forEach((res) => {
             const mentorName = res.mentor_name;
             let mentorEmail = res.mentor_email;
+            const username = res.user_fullname;
             const bookingDate = new Date(
               res.booking_mentor_date
             ).toDateString();
             const slotTime = res.booking_time;
-            let mentorHostUrl = res.mentor_host_url;
             let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             var day = new Date(res.booking_mentor_date).getDate();
@@ -831,7 +831,7 @@ function sentEmailRemainderOnTheDayToMentor(req, res) {
                 bookingDate,
                 slotTime,
                 1,
-                mentorHostUrl
+                "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
               );
               sgMail
                 .send(msg)
@@ -869,17 +869,18 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
               res.booking_mentor_date
             ).toDateString();
             const slotTime = res.booking_time;
-            let mentorHostUrl = res.mentor_host_url;
+            const username = res.user_fullname;
             let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
             let min = res.booking_starts_time.split(":")[1];
             if (min === "00") {
+              console.log("Hello");
               hour = hour - 1;
-              const date = new Date(year, month, day, hour, 50, 0);
-
+              const date = new Date(year, month, day, hour, 51, 0);
               schedule.scheduleJob(date, function () {
+                console.log("Hello entered this final function");
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -888,7 +889,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                   bookingDate,
                   slotTime,
                   1,
-                  mentorHostUrl
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -911,7 +912,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                   bookingDate,
                   slotTime,
                   15,
-                  mentorHostUrl
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -925,7 +926,6 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
             }
             if (min === "30") {
               min = min - 10;
-
               const date = new Date(year, month, day, hour, min, 0);
               schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -936,7 +936,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                   bookingDate,
                   slotTime,
                   1,
-                  mentorHostUrl
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -959,7 +959,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                   bookingDate,
                   slotTime,
                   1,
-                  mentorHostUrl
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -996,14 +996,13 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
             const bookingDate = new Date(
               res.booking_mentor_date
             ).toDateString();
+            const username = res.user_fullname;
             const slotTime = res.booking_time;
-            let mentorHostUrl = res.mentor_host_url;
             let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
             let min = res.booking_starts_time.split(":")[1];
-
             if (min === "00") {
               hour = hour - 1;
               const date = new Date(year, month, day, hour, 55, 0);
@@ -1016,7 +1015,7 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                   bookingDate,
                   slotTime,
                   1,
-                  mentorHostUrl
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1039,7 +1038,7 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                   bookingDate,
                   slotTime,
                   1,
-                  mentorHostUrl
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1062,7 +1061,7 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                   bookingDate,
                   slotTime,
                   1,
-                  mentorHostUrl
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1086,7 +1085,7 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                   bookingDate,
                   slotTime,
                   1,
-                  mentorHostUrl
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1123,8 +1122,8 @@ function sentEmailRemainderToMentorToStart(req, res) {
             const bookingDate = new Date(
               res.booking_mentor_date
             ).toDateString();
+            const username = res.user_fullname;
             const slotTime = res.booking_time;
-            let mentorHostUrl = res.mentor_host_url;
             let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
@@ -1139,8 +1138,8 @@ function sentEmailRemainderToMentorToStart(req, res) {
                 username,
                 bookingDate,
                 slotTime,
-                1,
-                mentorHostUrl
+                0,
+                "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
               );
               sgMail
                 .send(msg)
@@ -1212,19 +1211,17 @@ function sentEmail(req, res) {
   } catch (error) {}
 }
 
-setInterval(() => {
-  //remainder email will be sent before one day function call
-  sentEmailRemainderBeforeOneDayToMentor();
+//remainder email will be sent before one day function call
+//sentEmailRemainderBeforeOneDayToMentor();
 
-  // remainder will be sent on the day function call
-  sentEmailRemainderOnTheDayToMentor();
+// remainder will be sent on the day function call
+sentEmailRemainderOnTheDayToMentor();
 
-  // remainder will be sent on before 10 minutes function call
-  sentEmailRemainderToMentorBefore10Min();
+// remainder will be sent on before 10 minutes function call
+sentEmailRemainderToMentorBefore10Min();
 
-  // remainder will be sent on before 5 minutes function call
-  sentEmailRemainderToMentorBefore5Min();
+// remainder will be sent on before 5 minutes function call
+sentEmailRemainderToMentorBefore5Min();
 
-  // remainder will be sent to start or join meeting function call
-  sentEmailRemainderToMentorToStart();
-}, 60000);
+// remainder will be sent to start or join meeting function call
+sentEmailRemainderToMentorToStart();

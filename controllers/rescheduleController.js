@@ -353,7 +353,8 @@ function checkTheDateAndStatusChangeOfTraineeANdMentor(req, res) {
                                           1 +
                                           "' )",
                                         (err, result) => {
-                                          if (err) return res.send(err.message);
+                                          if (err)
+                                            return console.log(err.message);
                                           if (result) {
                                             sgMail.setApiKey(
                                               process.env.SENDGRID_API_KEY
@@ -370,7 +371,7 @@ function checkTheDateAndStatusChangeOfTraineeANdMentor(req, res) {
                                             sgMail
                                               .send(msg)
                                               .then(() => {
-                                                return res.send({
+                                                return console.log({
                                                   success:
                                                     "Successfully reschedule email sent",
                                                 });
@@ -456,11 +457,11 @@ function checkTheDateAndStatusChangeOfTraineeANdMentor(req, res) {
       );
     });
   } catch (error) {
-    return res.send({ error: error.message });
+    return console.log({ error: error.message });
   }
 }
 setInterval(() => {
   checkTheDateAndStatusChangeOfTrainee();
   checkTheDateAndStatusChangeOfMentor();
   checkTheDateAndStatusChangeOfTraineeANdMentor();
-}, 6000);
+}, 60000);
