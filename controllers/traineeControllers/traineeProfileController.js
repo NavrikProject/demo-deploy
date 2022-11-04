@@ -21,12 +21,7 @@ export async function createTraineeProfile(req, res, next) {
   const profession = req.body.profession;
   const experience = req.body.experience;
   const address = req.body.address;
-  const blobName = new Date().getTime() + "-" + req.files.image.name;
-
-  let fileName = `https://navrik.blob.core.windows.net/navrikimage/${blobName}`;
-
-  const stream = intoStream(req.files.image.data);
-  const streamLength = req.files.image.data.length;
+  const imageFileName = req.body.imageFileName;
   try {
     sql.connect(config, (err) => {
       if (err) return res.send(err.message);
@@ -51,12 +46,44 @@ export async function createTraineeProfile(req, res, next) {
                 (err, result) => {
                   if (err) return res.send(err.message);
                   if (result.recordset.length > 0) {
-                    return res.send({
-                      error: "You have already submitted the profile details!",
+                    request.input("mobile", sql.VarChar, mobile);
+                    request.input("dob", sql.VarChar, dob);
+                    request.input("imageFileName", sql.VarChar, imageFileName);
+                    request.input("address", sql.VarChar, address);
+                    request.input("experience", sql.Int, experience);
+                    request.input("graduate", sql.VarChar, graduate);
+                    request.input("profession", sql.VarChar, profession);
+                    const sqlUpdate =
+                      "update trainee_dtls set trainee_mobile = @mobile , trainee_dob= @dob,trainee_image = @imageFileName, trainee_address = @address, trainee_experience = @experience, trainee_graduate = @graduate, trainee_profession = @profession where trainee_email = @email";
+                    request.query(sqlUpdate, (err, result) => {
+                      if (err)
+                        return res.send({
+                          err: "There was an error processing the request",
+                        });
+                      if (result) {
+                        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                        const msg = traineeProfileUpdateEmailTemplate(
+                          email,
+                          fullname,
+                          "profile"
+                        );
+                        sgMail
+                          .send(msg)
+                          .then(() => {
+                            return res.send({
+                              success: "Profile details are saved successfully",
+                            });
+                          })
+                          .catch((error) => {
+                            return res.send({
+                              error: "There is some error while saving",
+                            });
+                          });
+                      }
                     });
                   } else {
                     sql.connect(config, (err) => {
-                      if (err) return res.send({ error: error.message });
+                      if (err) return res.send({ error: err.message });
                       const request = new sql.Request();
                       request.query(
                         "INSERT INTO trainee_dtls (trainee_email, trainee_mobile, trainee_dob,trainee_image,trainee_address,trainee_experience,trainee_graduate, trainee_profession) VALUES('" +
@@ -66,7 +93,7 @@ export async function createTraineeProfile(req, res, next) {
                           "','" +
                           dob +
                           "','" +
-                          fileName +
+                          imageFileName +
                           "','" +
                           address +
                           "', '" +
