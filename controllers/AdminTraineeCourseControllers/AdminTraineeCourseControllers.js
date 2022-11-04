@@ -7,8 +7,14 @@ import jwt from "jsonwebtoken";
 import rp from "request-promise";
 import schedule from "node-schedule";
 import sgMail from "@sendgrid/mail";
-import { traineeLiveClassRemainderEmailTemplate } from "../../middleware/traineeEmailTemplates.js";
-import { instructorLiveClassRemainderEmailTemplate } from "../../middleware/trainerEmailTemplates.js";
+import {
+  traineeLiveClassRemainderEmailTemplate,
+  traineeLiveClassRemainderStartedEmailTemplate,
+} from "../../middleware/traineeEmailTemplates.js";
+import {
+  instructorLiveClassRemainderEmailTemplate,
+  instructorLiveClassRemainderStartedEmailTemplate,
+} from "../../middleware/trainerEmailTemplates.js";
 dotenv.config();
 
 const payload = {
@@ -290,8 +296,9 @@ setInterval(() => {
   updateLiveInstructorClassToComplete();
 }, 60000);
 
-// remainder will be sent on before 10 minutes to trainee
-function sentEmailLiveClassRemainderToTraineeBefore15Min(req, res) {
+// remainder will be sent on before 10 minutes to trainee function
+
+function sentEmailLiveClassRemainderToTraineeBefore10Min(req, res) {
   try {
     sql.connect(config, (err) => {
       if (err) return res.send(err.message);
@@ -316,10 +323,19 @@ function sentEmailLiveClassRemainderToTraineeBefore15Min(req, res) {
             let hour = res.instructor_live_class_start_time.split(":")[0];
             let min = res.instructor_live_class_start_time.split(":")[1];
             if (min === "00") {
-              hour = hour - 1;
-              const date = new Date(year, month, day, hour, 50, 0);
-              schedule.scheduleJob(date, function () {
-                console.log("Entered this function");
+              var date = new Date(year, month, day, hour, min, 0);
+              date.setHours(date.getHours() - 5);
+              //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+              date.setMinutes(date.getMinutes() - 40); //for 5 minutes before
+              console.log(new Date(date).getUTCMinutes() + " 10 minutes email");
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = traineeLiveClassRemainderEmailTemplate(
                   traineeEmail,
@@ -327,7 +343,7 @@ function sentEmailLiveClassRemainderToTraineeBefore15Min(req, res) {
                   instructorName,
                   new Date(date).toDateString(),
                   slotTime,
-                  "15",
+                  "10",
                   traineeJoinUrl
                 );
                 sgMail
@@ -339,13 +355,13 @@ function sentEmailLiveClassRemainderToTraineeBefore15Min(req, res) {
                       traineeName,
                       new Date(date).toDateString(),
                       slotTime,
-                      "15",
+                      "10",
                       instructorHostUrl
                     );
                     sgMail
                       .send(msg)
                       .then(() => {
-                        console.log("Email Sent before 15 minutes");
+                        console.log("Email Sent before 10 minutes");
                       })
                       .catch((error) => {
                         console.log(error.message);
@@ -354,7 +370,7 @@ function sentEmailLiveClassRemainderToTraineeBefore15Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              });
+              }
             }
           });
         }
@@ -389,10 +405,21 @@ function sentEmailLiveClassRemainderToTraineeBefore5Min(req, res) {
             let hour = res.instructor_live_class_start_time.split(":")[0];
             let min = res.instructor_live_class_start_time.split(":")[1];
             if (min === "00") {
-              hour = hour - 1;
-              const date = new Date(year, month, day, hour, 55, 0);
-              schedule.scheduleJob(date, function () {
-                console.log("Entered this function");
+              var date = new Date(year, month, day, hour, min, 0);
+              date.setHours(date.getHours() - 5);
+              //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+              date.setMinutes(date.getMinutes() - 35); //for 5 minutes before
+              console.log(date);
+              console.log(new Date());
+              console.log(new Date(date).getUTCMinutes() + "5 minutes email");
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = traineeLiveClassRemainderEmailTemplate(
                   traineeEmail,
@@ -418,7 +445,7 @@ function sentEmailLiveClassRemainderToTraineeBefore5Min(req, res) {
                     sgMail
                       .send(msg)
                       .then(() => {
-                        console.log("Email Sent before 15 minutes");
+                        console.log("Email Sent before 5 minutes");
                       })
                       .catch((error) => {
                         console.log(error.message);
@@ -427,7 +454,7 @@ function sentEmailLiveClassRemainderToTraineeBefore5Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              });
+              }
             }
           });
         }
@@ -437,6 +464,7 @@ function sentEmailLiveClassRemainderToTraineeBefore5Min(req, res) {
     console.log(error.message);
   }
 }
+
 function sentEmailLiveClassRemainderToTraineeToStart(req, res) {
   try {
     sql.connect(config, (err) => {
@@ -462,43 +490,56 @@ function sentEmailLiveClassRemainderToTraineeToStart(req, res) {
             let hour = res.instructor_live_class_start_time.split(":")[0];
             let min = res.instructor_live_class_start_time.split(":")[1];
             const date = new Date(year, month, day, hour, min, 0);
-            schedule.scheduleJob(date, function () {
-              sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-              console.log("Entered this function");
-              const msg = traineeLiveClassRemainderEmailTemplate(
-                traineeEmail,
-                traineeName,
-                instructorName,
-                new Date(date).toDateString(),
-                slotTime,
-                "0",
-                traineeJoinUrl
-              );
-              sgMail
-                .send(msg)
-                .then(() => {
-                  const msg = instructorLiveClassRemainderEmailTemplate(
-                    instructorEmail,
-                    instructorName,
-                    traineeName,
-                    new Date(date).toDateString(),
-                    slotTime,
-                    "0",
-                    instructorHostUrl
-                  );
-                  sgMail
-                    .send(msg)
-                    .then(() => {
-                      console.log("Email Sent before 0 minutes");
-                    })
-                    .catch((error) => {
-                      console.log(error.message);
-                    });
-                })
-                .catch((error) => {
-                  console.log(error.message);
-                });
-            });
+            if (min === "00") {
+              date.setHours(date.getHours() - 5);
+              //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+              date.setMinutes(date.getMinutes() - 30); //for 5 minutes before
+              console.log(new Date(date).getUTCMinutes() + " start minutes");
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = traineeLiveClassRemainderStartedEmailTemplate(
+                  traineeEmail,
+                  traineeName,
+                  instructorName,
+                  new Date(date).toDateString(),
+                  slotTime,
+                  traineeJoinUrl
+                );
+                sgMail
+                  .send(msg)
+                  .then(() => {
+                    const msg =
+                      instructorLiveClassRemainderStartedEmailTemplate(
+                        instructorEmail,
+                        instructorName,
+                        traineeName,
+                        new Date(date).toDateString(),
+                        slotTime,
+                        instructorHostUrl
+                      );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent before 0 minutes");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
+                  })
+                  .catch((error) => {
+                    console.log(error.message);
+                  });
+              }
+            } else {
+              console.log("not found");
+            }
           });
         }
       );
@@ -507,6 +548,334 @@ function sentEmailLiveClassRemainderToTraineeToStart(req, res) {
     console.log(error.message);
   }
 }
-sentEmailLiveClassRemainderToTraineeBefore15Min();
-sentEmailLiveClassRemainderToTraineeBefore5Min();
-sentEmailLiveClassRemainderToTraineeToStart();
+
+const sentHello = () => {
+  sql.connect(config, (err) => {
+    if (err) return res.send(err.message);
+    const request = new sql.Request();
+    request.query(
+      "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
+      (err, result) => {
+        result?.recordset.forEach((res) => {
+          let year = new Date(res.instructor_live_class_date).getFullYear();
+          let month = new Date(res.instructor_live_class_date).getMonth();
+          let day = new Date(res.instructor_live_class_date).getDate();
+          var hour = res.instructor_live_class_start_time.split(":")[0];
+          var min = res.instructor_live_class_start_time.split(":")[1];
+          min = parseInt(min);
+          var date = new Date(year, month, day, hour, min, 0);
+          console.log(
+            new Date().getUTCFullYear(date) + " year",
+            new Date().getUTCMonth(date) + " month",
+            new Date().getUTCDate(date) + " date ",
+            new Date().getUTCHours(date) + " Hours",
+            new Date().getUTCMinutes(date) +
+              " minutes" +
+              " before updating the hours and minutes 1"
+          );
+          console.log(
+            new Date().getFullYear(date) + " year",
+            new Date().getMonth(date) + " month",
+            new Date().getDate(date) + " date ",
+            new Date().getHours(date) + " Hours",
+            new Date().getMinutes(date) +
+              " minutes" +
+              " before updating the hours and minutes without utc 2"
+          );
+          date.setHours(date.getHours() - 5);
+          date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+          console.log(date + "changed minutes and hours date");
+          console.log(
+            new Date().getUTCFullYear(date) + " year",
+            new Date().getUTCMonth(date) + " month",
+            new Date().getUTCDate(date) + " date ",
+            new Date().getUTCHours(date) + " Hours",
+            new Date().getUTCMinutes(date) +
+              " minutes" +
+              " after updating the hours and minutes 3"
+          );
+          console.log(
+            new Date().getFullYear(date) + " year",
+            new Date().getMonth(date) + " month",
+            new Date().getDate(date) + " date ",
+            new Date().getHours(date) + " Hours",
+            new Date().getMinutes(date) +
+              " minutes" +
+              " after updating the hours and minutes 4 normal date"
+          );
+          console.log(
+            new Date().getUTCFullYear() + " year",
+            new Date().getUTCMonth() + " month",
+            new Date().getUTCDate() + " date ",
+            new Date().getUTCHours() + " Hours",
+            new Date().getUTCMinutes() + " minutes" + " from the new date 4"
+          );
+          console.log(
+            new Date().getFullYear() + " year",
+            new Date().getMonth() + " month",
+            new Date().getDate() + " date ",
+            new Date().getHours() + " Hours",
+            new Date().getMinutes() + " minutes" + " from the new date normal 6"
+          );
+          //date.setMinutes(date.getMinutes() - 35); //for 5 minutes before
+          schedule.scheduleJob(date, function () {
+            console.log("email sent before 10 minutes");
+          });
+          // console.log(new Date());
+          // console.log(
+          //   new Date(new Date(year, month, day, hour, 50, 0)).toUTCString()
+          // );
+
+          // console.log(
+          //   new Date(new Date(year, month, day, hour, 50, 0)).toUTCHours() +
+          //     " Hours"
+          // );
+          // console.log(
+          //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCMinutes() +
+          //     " minutes"
+          // );
+          // console.log(
+          //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCDate() +
+          //     " date"
+          // );
+          // console.log(
+          //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCMonth() +
+          //     " month"
+          // );
+          // console.log(
+          //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCFullYear() +
+          //     " year"
+          // );
+        });
+      }
+    );
+  });
+};
+
+setInterval(() => {
+  sentEmailLiveClassRemainderToTraineeBefore10Min();
+  sentEmailLiveClassRemainderToTraineeBefore5Min();
+  sentEmailLiveClassRemainderToTraineeToStart();
+  console.log("Logging from every 1 minutes from the remainders");
+}, 60000);
+function convertDateToUTC(date) {
+  return new Date(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes()
+  );
+}
+function createDateAsUTC(date) {
+  return new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes()
+    )
+  );
+}
+//var date = new Date(year, month, day, hour, 50, 0);
+//date.setHours(date.getHours() - 5);
+// date.setMinutes(date.getMinutes() - 30);
+//console.log(new Date(date));
+// console.log(new Date(new Date(year, month, day, hour, 50, 0)));
+// console.log(
+//   new Date(new Date(year, month, day, hour, 50, 0)).toUTCString()
+// );
+
+//  console.log(
+//    new Date().getUTCDate() + " date ",
+//    new Date().getUTCFullYear() + " year",
+//    new Date().getUTCHours() + " Hours",
+//    new Date().getUTCMinutes() + " minutes"
+//  );
+//  var date = new Date(year, month, day, hour, min, 0);
+//  date.setHours(date.getHours() - 5);
+//  //date.setMinutes(date.getMinutes() - 35); //for 5 minutes before
+//  console.log(new Date(date));
+//  date.setMinutes(date.getMinutes() - 40); //for 10 minutes before
+//  console.log(new Date(date));
+//  console.log(new Date());
+//  console.log(new Date().getUTCHours());
+//  schedule.scheduleJob(date, function () {
+//    console.log("email sent before 10 minutes from schedule job");
+//  });
+//  if (
+//    new Date().getDate() === new Date(date).getUTCDate() &&
+//    new Date().getHours() === new Date(date).getUTCHours() &&
+//    new Date().getMinutes() === new Date(date).getUTCMinutes()
+//  ) {
+//    console.log("logged from the if statement 10 minutes before");
+//  }
+//  console.log(date + "changed minutes and hours date");
+//  console.log(
+//    new Date().getUTCFullYear(date) + " year",
+//    new Date().getUTCMonth(date) + " month",
+//    new Date().getUTCDate(date) + " date ",
+//    new Date().getUTCHours(date) + " Hours",
+//    new Date().getUTCMinutes(date) +
+//      " minutes" +
+//      " after updating the hours and minutes 3"
+//  );
+//  console.log(
+//    new Date().getFullYear(date) + " year",
+//    new Date().getMonth(date) + " month",
+//    new Date().getDate(date) + " date ",
+//    new Date().getHours(date) + " Hours",
+//    new Date().getMinutes(date) +
+//      " minutes" +
+//      " after updating the hours and minutes 4 normal date"
+//  );
+//  console.log(
+//    new Date().getUTCFullYear() + " year",
+//    new Date().getUTCMonth() + " month",
+//    new Date().getUTCDate() + " date ",
+//    new Date().getUTCHours() + " Hours",
+//    new Date().getUTCMinutes() + " minutes" + " from the new date 4"
+//  );
+//  console.log(
+//    new Date().getFullYear() + " year",
+//    new Date().getMonth() + " month",
+//    new Date().getDate() + " date ",
+//    new Date().getHours() + " Hours",
+//    new Date().getMinutes() + " minutes" + " from the new date normal 6"
+//  );
+//  console.log(
+//    new Date().getUTCFullYear(date) + " year",
+//    new Date().getUTCMonth(date) + " month",
+//    new Date().getUTCDate(date) + " date ",
+//    new Date().getUTCHours(date) + " Hours",
+//    new Date().getUTCMinutes(date) +
+//      " minutes" +
+//      " before updating the hours and minutes 1"
+//  );
+//  console.log(
+//    new Date().getFullYear(date) + " year",
+//    new Date().getMonth(date) + " month",
+//    new Date().getDate(date) + " date ",
+//    new Date().getHours(date) + " Hours",
+//    new Date().getMinutes(date) +
+//      " minutes" +
+//      " before updating the hours and minutes without utc 2"
+//  );
+// try {
+//   const sentHello10 = () => {
+//     sql.connect(config, (err) => {
+//       if (err) return res.send(err.message);
+//       const request = new sql.Request();
+//       request.query(
+//         "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
+//         (err, result) => {
+//           result?.recordset.forEach((res) => {
+//             let year = new Date(res.instructor_live_class_date).getFullYear();
+//             let month = new Date(res.instructor_live_class_date).getMonth();
+//             let day = new Date(res.instructor_live_class_date).getDate();
+//             var hour = res.instructor_live_class_start_time.split(":")[0];
+//             var min = res.instructor_live_class_start_time.split(":")[1];
+//             min = parseInt(min);
+//             var date = new Date(year, month, day, hour, min, 0);
+//             date.setHours(date.getHours() - 5);
+//             //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+//             date.setMinutes(date.getMinutes() - 40); //for 5 minutes before
+//             schedule.scheduleJob(date, function () {
+//               console.log("email sent before 10 minutes from schedule job");
+//             });
+//           });
+//         }
+//       );
+//     });
+//   };
+//   const sentHello5 = () => {
+//     sql.connect(config, (err) => {
+//       if (err) return res.send(err.message);
+//       const request = new sql.Request();
+//       request.query(
+//         "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
+//         (err, result) => {
+//           result?.recordset.forEach((res) => {
+//             let year = new Date(res.instructor_live_class_date).getFullYear();
+//             let month = new Date(res.instructor_live_class_date).getMonth();
+//             let day = new Date(res.instructor_live_class_date).getDate();
+//             var hour = res.instructor_live_class_start_time.split(":")[0];
+//             var min = res.instructor_live_class_start_time.split(":")[1];
+//             min = parseInt(min);
+//             var date = new Date(year, month, day, hour, min, 0);
+//             date.setHours(date.getHours() - 5);
+//             //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+//             date.setMinutes(date.getMinutes() - 35); //for 5 minutes before
+//             console.log(date);
+//             console.log(new Date());
+//             console.log(new Date(date).getUTCMinutes());
+//             schedule.scheduleJob(date, function () {
+//               console.log("email sent before 5 minutes from schedule job");
+//             });
+//           });
+//         }
+//       );
+//     });
+//   };
+//   const sentHello = () => {
+//     sql.connect(config, (err) => {
+//       if (err) return res.send(err.message);
+//       const request = new sql.Request();
+//       request.query(
+//         "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
+//         (err, result) => {
+//           result?.recordset.forEach((res) => {
+//             let year = new Date(res.instructor_live_class_date).getFullYear();
+//             let month = new Date(res.instructor_live_class_date).getMonth();
+//             let day = new Date(res.instructor_live_class_date).getDate();
+//             var hour = res.instructor_live_class_start_time.split(":")[0];
+//             var min = res.instructor_live_class_start_time.split(":")[1];
+//             min = parseInt(min);
+//             var date = new Date(year, month, day, hour, min, 0);
+//             date.setHours(date.getHours() - 5);
+//             //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+//             date.setMinutes(date.getMinutes() - 30); //for 5 minutes before
+//             console.log(date);
+//             console.log(new Date());
+//             console.log(new Date(date).getUTCMinutes());
+//             schedule.scheduleJob(date, function () {
+//               console.log("email sent before 5 minutes from schedule job");
+//             });
+//           });
+//         }
+//       );
+//     });
+//   };
+//   function convertDateToUTC(date) {
+//     return new Date(
+//       date.getUTCFullYear(),
+//       date.getUTCMonth(),
+//       date.getUTCDate(),
+//       date.getUTCHours(),
+//       date.getUTCMinutes()
+//     );
+//   }
+//   function createDateAsUTC(date) {
+//     return new Date(
+//       Date.UTC(
+//         date.getFullYear(),
+//         date.getMonth(),
+//         date.getDate(),
+//         date.getHours(),
+//         date.getMinutes()
+//       )
+//     );
+//   }
+//   sentHello();
+//   sentHello10();
+//   sentHello5;
+//   setInterval(() => {
+//     sentEmailLiveClassRemainderToTraineeBefore15Min();
+//     sentEmailLiveClassRemainderToTraineeBefore5Min();
+//     sentEmailLiveClassRemainderToTraineeToStart();
+//     console.log("Logging from every minutes from the remainders");
+//   }, 60000);
+// } catch (error) {
+
+// }
