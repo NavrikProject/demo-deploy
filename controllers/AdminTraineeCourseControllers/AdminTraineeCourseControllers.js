@@ -1,4 +1,3 @@
-import { request } from "express";
 import moment from "moment";
 import sql from "mssql";
 import config from "../../config/dbconfig.js";
@@ -8,10 +7,12 @@ import rp from "request-promise";
 import schedule from "node-schedule";
 import sgMail from "@sendgrid/mail";
 import {
+  traineeLiveClassBookingEmailTemplate,
   traineeLiveClassRemainderEmailTemplate,
   traineeLiveClassRemainderStartedEmailTemplate,
 } from "../../middleware/traineeEmailTemplates.js";
 import {
+  instructorLiveClassBookingEmailTemplate,
   instructorLiveClassRemainderEmailTemplate,
   instructorLiveClassRemainderStartedEmailTemplate,
 } from "../../middleware/trainerEmailTemplates.js";
@@ -29,7 +30,29 @@ export async function getTraineeInCompleteCourses(req, res) {
       if (err) return res.send({ error: err.message });
       const request = new sql.Request();
       request.query(
-        "select * from trainee_courses_dtls where trainee_course_progress_percentage <= '40' and trainee_course_progress_percentage > '30' or trainee_course_progress_percentage > '60' and trainee_course_progress_percentage <= '70' or trainee_course_progress_percentage = '100' or trainee_course_complete_status = 'pending' ORDER by trainee_course_dtls_id DESC",
+        "select * from trainee_courses_dtls where trainee_course_progress_percentage <= '40' and trainee_course_progress_percentage > '30' or trainee_course_progress_percentage > '60' and trainee_course_progress_percentage <= '70' or trainee_course_progress_percentage = '100' and trainee_course_complete_status = 'pending' ORDER by trainee_course_dtls_id DESC",
+        (err, result) => {
+          if (err) return res.send({ error: err.message });
+          if (result.recordset.length > 0) {
+            return res.send({ success: result.recordset });
+          } else {
+            return res.send({ error: "Not found from in complete course" });
+          }
+        }
+      );
+    });
+  } catch (error) {
+    return res.send({ error: "Not found" });
+  }
+}
+
+export async function getAllTraineeCompleteCourses(req, res) {
+  try {
+    sql.connect(config, (err) => {
+      if (err) return res.send({ error: err.message });
+      const request = new sql.Request();
+      request.query(
+        "select * from trainee_courses_dtls where  trainee_course_progress_percentage = '100' and trainee_course_complete_status = 'completed' ORDER by trainee_course_dtls_id DESC",
         (err, result) => {
           if (err) return res.send({ error: err.message });
           if (result.recordset.length > 0) {
@@ -155,10 +178,46 @@ export async function bookInstructorLiveClass(req, res) {
                             return res.send({ error: err.message });
                           }
                           if (success) {
-                            res.send({
-                              success:
-                                "Live class has been scheduled successfully",
-                            });
+                            const slotTime = startTime + " to " + endTime;
+                            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                            const msg = traineeLiveClassBookingEmailTemplate(
+                              traineeEmail,
+                              traineeName,
+                              instructorName,
+                              new Date(date).toDateString(),
+                              slotTime
+                            );
+                            sgMail
+                              .send(msg)
+                              .then(() => {
+                                const msg =
+                                  instructorLiveClassBookingEmailTemplate(
+                                    userEmail,
+                                    instructorName,
+                                    traineeName,
+                                    new Date(date).toDateString(),
+                                    slotTime
+                                  );
+                                sgMail
+                                  .send(msg)
+                                  .then(() => {
+                                    res.send({
+                                      success:
+                                        "Live class has been scheduled successfully",
+                                    });
+                                  })
+                                  .catch((error) => {
+                                    return res.send({
+                                      error: error.message,
+                                    });
+                                  });
+                              })
+                              .catch((error) => {
+                                return res.send({
+                                  error:
+                                    "Sorry you can not book the instructor live class",
+                                });
+                              });
                           } else {
                             return res.send({
                               error:
@@ -233,7 +292,31 @@ export async function getTraineeLiveClassDetailsInAdmin(req, res) {
     return res.send({ error: " " });
   }
 }
+export async function getTraineeCompletedLiveClassDetailsInAdmin(req, res) {
+  const { traineeCourseId } = req.body;
+  console.log(traineeCourseId);
 
+  try {
+    sql.connect(config, (err) => {
+      if (err) return res.send({ error: err.message });
+      const request = new sql.Request();
+      request.input("traineeCourseId", sql.Int, traineeCourseId);
+      request.query(
+        "select * from instructor_live_classes_dtls where trainee_course_id = @traineeCourseId and instructor_live_class_completed_status = 'completed' ",
+        (err, result) => {
+          if (err) return res.send({ error: err.message });
+          if (result.recordset.length > 0) {
+            return res.send({ success: result.recordset });
+          } else {
+            return res.send({ error: "not found" });
+          }
+        }
+      );
+    });
+  } catch (error) {
+    return res.send({ error: " " });
+  }
+}
 function updateLiveInstructorClassToComplete(req, res) {
   try {
     sql.connect(config, (err) => {

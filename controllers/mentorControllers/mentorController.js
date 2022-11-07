@@ -1023,6 +1023,7 @@ export async function registerMentorWithAdditionalDtls(req, res) {
     mentorAvailability,
     startTime,
     endTime,
+    imageFileName,
   } = req.body;
   firstName = firstName.toLowerCase();
   lastName = lastName.toLowerCase();
@@ -1045,13 +1046,7 @@ export async function registerMentorWithAdditionalDtls(req, res) {
   }
   let saltRounds = await bcrypt.genSalt(12);
   let hashedPassword = await bcrypt.hash(password, saltRounds);
-  const blobName = new Date().getTime() + "-" + req.files.image.name;
   const lowEmail = email.toLowerCase();
-
-  let fileName = `https://navrik.blob.core.windows.net/navrikimage/${blobName}`;
-  const stream = intoStream(req.files.image.data);
-  const streamLength = req.files.image.data.length;
-
   try {
     sql.connect(config, async (err) => {
       if (err) {
@@ -1151,7 +1146,7 @@ export async function registerMentorWithAdditionalDtls(req, res) {
                           "','" +
                           0 +
                           "','" +
-                          fileName +
+                          imageFileName +
                           "')",
                         (err, success) => {
                           if (err) {

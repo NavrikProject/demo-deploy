@@ -452,3 +452,60 @@ export const instructorLiveClassRemainderStartedEmailTemplate = (
     `,
   };
 };
+
+export const instructorLiveClassBookingEmailTemplate = (
+  email,
+  mentorName,
+  username,
+  date,
+  slotTime
+) => {
+  return {
+    to: `${email}`, // Change to your recipient
+    from: "no-reply@practilearn.com", // Change to your verified sender
+    subject: `Live class has been scheduled.`,
+    html: `
+<section>
+      <div
+        style="
+          font-size: 19px;
+          font-family: poppins;
+          max-width: 700px;
+          margin: auto;
+          padding: 50px 20px;
+        "
+      >
+        <h2
+          style="
+            text-transform: uppercase;
+            color: teal;
+            text-align: center;
+            padding-bottom: 30px;
+          "
+        >
+          Welcome to the Practiwiz Training Programme
+        </h2>
+        <p>Hi <b>${mentorName}</b>,</p>
+        <p>
+          A live Instructor doubt clearing session with <b>${username}</b> on
+          <b>${date}</b> and time is <b>${slotTime}</b> has ready to host the live class.
+          
+        </p>
+        <p>or if it doesn't work try the link below</p>
+        <p>if you are facing any issue while joining please contact through email.</p>
+        <p>
+          If you have any questions, reply back to this email and we'll be happy
+          to help.
+        </p>
+        <p>Thanks, Practiwiz</p>
+        <img
+          width="300px"
+          height="100px"
+          src="https://res.cloudinary.com/droa7dncb/image/upload/v1665987569/practiwiz-logo3_xifxbc.png"
+          alt="Logo"
+        />
+      </div>
+    </section>
+    `,
+  };
+};

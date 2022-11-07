@@ -3,10 +3,11 @@ import config from "../../config/dbconfig.js";
 import sgMail from "@sendgrid/mail";
 import dotenv from "dotenv";
 import Razorpay from "razorpay";
-import schedule from "node-schedule";
 import jwt from "jsonwebtoken";
 import rp from "request-promise";
 import {
+  traineeBookingRemainderEmailTemplate,
+  traineeFeedbackEmail,
   traineeRefundEmailTemplate,
   traineeRescheduledMentorUpdatedEmailTemplate,
 } from "../../middleware/traineeEmailTemplates.js";
@@ -744,113 +745,8 @@ export async function rescheduleBookingDateOfMentor(req, res) {
   }
 }
 
-//remainder email will be sent before one day to mentor
-function sentEmailRemainderBeforeOneDayToMentor(req, res) {
-  try {
-    sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
-      const request = new sql.Request();
-      const amountPaidStatus = "Paid";
-      const mentorSessionsStatus = "upcoming";
-      request.input("amountPaidStatus", sql.VarChar, amountPaidStatus);
-      request.input("mentorSessionsStatus", sql.VarChar, mentorSessionsStatus);
-      request.query(
-        "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
-        (err, result) => {
-          result?.recordset.forEach((res) => {
-            let mentorEmail = res.mentor_email;
-            let mentorHostUrl = res.mentor_host_url;
-            let mentorName = res.mentor_name;
-            let username = res.user_fullname;
-            const bookingDate = new Date(
-              res.booking_mentor_date
-            ).toDateString();
-            const slotTime = res.booking_time;
-            let year = new Date(res.booking_mentor_date).getFullYear();
-            let month = new Date(res.booking_mentor_date).getMonth();
-            var day = new Date(res.booking_mentor_date).getDate();
-            const date = new Date(year, month, day, 0, 0, 0);
-            schedule.scheduleJob(date, function () {
-              sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-              const msg = mentorBookingRemainderEmailTemplate(
-                mentorEmail,
-                mentorName,
-                username,
-                bookingDate,
-                slotTime,
-                1,
-                mentorHostUrl
-              );
-              sgMail
-                .send(msg)
-                .then(() => {
-                  console.log("Email Sent before one day");
-                })
-                .catch((error) => {
-                  console.log(error.message);
-                });
-            });
-          });
-        }
-      );
-    });
-  } catch (error) {}
-}
-
-// remainder will be sent on the day to mentor
-function sentEmailRemainderOnTheDayToMentor(req, res) {
-  try {
-    sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
-      const request = new sql.Request();
-      const amountPaidStatus = "Paid";
-      const mentorSessionsStatus = "upcoming";
-      request.input("amountPaidStatus", sql.VarChar, amountPaidStatus);
-      request.input("mentorSessionsStatus", sql.VarChar, mentorSessionsStatus);
-      request.query(
-        "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
-        (err, result) => {
-          result?.recordset.forEach((res) => {
-            const mentorName = res.mentor_name;
-            let mentorEmail = res.mentor_email;
-            const username = res.user_fullname;
-            const bookingDate = new Date(
-              res.booking_mentor_date
-            ).toDateString();
-            const slotTime = res.booking_time;
-            let year = new Date(res.booking_mentor_date).getFullYear();
-            let month = new Date(res.booking_mentor_date).getMonth();
-            var day = new Date(res.booking_mentor_date).getDate();
-            const date = new Date(year, month, day, 0, 0, 0);
-            schedule.scheduleJob(date, function () {
-              sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-              const msg = mentorBookingRemainderEmailTemplate(
-                mentorEmail,
-                mentorName,
-                username,
-                bookingDate,
-                slotTime,
-                1,
-                "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
-              );
-              sgMail
-                .send(msg)
-                .then(() => {
-                  console.log("Sent");
-                })
-                .catch((error) => {
-                  console.log(error.message);
-                });
-            });
-          });
-        }
-      );
-    });
-  } catch (error) {}
-}
-
 // remainder will be sent on before 10 minutes to mentor
-function sentEmailRemainderToMentorBefore10Min(req, res) {
+function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
   try {
     sql.connect(config, (err) => {
       if (err) return res.send(err.message);
@@ -863,6 +759,7 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
         "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
         (err, result) => {
           result?.recordset.forEach((res) => {
+            let traineeEmail = res.user_email;
             const mentorName = res.mentor_name;
             let mentorEmail = res.mentor_email;
             const bookingDate = new Date(
@@ -875,12 +772,18 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
             let min = res.booking_starts_time.split(":")[1];
+            var date = new Date(year, month, day, hour, min, 0);
+            date.setHours(date.getHours() - 5);
+            date.setMinutes(date.getMinutes() - 40); //for 10 minutes before
             if (min === "00") {
-              console.log("Hello");
-              hour = hour - 1;
-              const date = new Date(year, month, day, hour, 51, 0);
-              schedule.scheduleJob(date, function () {
-                console.log("Hello entered this final function");
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -888,22 +791,45 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                   username,
                   bookingDate,
                   slotTime,
-                  1,
+                  "10",
                   "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Email Sent before 10 minutes");
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "10",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent before 10 minutes");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
                   })
                   .catch((error) => {
                     console.log(error.message);
                   });
-              });
+              }
             }
             if (min === "15") {
-              const date = new Date(year, month, day, hour, 5, 0);
-              schedule.scheduleJob(date, function () {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -911,23 +837,45 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                   username,
                   bookingDate,
                   slotTime,
-                  15,
+                  "10",
                   "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Email Sent before 10 minutes");
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "10",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent before 10 minutes");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
                   })
                   .catch((error) => {
                     console.log(error.message);
                   });
-              });
+              }
             }
             if (min === "30") {
-              min = min - 10;
-              const date = new Date(year, month, day, hour, min, 0);
-              schedule.scheduleJob(date, function () {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -935,22 +883,45 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                   username,
                   bookingDate,
                   slotTime,
-                  1,
+                  "10",
                   "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Email Sent before 10 minutes");
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "10",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent before 10 minutes");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
                   })
                   .catch((error) => {
                     console.log(error.message);
                   });
-              });
+              }
             }
             if (min === "45") {
-              const date = new Date(year, month, day, hour, 35, 0);
-              schedule.scheduleJob(date, function () {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -958,27 +929,47 @@ function sentEmailRemainderToMentorBefore10Min(req, res) {
                   username,
                   bookingDate,
                   slotTime,
-                  1,
+                  "10",
                   "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Email Sent before 10 minutes");
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "10",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent before 10 minutes");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
                   })
                   .catch((error) => {
                     console.log(error.message);
                   });
-              });
+              }
             }
           });
         }
       );
     });
-  } catch (error) {}
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-function sentEmailRemainderToMentorBefore5Min(req, res) {
+// remainder will be sent on before 5 minutes to mentor
+function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
   try {
     sql.connect(config, (err) => {
       if (err) return res.send(err.message);
@@ -991,22 +982,31 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
         "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
         (err, result) => {
           result?.recordset.forEach((res) => {
+            let traineeEmail = res.user_email;
             const mentorName = res.mentor_name;
             let mentorEmail = res.mentor_email;
             const bookingDate = new Date(
               res.booking_mentor_date
             ).toDateString();
-            const username = res.user_fullname;
             const slotTime = res.booking_time;
+            const username = res.user_fullname;
             let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
             let min = res.booking_starts_time.split(":")[1];
+            var date = new Date(year, month, day, hour, min, 0);
+            date.setHours(date.getHours() - 5);
+            date.setMinutes(date.getMinutes() - 35); //for 10 minutes before
             if (min === "00") {
-              hour = hour - 1;
-              const date = new Date(year, month, day, hour, 55, 0);
-              schedule.scheduleJob(date, function () {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1014,22 +1014,45 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                   username,
                   bookingDate,
                   slotTime,
-                  1,
+                  "5",
                   "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Sent");
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "5",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent before 5 minutes");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
                   })
                   .catch((error) => {
-                    console.log(error);
+                    console.log(error.message);
                   });
-              });
+              }
             }
             if (min === "15") {
-              const date = new Date(year, month, day, hour, 10, 0);
-              schedule.scheduleJob(date, function () {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1037,22 +1060,45 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                   username,
                   bookingDate,
                   slotTime,
-                  1,
+                  "5",
                   "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Sent");
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "5",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent before 5 minutes");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
                   })
                   .catch((error) => {
-                    console.log(error);
+                    console.log(error.message);
                   });
-              });
+              }
             }
             if (min === "30") {
-              const date = new Date(year, month, day, hour, 25, 0);
-              schedule.scheduleJob(date, function () {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1060,23 +1106,45 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                   username,
                   bookingDate,
                   slotTime,
-                  1,
+                  "5",
                   "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Sent" + mentorEmail);
-                    console.log("Called this 5 minutes function");
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "5",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent before 5 minutes");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
                   })
                   .catch((error) => {
-                    console.log(error);
+                    console.log(error.message);
                   });
-              });
+              }
             }
             if (min === "45") {
-              const date = new Date(year, month, day, hour, 40, 0);
-              schedule.scheduleJob(date, function () {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1084,27 +1152,47 @@ function sentEmailRemainderToMentorBefore5Min(req, res) {
                   username,
                   bookingDate,
                   slotTime,
-                  1,
+                  "5",
                   "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
                   .then(() => {
-                    console.log("Sent");
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "5",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent before 5 minutes");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
                   })
                   .catch((error) => {
-                    console.log(error);
+                    console.log(error.message);
                   });
-              });
+              }
             }
           });
         }
       );
     });
-  } catch (error) {}
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-function sentEmailRemainderToMentorToStart(req, res) {
+// remainder will be sent to start trainee and host
+function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
   try {
     sql.connect(config, (err) => {
       if (err) return res.send(err.message);
@@ -1117,111 +1205,267 @@ function sentEmailRemainderToMentorToStart(req, res) {
         "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
         (err, result) => {
           result?.recordset.forEach((res) => {
+            let traineeEmail = res.user_email;
             const mentorName = res.mentor_name;
             let mentorEmail = res.mentor_email;
             const bookingDate = new Date(
               res.booking_mentor_date
             ).toDateString();
-            const username = res.user_fullname;
             const slotTime = res.booking_time;
+            const username = res.user_fullname;
             let year = new Date(res.booking_mentor_date).getFullYear();
             let month = new Date(res.booking_mentor_date).getMonth();
             let day = new Date(res.booking_mentor_date).getDate();
             let hour = res.booking_starts_time.split(":")[0];
             let min = res.booking_starts_time.split(":")[1];
-            const date = new Date(year, month, day, hour, min, 0);
-            schedule.scheduleJob(date, function () {
+            var date = new Date(year, month, day, hour, min, 0);
+            date.setHours(date.getHours() - 5);
+            date.setMinutes(date.getMinutes() - 30);
+            if (min === "00") {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = mentorBookingRemainderEmailTemplate(
+                  mentorEmail,
+                  mentorName,
+                  username,
+                  bookingDate,
+                  slotTime,
+                  "0",
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                );
+                sgMail
+                  .send(msg)
+                  .then(() => {
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "0",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent to start");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
+                  })
+                  .catch((error) => {
+                    console.log(error.message);
+                  });
+              }
+            }
+            if (min === "15") {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = mentorBookingRemainderEmailTemplate(
+                  mentorEmail,
+                  mentorName,
+                  username,
+                  bookingDate,
+                  slotTime,
+                  "0",
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                );
+                sgMail
+                  .send(msg)
+                  .then(() => {
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "0",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent to start");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
+                  })
+                  .catch((error) => {
+                    console.log(error.message);
+                  });
+              }
+            }
+            if (min === "30") {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = mentorBookingRemainderEmailTemplate(
+                  mentorEmail,
+                  mentorName,
+                  username,
+                  bookingDate,
+                  slotTime,
+                  "0",
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                );
+                sgMail
+                  .send(msg)
+                  .then(() => {
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "0",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent to start");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
+                  })
+                  .catch((error) => {
+                    console.log(error.message);
+                  });
+              }
+            }
+            if (min === "45") {
+              if (
+                new Date(date).getUTCFullYear() ===
+                  new Date().getUTCFullYear() &&
+                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+                new Date(date).getUTCDate() === new Date().getUTCDate() &&
+                new Date(date).getUTCHours() === new Date().getUTCHours() &&
+                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+              ) {
+                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                const msg = mentorBookingRemainderEmailTemplate(
+                  mentorEmail,
+                  mentorName,
+                  username,
+                  bookingDate,
+                  slotTime,
+                  "0",
+                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                );
+                sgMail
+                  .send(msg)
+                  .then(() => {
+                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                    const msg = traineeBookingRemainderEmailTemplate(
+                      traineeEmail,
+                      traineeName,
+                      mentorName,
+                      bookingDate,
+                      slotTime,
+                      "0",
+                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                    );
+                    sgMail
+                      .send(msg)
+                      .then(() => {
+                        console.log("Email Sent to start");
+                      })
+                      .catch((error) => {
+                        console.log(error.message);
+                      });
+                  })
+                  .catch((error) => {
+                    console.log(error.message);
+                  });
+              }
+            }
+          });
+        }
+      );
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
+// email sent to fill the feedback
+function sentEmailRemainderToFillFeedback(req, res) {
+  try {
+    sql.connect(config, (err) => {
+      if (err) return res?.send(err.message);
+      const request = new sql.Request();
+      const amountPaidStatus = "Paid";
+      const traineeSessionStatus = "attended";
+      request.input("amountPaidStatus", sql.VarChar, amountPaidStatus);
+      request.input("traineeSessionStatus", sql.VarChar, traineeSessionStatus);
+      request.query(
+        "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND trainee_session_status = @traineeSessionStatus AND mentor_session_status = @traineeSessionStatus",
+        (err, result) => {
+          result?.recordset.forEach((res) => {
+            let traineeEmail = res.user_email;
+            let year = new Date(res.booking_mentor_date).getFullYear();
+            let month = new Date(res.booking_mentor_date).getMonth();
+            let day = new Date(res.booking_mentor_date).getDate();
+            const username = res.user_fullname;
+            let hour = res.booking_end_time.split(":")[0];
+            let min = res.booking_end_time.split(":")[1];
+            var date = new Date(year, month, day, hour, min, 0);
+            date.setHours(date.getHours() - 5);
+            date.setMinutes(date.getMinutes() - 30);
+            if (
+              new Date(date).getUTCFullYear() === new Date().getUTCFullYear() &&
+              new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+              new Date(date).getUTCDate() === new Date().getUTCDate() &&
+              new Date(date).getUTCHours() === new Date().getUTCHours() &&
+              new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+            ) {
               sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-              const msg = mentorBookingRemainderEmailTemplate(
-                mentorEmail,
-                mentorName,
-                username,
-                bookingDate,
-                slotTime,
-                0,
-                "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
-              );
+              const msg = traineeFeedbackEmail(traineeEmail, username);
               sgMail
                 .send(msg)
                 .then(() => {
-                  console.log("Sent");
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
-            });
-          });
-        }
-      );
-    });
-  } catch (error) {}
-}
-
-function sentEmail(req, res) {
-  try {
-    sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
-      const request = new sql.Request();
-      const amountPaidStatus = "Paid";
-      const mentorSessionsStatus = "upcoming";
-      request.input("amountPaidStatus", sql.VarChar, amountPaidStatus);
-      request.input("mentorSessionsStatus", sql.VarChar, mentorSessionsStatus);
-      request.query(
-        "select * from booking_appointments_dtls where mentor_amount_paid_status = @amountPaidStatus AND mentor_session_status = @mentorSessionsStatus",
-        (err, result) => {
-          result?.recordset.forEach((res) => {
-            const mentorName = res.mentor_name;
-            let mentorEmail = res.mentor_email;
-            const bookingDate = new Date(
-              res.booking_mentor_date
-            ).toDateString();
-            const slotTime = res.booking_time;
-            let mentorHostUrl = res.mentor_host_url;
-            let year = new Date(res.booking_mentor_date).getFullYear();
-            let month = new Date(res.booking_mentor_date).getMonth();
-            let day = new Date(res.booking_mentor_date).getDate();
-            let hour = res.booking_starts_time.split(":")[0];
-            let min = res.booking_starts_time.split(":")[1];
-            const date = new Date(year, month, day, hour, min, 0);
-            schedule.scheduleJob(date, function () {
-              console.log("Entered this final call function");
-              sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-              const msg = mentorBookingRemainderEmailTemplate(
-                mentorEmail,
-                mentorName,
-                username,
-                bookingDate,
-                slotTime,
-                1,
-                mentorHostUrl
-              );
-              sgMail
-                .send(msg)
-                .then(() => {
-                  console.log("Sent");
+                  console.log("feedback form Sent");
                 })
                 .catch((error) => {
                   console.log(error.message);
                 });
-            });
+            }
           });
         }
       );
     });
   } catch (error) {}
 }
-
-//remainder email will be sent before one day function call
-//sentEmailRemainderBeforeOneDayToMentor();
-
-// remainder will be sent on the day function call
-sentEmailRemainderOnTheDayToMentor();
-
-// remainder will be sent on before 10 minutes function call
-sentEmailRemainderToMentorBefore10Min();
-
-// remainder will be sent on before 5 minutes function call
-sentEmailRemainderToMentorBefore5Min();
-
-// remainder will be sent to start or join meeting function call
-sentEmailRemainderToMentorToStart();
+setInterval(() => {
+  // remainder will be sent on before 10 minutes function call
+  sentEmailRemainderToMentorAndTraineeBefore10Min();
+  sentEmailRemainderToMentorAndTraineeBefore5Min();
+  sentEmailRemainderToMentorAndTraineeToStart();
+  sentEmailRemainderToFillFeedback();
+}, 60000);
