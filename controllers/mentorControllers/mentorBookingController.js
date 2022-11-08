@@ -800,7 +800,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -846,7 +846,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -892,7 +892,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -938,7 +938,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -1023,7 +1023,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -1069,7 +1069,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -1115,7 +1115,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -1161,7 +1161,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -1246,7 +1246,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -1292,7 +1292,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -1338,7 +1338,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
@@ -1384,7 +1384,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                     const msg = traineeBookingRemainderEmailTemplate(
                       traineeEmail,
-                      traineeName,
+                      username,
                       mentorName,
                       bookingDate,
                       slotTime,
