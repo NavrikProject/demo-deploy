@@ -26,3 +26,14 @@ export const verifyTokenAndAuthorization = (req, res, next) => {
     }
   });
 };
+export function generateUniqueId(length) {
+  var result = "";
+  var characters = "abcdefuv";
+  var number = "0123456789";
+  var charactersLength = characters.length;
+  for (var i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    result += number.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
