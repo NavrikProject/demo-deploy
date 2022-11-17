@@ -75,13 +75,14 @@ export async function bookInstructorLiveClass(req, res) {
   minutes = parseInt(minutes) + 30;
   minutes = minutes.toString();
   let endTime = `${hour}:${minutes.toString()}`;
+  const instructorEmail = "tarungautam4777@gmail.com";
   try {
     var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
     var options = {
       method: "POST",
       uri: "https://api.zoom.us/v2/users/me/meetings",
       body: {
-        topic: "Instructor booking",
+        topic: "Instructor Live class has been scheduled",
         type: 1,
         start_time: new Date(date),
         contact_email: userEmail,
@@ -157,7 +158,7 @@ export async function bookInstructorLiveClass(req, res) {
                           "','" +
                           instructorName +
                           "','" +
-                          userEmail +
+                          instructorEmail +
                           "','" +
                           date +
                           "','" +
