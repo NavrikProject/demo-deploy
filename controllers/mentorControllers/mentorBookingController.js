@@ -792,7 +792,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                   bookingDate,
                   slotTime,
                   "10",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -805,7 +805,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                       bookingDate,
                       slotTime,
                       "10",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -838,7 +838,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                   bookingDate,
                   slotTime,
                   "10",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -851,7 +851,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                       bookingDate,
                       slotTime,
                       "10",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -884,7 +884,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                   bookingDate,
                   slotTime,
                   "10",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -897,7 +897,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                       bookingDate,
                       slotTime,
                       "10",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -930,7 +930,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                   bookingDate,
                   slotTime,
                   "10",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -943,7 +943,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                       bookingDate,
                       slotTime,
                       "10",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -1015,7 +1015,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                   bookingDate,
                   slotTime,
                   "5",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1028,7 +1028,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                       bookingDate,
                       slotTime,
                       "5",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -1061,7 +1061,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                   bookingDate,
                   slotTime,
                   "5",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1074,7 +1074,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                       bookingDate,
                       slotTime,
                       "5",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -1107,7 +1107,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                   bookingDate,
                   slotTime,
                   "5",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1120,7 +1120,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                       bookingDate,
                       slotTime,
                       "5",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -1153,7 +1153,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                   bookingDate,
                   slotTime,
                   "5",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1166,7 +1166,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                       bookingDate,
                       slotTime,
                       "5",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -1238,7 +1238,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                   bookingDate,
                   slotTime,
                   "0",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1251,7 +1251,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                       bookingDate,
                       slotTime,
                       "0",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -1284,7 +1284,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                   bookingDate,
                   slotTime,
                   "0",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1297,7 +1297,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                       bookingDate,
                       slotTime,
                       "0",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -1330,7 +1330,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                   bookingDate,
                   slotTime,
                   "0",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1343,7 +1343,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                       bookingDate,
                       slotTime,
                       "0",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)
@@ -1376,7 +1376,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                   bookingDate,
                   slotTime,
                   "0",
-                  "https://happy-tree-0192a720f.1.azurestaticapps.net/mentor/profile/my-sessions"
+                  "https://www.practiwiz.com/mentor/profile/my-sessions"
                 );
                 sgMail
                   .send(msg)
@@ -1389,7 +1389,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                       bookingDate,
                       slotTime,
                       "0",
-                      "https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-sessions"
+                      "https://www.practiwiz.com/trainee/profile/my-sessions"
                     );
                     sgMail
                       .send(msg)

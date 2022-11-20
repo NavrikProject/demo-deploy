@@ -258,7 +258,7 @@ export const traineeMentorAttendEmail = (
         </p>
         <p>You can book a session with mentor for free!</p>
       <p>Here the redeem code for the mentor session is: <b>KSDLKGJL</b></p> 
-      <p>You can find the mentors here <a href="https://happy-tree-0192a720f.1.azurestaticapps.net/mentors-club">Mentors Club</a></p>
+      <p>You can find the mentors here <a href="https://www.practiwiz.com/mentors-club">Mentors Club</a></p>
         <p>
           If you have any questions, reply back to this email and we'll be happy
           to help.

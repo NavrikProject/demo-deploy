@@ -96,7 +96,7 @@ export const traineeMentorAttendEmailCourseComplete = (
         </p>
         <p>You can book a session with mentor for free!</p>
       <p>Here the redeem code for the mentor session is: <b>KSDLKGJL</b></p> 
-      <p>You can find the mentors here <a href="https://happy-tree-0192a720f.1.azurestaticapps.net/mentors-club">Mentors Club</a></p>
+      <p>You can find the mentors here <a href="https://www.practiwiz.com/mentors-club">Mentors Club</a></p>
         <p>
           If you have any questions, reply back to this email and we'll be happy
           to help.
@@ -694,7 +694,7 @@ export const traineeCourseFeedbackEmail = (
        </p>
        <p>Now it's time to fill the feedback form
        </p>
-     <p>You can find all your courses here <a href="https://happy-tree-0192a720f.1.azurestaticapps.net/trainee/profile/my-courses">My courses</a> to submit the feedback.</p>
+     <p>You can find all your courses here <a href="https://www.practiwiz.com/trainee/profile/my-courses">My courses</a> to submit the feedback.</p>
          <p>
            Your feedback has helped us serve our customers better in the past, so
            we really appreciate you taking the time to provide it.
