@@ -168,13 +168,14 @@ export async function createJobPost(req, res, next) {
           if (result.recordset.length > 0) {
             const hiringCompanyId = result.recordset[0].hiring_company_dtls_id;
             const hiringCompanyName = result.recordset[0].hiring_company_name;
+            const hiringCompanyLogo = result.recordset[0].hiring_company_image;
             sql.connect(config, async (err) => {
               if (err) res.send(err.message);
               const request = new sql.Request();
               var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
               const jobUniqueId = generateUniqueId(10);
               request.query(
-                "insert into job_post_dtls (job_post_unique_id,hiring_company_dtls_id,job_post_company_name,job_post_heading,job_post_category,job_post_req_skills,job_post_role,job_post_min_qual,job_post_min_exp,job_post_no_of_positions,job_post_work_type,job_post_job_type,job_post_expected_salary,job_post_description,job_post_street_address,job_post_city,job_post_state,job_post_country,job_post_pincode,job_post_tags,job_post_cr_dt) VALUES('" +
+                "insert into job_post_dtls (job_post_unique_id,hiring_company_dtls_id,job_post_company_name,job_post_heading,job_post_category,job_post_req_skills,job_post_role,job_post_min_qual,job_post_min_exp,job_post_no_of_positions,job_post_work_type,job_post_job_type,job_post_expected_salary,job_post_description,job_post_street_address,job_post_city,job_post_state,job_post_country,job_post_pincode,job_post_tags,job_post_company_logo,job_post_cr_dt) VALUES('" +
                   jobUniqueId +
                   "','" +
                   hiringCompanyId +
@@ -214,6 +215,8 @@ export async function createJobPost(req, res, next) {
                   pincode +
                   "','" +
                   tags +
+                  "','" +
+                  hiringCompanyLogo +
                   "','" +
                   timestamp +
                   "' )",
