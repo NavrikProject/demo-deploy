@@ -24,6 +24,7 @@ export async function addHiringCompanyDetails(req, res, next) {
     address,
     userEmail,
     imageFileName,
+    companyDescription,
   } = req.body;
   try {
     sql.connect(config, (err) => {
@@ -46,7 +47,7 @@ export async function addHiringCompanyDetails(req, res, next) {
               const request = new sql.Request();
               var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
               request.query(
-                "insert into hiring_company_dtls (hiring_user_email,hiring_company_email,hiring_company_name,hiring_company_address,hiring_company_city,hiring_company_state,hiring_company_country,hiring_company_pincode,hiring_company_contact_person,hiring_company_mobile,hiring_company_website,hiring_company_image,hiring_company_cr_dt) VALUES('" +
+                "insert into hiring_company_dtls (hiring_user_email,hiring_company_email,hiring_company_name,hiring_company_address,hiring_company_city,hiring_company_state,hiring_company_country,hiring_company_pincode,hiring_company_contact_person,hiring_company_mobile,hiring_company_website,hiring_company_image,hiring_company_about,hiring_company_cr_dt) VALUES('" +
                   userEmail +
                   "', '" +
                   email +
@@ -70,6 +71,8 @@ export async function addHiringCompanyDetails(req, res, next) {
                   website +
                   "','" +
                   imageFileName +
+                  "','" +
+                  companyDescription +
                   "','" +
                   timestamp +
                   "' )",
@@ -134,11 +137,11 @@ export async function getFirmAllDetails(req, res) {
 
 export async function createJobPost(req, res, next) {
   const email = req.params.id;
-  let role = req.body.role;
+  let role = req.body.newData.role;
+  let jobDescription = req.body.jobDescription;
   const {
     heading,
     category,
-    skills,
     qualification,
     experience,
     salaryStarts,
@@ -146,14 +149,15 @@ export async function createJobPost(req, res, next) {
     workType,
     jobType,
     positions,
-    description,
-    address,
-    city,
-    state,
-    country,
-    pincode,
     tags,
-  } = req.body;
+  } = req.body.newData;
+  const skillsSet = [];
+  const loopOptions = () => {
+    req.body.selectedOption?.forEach((element) => {
+      skillsSet.push(element.value);
+    });
+  };
+  loopOptions();
   role = role.replace(/\s+/g, "-").toLowerCase();
   const salary = salaryStarts + "-" + salaryTo;
   try {
@@ -168,25 +172,22 @@ export async function createJobPost(req, res, next) {
           if (result.recordset.length > 0) {
             const hiringCompanyId = result.recordset[0].hiring_company_dtls_id;
             const hiringCompanyName = result.recordset[0].hiring_company_name;
-            const hiringCompanyLogo = result.recordset[0].hiring_company_image;
             sql.connect(config, async (err) => {
               if (err) res.send(err.message);
               const request = new sql.Request();
               var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
               const jobUniqueId = generateUniqueId(10);
               request.query(
-                "insert into job_post_dtls (job_post_unique_id,hiring_company_dtls_id,job_post_company_name,job_post_heading,job_post_category,job_post_req_skills,job_post_role,job_post_min_qual,job_post_min_exp,job_post_no_of_positions,job_post_work_type,job_post_job_type,job_post_expected_salary,job_post_description,job_post_street_address,job_post_city,job_post_state,job_post_country,job_post_pincode,job_post_tags,job_post_company_logo,job_post_cr_dt) VALUES('" +
+                "insert into job_post_dtls (job_post_unique_id,hiring_company_dtls_id,job_post_heading,job_post_category,job_post_req_skills,job_post_role,job_post_min_qual,job_post_min_exp,job_post_no_of_positions,job_post_work_type,job_post_job_type,job_post_expected_salary,job_post_description,job_post_tags,job_post_cr_dt) VALUES('" +
                   jobUniqueId +
                   "','" +
                   hiringCompanyId +
-                  "', '" +
-                  hiringCompanyName +
                   "','" +
                   heading +
                   "','" +
                   category +
                   "','" +
-                  skills +
+                  skillsSet +
                   "','" +
                   role +
                   "','" +
@@ -202,21 +203,9 @@ export async function createJobPost(req, res, next) {
                   "','" +
                   salary +
                   "','" +
-                  description +
-                  "','" +
-                  address +
-                  "','" +
-                  city +
-                  "','" +
-                  state +
-                  "','" +
-                  country +
-                  "','" +
-                  pincode +
+                  jobDescription +
                   "','" +
                   tags +
-                  "','" +
-                  hiringCompanyLogo +
                   "','" +
                   timestamp +
                   "' )",
@@ -250,7 +239,9 @@ export async function createJobPost(req, res, next) {
         }
       );
     });
-  } catch (error) {}
+  } catch (error) {
+    return res.send({ error: error.message });
+  }
 }
 export async function getAllClosedJobDetails(req, res) {
   try {

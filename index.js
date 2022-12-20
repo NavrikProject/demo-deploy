@@ -6,6 +6,8 @@ import morgan from "morgan";
 import path from "path";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
+import sql from "mssql";
+import config from "./config/dbConfig.js";
 // auth routes import
 import authRouter from "./routes/authRoutes/authRoute.js";
 import usersRoute from "./routes/authRoutes/usersRoute.js";

@@ -475,13 +475,15 @@ export async function applyJobWithUpdateJobPost(req, res, next) {
     jobRole,
   } = req.body;
   var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-  const skillsSet = [];
+  let skillsSet = [];
   const loopOptions = () => {
     selectedOption?.forEach((element) => {
       skillsSet.push(element.value);
     });
   };
   loopOptions();
+  let skillsStringSet = skillsSet.toString();
+  console.log(skillsStringSet);
   try {
     sql.connect(config, (err) => {
       if (err) return res.send({ error: err.message });
@@ -505,8 +507,8 @@ export async function applyJobWithUpdateJobPost(req, res, next) {
       request.input("endingYear", sql.VarChar, endingYear);
       request.input("completedYear", sql.Date, completedYear);
       request.input("percentage", sql.VarChar, percentage);
-      request.input("resumeUrl", sql.VarChar, resumeUrl);
-      request.input("skills", sql.VarChar, skillsSet);
+      request.input("resumeUrl", sql.Text, resumeUrl);
+      request.input("skillsStringSet", sql.Text, skillsStringSet);
 
       request.input("currentCompanyName", sql.VarChar, currentCompanyName);
       request.input("currentDesignation", sql.VarChar, currentDesignation);
@@ -571,7 +573,7 @@ export async function applyJobWithUpdateJobPost(req, res, next) {
                             if (err) return res.send({ error: err.message });
                             if (result) {
                               const sqlEduUpdate =
-                                "UPDATE job_seeker_edu_dtls SET job_seeker_edu_dtls_college =@collegeName,job_seeker_edu_dtls_university = @universityName,job_seeker_edu_starts_year = @startingYear,job_seeker_edu_end_year = @endingYear,job_seeker_edu_completion_dt = @completedYear,job_seeker_edu_percentage = @percentage,job_seeker_edu_skills = @skills,job_seeker_edu_resume = @resumeUrl,job_seeker_edu_cr_dt= @timeStamp WHERE job_seeker_user_dtls_id = @userDtlsId and job_seeker_edu_dtls_email = @jobSeekerEmail";
+                                "UPDATE job_seeker_edu_dtls SET job_seeker_edu_dtls_college =@collegeName,job_seeker_edu_dtls_university = @universityName,job_seeker_edu_starts_year = @startingYear,job_seeker_edu_end_year = @endingYear,job_seeker_edu_completion_dt = @completedYear,job_seeker_edu_percentage = @percentage,job_seeker_edu_skills = @skillsStringSet,job_seeker_edu_resume = @resumeUrl,job_seeker_edu_cr_dt= @timeStamp WHERE job_seeker_user_dtls_id = @userDtlsId and job_seeker_edu_dtls_email = @jobSeekerEmail";
                               request.query(sqlEduUpdate, (err, result) => {
                                 if (err)
                                   return res.send({ error: err.message });

@@ -9,6 +9,7 @@ import {
   addJoinNowCourse,
   getCourseBySearchInAllCourses,
   getCourseByCategory,
+  getSpecificCourseByName,
 } from "../../controllers/courseControllers/courseControllers.js";
 
 import { verifyToken } from "../../middleware/verifyToken.js";
@@ -18,6 +19,9 @@ let router = routers.Router();
 
 // specific  course
 router.get("/full-course/:id", getCourseController);
+
+// specific course by name
+router.get("/full-course", getSpecificCourseByName);
 
 // get course by name
 router.get("/all-courses", allCourseControllers);

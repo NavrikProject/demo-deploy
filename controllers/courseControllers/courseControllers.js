@@ -28,6 +28,56 @@ export async function getCourseController(req, res, next) {
   }
 }
 
+// get specific course by name
+export async function getSpecificCourseByName(req, res, next) {
+  const query = req.query.name;
+  try {
+    sql.connect(config, (err) => {
+      if (err) return res.send(err.message);
+      const request = new sql.Request();
+      request.input("query", sql.VarChar, query);
+      request.query(
+        "SELECT * FROM courses_dtls WHERE course_title = @query",
+        (err, result) => {
+          if (err) return res.send(err.message);
+          if (result.recordset.length > 0) {
+            return res.send({ success: result.recordset });
+          } else {
+            return res.send({ error: " " });
+          }
+        }
+      );
+    });
+  } catch (error) {
+    return res.send(error.message);
+  }
+}
+export function getCourseBySearch(req, res) {
+  const query = req.query.name;
+  console.log("called this function");
+  // try {
+  //   sql.connect(config, (err) => {
+  //     if (err) return res.send(err.message);
+  //     const request = new sql.Request();
+  //     request.input("search", sql.VarChar, query);
+  //     request.query(
+  //       "SELECT * FROM courses_dtls WHERE course_name = @search ",
+  //       (err, result) => {
+  //         if (err) return res.send(err.message);
+  //         if (result.recordset.length > 0) {
+  //           return res.send(result.recordset);
+  //         } else {
+  //           return;
+  //           // res.send("No course found with this category");
+  //         }
+  //       }
+  //     );
+  //   });
+  // } catch (error) {
+  //   return res.send(error.message);
+  // }
+}
+
 export function allCourseControllers(req, res, next) {
   const qCategory = req.query.category;
   try {
@@ -128,31 +178,6 @@ export function getCourseByCategorySoftware(req, res, next) {
             return res.send(result.recordset);
           } else {
             return;
-          }
-        }
-      );
-    });
-  } catch (error) {
-    return res.send(error.message);
-  }
-}
-
-export function getCourseBySearch(req, res) {
-  const query = req.query.name;
-  try {
-    sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
-      const request = new sql.Request();
-      request.input("search", sql.VarChar, query);
-      request.query(
-        "SELECT * FROM courses_dtls WHERE course_name = @search ",
-        (err, result) => {
-          if (err) return res.send(err.message);
-          if (result.recordset.length > 0) {
-            return res.send(result.recordset);
-          } else {
-            return;
-            // res.send("No course found with this category");
           }
         }
       );
