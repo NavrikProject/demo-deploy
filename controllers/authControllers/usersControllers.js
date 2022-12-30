@@ -78,13 +78,13 @@ export async function updateAdminApprove(req, res, next) {
               });
             }
           } else {
-            res.send("No user found");
+            res.send({ error: "No user found" });
           }
         }
       );
     });
   } catch (error) {
-    if (error) res.send(error.message);
+    if (error) res.send({ error: error.message });
   }
 }
 
@@ -137,7 +137,9 @@ export async function updateAdminDisapprove(req, res, next) {
               });
             }
           } else {
-            res.send("No user found");
+            res.send({
+              error: "No user found",
+            });
           }
         }
       );

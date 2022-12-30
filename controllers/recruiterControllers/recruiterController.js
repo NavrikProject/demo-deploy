@@ -4,6 +4,8 @@ import sgMail from "@sendgrid/mail";
 import moment from "moment";
 import dotenv from "dotenv";
 import path from "path";
+import { BlockBlobClient } from "@azure/storage-blob";
+import intoStream from "into-stream";
 import { traineeProfileUpdateEmailTemplate } from "../../middleware/traineeEmailTemplates.js";
 import { jobPostEmailTemplate } from "../../middleware/jobPostEmailTemplate.js";
 import { generateUniqueId } from "../../middleware/verifyToken.js";
@@ -23,92 +25,111 @@ export async function addHiringCompanyDetails(req, res, next) {
     firmName,
     address,
     userEmail,
-    imageFileName,
     companyDescription,
   } = req.body;
   try {
-    sql.connect(config, (err) => {
-      if (err) return res.send({ error: err.message });
-      const request = new sql.Request();
-      request.input("email", sql.VarChar, email);
-      request.input("userEmail", sql.VarChar, userEmail);
-      request.query(
-        "select * from hiring_company_dtls where hiring_company_email = @email AND hiring_user_email = @userEmail",
-        (err, result) => {
+    const blobName = new Date().getTime() + "-" + req.files.image.name;
+    const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/hiringcompanylogos/${blobName}`;
+    const blobService = new BlockBlobClient(
+      process.env.AZURE_STORAGE_CONNECTION_STRING,
+      "practiwizcontainer/hiringcompanylogos",
+      blobName
+    );
+    const stream = intoStream(req.files.image.data);
+    const streamLength = req.files.image.data.length;
+    blobService
+      .uploadStream(stream, streamLength)
+      .then((response) => {
+        sql.connect(config, (err) => {
           if (err) return res.send({ error: err.message });
-          if (result.recordset.length > 0) {
-            return res.send({
-              error: "You have all ready filled the firm details",
-            });
-          }
-          if (result.recordset.length === 0) {
-            sql.connect(config, async (err) => {
-              if (err) res.send(err.message);
-              const request = new sql.Request();
-              var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-              request.query(
-                "insert into hiring_company_dtls (hiring_user_email,hiring_company_email,hiring_company_name,hiring_company_address,hiring_company_city,hiring_company_state,hiring_company_country,hiring_company_pincode,hiring_company_contact_person,hiring_company_mobile,hiring_company_website,hiring_company_image,hiring_company_about,hiring_company_cr_dt) VALUES('" +
-                  userEmail +
-                  "', '" +
-                  email +
-                  "','" +
-                  firmName +
-                  "','" +
-                  address +
-                  "','" +
-                  city +
-                  "','" +
-                  state +
-                  "','" +
-                  country +
-                  "','" +
-                  pincode +
-                  "','" +
-                  contactPerson +
-                  "','" +
-                  mobile +
-                  "','" +
-                  website +
-                  "','" +
-                  imageFileName +
-                  "','" +
-                  companyDescription +
-                  "','" +
-                  timestamp +
-                  "' )",
-                (err, success) => {
-                  if (err) {
-                    return res.send({ error: err.message });
-                  }
-                  if (success) {
-                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-                    const msg = traineeProfileUpdateEmailTemplate(
-                      email,
-                      firmName,
-                      "hiring company details"
-                    );
-                    sgMail
-                      .send(msg)
-                      .then(() => {
-                        return res.send({
-                          success:
-                            "Hiring company details added successfully, You can post the jobs Now!",
-                        });
-                      })
-                      .catch((error) => {
-                        return res.send({
-                          error: error.message,
-                        });
-                      });
-                  }
-                }
-              );
-            });
-          }
-        }
-      );
-    });
-  } catch (error) {}
+          const request = new sql.Request();
+          request.input("email", sql.VarChar, email);
+          request.input("userEmail", sql.VarChar, userEmail);
+          request.query(
+            "select * from hiring_company_dtls where hiring_company_email = @email AND hiring_user_email = @userEmail",
+            (err, result) => {
+              if (err) return res.send({ error: err.message });
+              if (result.recordset.length > 0) {
+                return res.send({
+                  error: "You have all ready filled the firm details",
+                });
+              }
+              if (result.recordset.length === 0) {
+                sql.connect(config, async (err) => {
+                  if (err) res.send(err.message);
+                  const request = new sql.Request();
+                  var timestamp = moment(Date.now()).format(
+                    "YYYY-MM-DD HH:mm:ss"
+                  );
+                  request.query(
+                    "insert into hiring_company_dtls (hiring_user_email,hiring_company_email,hiring_company_name,hiring_company_address,hiring_company_city,hiring_company_state,hiring_company_country,hiring_company_pincode,hiring_company_contact_person,hiring_company_mobile,hiring_company_website,hiring_company_image,hiring_company_about,hiring_company_cr_dt) VALUES('" +
+                      userEmail +
+                      "', '" +
+                      email +
+                      "','" +
+                      firmName +
+                      "','" +
+                      address +
+                      "','" +
+                      city +
+                      "','" +
+                      state +
+                      "','" +
+                      country +
+                      "','" +
+                      pincode +
+                      "','" +
+                      contactPerson +
+                      "','" +
+                      mobile +
+                      "','" +
+                      website +
+                      "','" +
+                      filename +
+                      "','" +
+                      companyDescription +
+                      "','" +
+                      timestamp +
+                      "' )",
+                    (err, success) => {
+                      if (err) {
+                        return res.send({ error: err.message });
+                      }
+                      if (success) {
+                        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                        const msg = traineeProfileUpdateEmailTemplate(
+                          email,
+                          firmName,
+                          "hiring company details"
+                        );
+                        sgMail
+                          .send(msg)
+                          .then(() => {
+                            return res.send({
+                              success:
+                                "Hiring company details added successfully, You can post the jobs Now!",
+                            });
+                          })
+                          .catch((error) => {
+                            return res.send({
+                              error: error.message,
+                            });
+                          });
+                      }
+                    }
+                  );
+                });
+              }
+            }
+          );
+        });
+      })
+      .catch((err) => {
+        return res.send({ error: "There was an error uploading" });
+      });
+  } catch (error) {
+    return res.send({ error: "There was an error uploading" });
+  }
 }
 
 export async function getFirmAllDetails(req, res) {

@@ -6,8 +6,11 @@ import morgan from "morgan";
 import path from "path";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
+import rp from "request-promise";
+import jwt from "jsonwebtoken";
 import sql from "mssql";
 import config from "./config/dbConfig.js";
+import axios from "axios";
 // auth routes import
 import authRouter from "./routes/authRoutes/authRoute.js";
 import usersRoute from "./routes/authRoutes/usersRoute.js";
@@ -36,6 +39,8 @@ import jobSeekerRoute from "./routes/jobSeekerRoutes/jobSeekerRoutes.js";
 
 import mentorRoute from "./routes/mentorRoutes/mentorRoute.js";
 import mentorBookingRoute from "./routes/mentorRoutes/MentorBookingRoute.js";
+import mentorProfileRoute from "./routes/mentorRoutes/mentorProfileRoute.js";
+
 import FeedbackRoute from "./routes/feedbackRoutes/feedbackRoute.js";
 import ContributersRoute from "./routes/contributerRoutes/contributersRoute.js";
 import googleRoute from "./routes/googleRoute.js";
@@ -44,10 +49,12 @@ import rescheduleRoute from "./routes/rescheduleRoute.js";
 import recruiterRoute from "./routes/recruiterRoutes/recruiterRoute.js";
 import jobsRoute from "./routes/jobPostsRoutes/jobRoute.js";
 //import config from "./config/dbconfig.js";
-import fs from "fs";
 import masterRoute from "./routes/masterRoutes/masterRoute.js";
 import HomeRoute from "./routes/indexRoute.js";
-
+import sgMail from "@sendgrid/mail";
+import { BlockBlobClient } from "@azure/storage-blob";
+import intoStream from "into-stream";
+import { accountCreatedEmailTemplate } from "./middleware/authEmailTemplate.js";
 const __dirname = path.resolve();
 
 const app = express();
@@ -83,7 +90,7 @@ app.use("/api/users", usersRoute);
 
 // trainee routes
 app.use("/api/trainee/profile/booking", TraineeBookingProfileRoute);
-app.use("/api/trainee/profile", traineeProfileRoute);
+app.use("/api/member/profile", traineeProfileRoute);
 app.use("/api/trainee/courses", traineeCourseRoute);
 app.use("/api/trainee/courses/progress", traineeCourseProgressRoute);
 
@@ -97,7 +104,7 @@ app.use("/api/trainer", trainerRoute);
 //mentor routes
 app.use("/api/mentor/bookings", mentorBookingRoute);
 app.use("/api/mentor", mentorRoute);
-
+app.use("/api/mentor/profile", mentorProfileRoute);
 //contributers routes
 app.use("/api/contributers", ContributersRoute);
 
@@ -132,6 +139,101 @@ app.get("/", (req, res) => {
     success: `The server is working fine on the date ${date} and ${time}`,
   });
 });
+const payload = {
+  iss: process.env.ZOOM_APP_API_KEY,
+  exp: new Date().getTime() + 5000,
+};
+
+const token = jwt.sign(payload, process.env.ZOOM_APP_API_SECRET_KEY);
+app.get("/meetings", async (req, res) => {
+  try {
+    const email = "b.mahesh311296@gmail.com"; //host email id;
+    const result = await axios.post(
+      "https://api.zoom.us/v2/users/me/meetings",
+      {
+        topic: "Discussion about today's Demo",
+        type: 2,
+        start_time: "2021-03-18T17:00:00",
+        duration: 20,
+        timezone: "India",
+        password: "1234567",
+        agenda: "We will discuss about Today's Demo process",
+        settings: {
+          host_video: true,
+          participant_video: true,
+          cn_meeting: false,
+          in_meeting: true,
+          join_before_host: false,
+          mute_upon_entry: false,
+          watermark: false,
+          use_pmi: false,
+          approval_type: 2,
+          audio: "both",
+          auto_recording: "local",
+          enforce_login: false,
+          registrants_email_notification: true,
+          waiting_room: true,
+          allow_multiple_devices: true,
+          email: email,
+        },
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+          "User-Agent": "Zoom-api-Jwt-Request",
+          "content-type": "application/json",
+        },
+      }
+    );
+    if (result) {
+      return res.json({ success: result.data });
+    } else {
+      return res.json({ error: result.error });
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+});
+app.get("/send-email", (req, res) => {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const msg = accountCreatedEmailTemplate(
+    "b.mahesh311296@gmail.com",
+    "Mahesh bandari"
+  );
+  sgMail
+    .send(msg)
+    .then(() => {
+      res.send({
+        success: "Successfully email sent",
+      });
+    })
+    .catch((error) => {
+      res.send({
+        error: error.message,
+      });
+    });
+});
+
+// app.post("/upload-image", async (req, res) => {
+//   const blobName = new Date().getTime() + "-" + req.files.image.name;
+//   const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/mentorprofilepictures/${blobName}`;
+//   const blobService = new BlockBlobClient(
+//     process.env.AZURE_STORAGE_CONNECTION_STRING,
+//     "practiwizcontainer/mentorprofilepictures",
+//     blobName
+//   );
+//   const stream = intoStream(req.files.image.data);
+//   const streamLength = req.files.image.data.length;
+
+//   blobService
+//     .uploadStream(stream, streamLength)
+//     .then((response) => {
+//       return res.send({ success: filename });
+//     })
+//     .catch((err) => {
+//       return res.send({ error: "There was an error uploading" });
+//     });
+// });
 
 app.listen(port, (req, res) => {
   console.log("listening on port " + port);

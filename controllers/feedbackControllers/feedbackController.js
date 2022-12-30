@@ -23,7 +23,7 @@ async function getBlobServiceClient() {
 export async function imageHandler(req, res) {
   const bsClient = await getBlobServiceClient();
 }
-
+// feedback from the trainee and update the trainee and mentor points.
 export async function insertFeedBackController(req, res) {
   let {
     userFullName,
@@ -43,77 +43,7 @@ export async function insertFeedBackController(req, res) {
     question10,
     question11,
   } = req.body;
-  // sql.connect(config, async (err) => {
-  //   if (err)
-  //     return (
-  //       res.send({
-  //         error: err.message,
-  //       }),
-  //       console.log(err.message + "form here 5")
-  //     );
-  //   const request = new sql.Request();
-  //   request.query(
-  //     "insert into trainee_feedback_dtls (trainee_feedback_booking_id,trainee_fullname,mentor_fullname,trainee_feedback_user_email,trainee_feedback_mentor_email,trainee_feedback_useful,trainee_feedback_structure,trainee_feedback_relevant,trainee_feedback_clear,trainee_feedback_teaching,trainee_feedback_material,trainee_feedback_ad_time,trainee_feedback_learn_wp,trainee_feedback_aspects,trainee_feedback_improve_mentor,trainee_feedback_overall_exp,trainee_feedback_cr_date) VALUES('" +
-  //       bookingId +
-  //       "','" +
-  //       userFullName +
-  //       "','" +
-  //       mentorFullname +
-  //       "','" +
-  //       userEmail +
-  //       "','" +
-  //       mentorEmail +
-  //       "','" +
-  //       question1 +
-  //       "','" +
-  //       question2 +
-  //       "','" +
-  //       question3 +
-  //       "','" +
-  //       question4 +
-  //       "','" +
-  //       question5 +
-  //       "','" +
-  //       question6 +
-  //       "','" +
-  //       question7 +
-  //       "','" +
-  //       question8 +
-  //       "','" +
-  //       question9 +
-  //       "','" +
-  //       question10 +
-  //       "','" +
-  //       new Date().toISOString().substring(0, 10) +
-  //       "' )",
-  //     (err, success) => {
-  //       if (err) {
-  //         return (
-  //           res.send({
-  //             error: err.message,
-  //           }),
-  //           console.log(err + "from here")
-  //         );
-  //       }
-  //       if (success) {
-  //         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  //         const msg = traineeFeedbackEmail(userEmail, userFullName);
-  //         sgMail
-  //           .send(msg)
-  //           .then(() => {
-  //             return res.send({
-  //               success: "Thanks for your valuable feedback",
-  //             });
-  //           })
-  //           .catch((error) => {
-  //             return res.send({
-  //               error: "There was an error while submitting the feedback",
-  //             });
-  //           });
-  //       }
-  //     }
-  //   );
-  // });
+
   try {
     sql.connect(config, (err) => {
       var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
@@ -140,55 +70,45 @@ export async function insertFeedBackController(req, res) {
             request.query(sqlUpdate, (err, result) => {
               if (err) return res.send(err.message);
               if (result) {
-                sql.connect(config, (err) => {
-                  if (err) return res.send(err.message);
-                  const request = new sql.Request();
-                  request.input("mentorEmail", sql.VarChar, mentorEmail);
-                  request.input("bookingId", sql.Int, bookingId);
-                  request.query(
-                    "select * from user_points_dtls where user_points_dtls_email = @mentorEmail",
-                    (err, result) => {
-                      if (err) return res.send(err.message);
-                      if (result.recordset.length > 0) {
-                        const request = new sql.Request();
-                        request.input("mentorEmail", sql.VarChar, mentorEmail);
-                        const previousRewardPoints =
-                          result.recordset[0].user_points_dtls_closing_points;
-                        const currentPoints = (rewardPoints / 5) * question11;
-                        const totalRewardPoints =
-                          previousRewardPoints + currentPoints;
-                        request.input(
-                          "previousRewardPoints",
-                          sql.Int,
-                          previousRewardPoints
-                        );
-                        request.input(
-                          "totalRewardPoints",
-                          sql.Int,
-                          totalRewardPoints
-                        );
-                        const sqlUpdate =
-                          "UPDATE user_points_dtls SET user_points_dtls_closing_points = @totalRewardPoints,user_points_dtls_last_points = @previousRewardPoints WHERE user_points_dtls_email = @mentorEmail";
-                        request.query(sqlUpdate, (err, result) => {
-                          if (err) return res.send({ error: err.message });
-                          if (result) {
+                request.input("mentorEmail", sql.VarChar, mentorEmail);
+                request.query(
+                  "select * from mentor_dtls where mentor_email = @mentorEmail",
+                  (err, result) => {
+                    if (result) {
+                      const mentorSessions =
+                        result.recordset[0].mentor_sessions_conducted;
+                      const totalSessions = mentorSessions + 1;
+                      request.input("totalSessions", sql.Int, totalSessions);
+                      const sessionsUpdateQuery =
+                        "UPDATE mentor_dtls SET mentor_sessions_conducted = @totalSessions where mentor_email = @mentorEmail";
+                      request.query(sessionsUpdateQuery, (err, result) => {
+                        if (err) return res.send(err.message);
+                        if (result) {
+                          sql.connect(config, (err) => {
+                            if (err) return res.send(err.message);
                             const request = new sql.Request();
-                            request.input("userEmail", sql.VarChar, userEmail);
+                            request.input(
+                              "mentorEmail",
+                              sql.VarChar,
+                              mentorEmail
+                            );
+                            request.input("bookingId", sql.Int, bookingId);
                             request.query(
-                              "select * from user_points_dtls where user_points_dtls_email = @userEmail",
+                              "select * from user_points_dtls where user_points_dtls_email = @mentorEmail",
                               (err, result) => {
                                 if (err) return res.send(err.message);
                                 if (result.recordset.length > 0) {
                                   const request = new sql.Request();
                                   request.input(
-                                    "userEmail",
+                                    "mentorEmail",
                                     sql.VarChar,
-                                    userEmail
+                                    mentorEmail
                                   );
                                   const previousRewardPoints =
                                     result.recordset[0]
                                       .user_points_dtls_closing_points;
-                                  const currentPoints = 100;
+                                  const currentPoints =
+                                    (rewardPoints / 5) * question11;
                                   const totalRewardPoints =
                                     previousRewardPoints + currentPoints;
                                   request.input(
@@ -202,151 +122,409 @@ export async function insertFeedBackController(req, res) {
                                     totalRewardPoints
                                   );
                                   const sqlUpdate =
-                                    "UPDATE user_points_dtls SET user_points_dtls_closing_points = @totalRewardPoints,user_points_dtls_last_points = @previousRewardPoints WHERE user_points_dtls_email = @userEmail";
+                                    "UPDATE user_points_dtls SET user_points_dtls_closing_points = @totalRewardPoints,user_points_dtls_last_points = @previousRewardPoints WHERE user_points_dtls_email = @mentorEmail";
                                   request.query(sqlUpdate, (err, result) => {
                                     if (err)
-                                      return (
-                                        res.send({
-                                          error: err.message,
-                                        }),
-                                        console.log(err.message + "form here 7")
-                                      );
+                                      return res.send({ error: err.message });
                                     if (result) {
-                                      sql.connect(config, (err) => {
-                                        if (err) return res.send(err.message);
-                                        const request = new sql.Request();
-                                        request.input(
-                                          "bookingId",
-                                          sql.Int,
-                                          bookingId
-                                        );
-                                        request.query(
-                                          "select * from trainee_feedback_dtls where trainee_feedback_booking_id = @bookingId",
-                                          (err, result) => {
-                                            if (err)
-                                              return (
-                                                res.send({
-                                                  error: err.message,
-                                                }),
-                                                console.log(
-                                                  err.message + "form here 6"
-                                                )
-                                              );
-                                            if (result.recordset.length > 0) {
-                                              return res.send({
-                                                error:
-                                                  "You have all ready submitted the feedback",
-                                              });
-                                            } else {
-                                              sql.connect(
-                                                config,
-                                                async (err) => {
-                                                  if (err)
-                                                    return (
-                                                      res.send({
-                                                        error: err.message,
-                                                      }),
-                                                      console.log(
-                                                        err.message +
-                                                          "form here 5"
-                                                      )
+                                      const request = new sql.Request();
+                                      request.input(
+                                        "userEmail",
+                                        sql.VarChar,
+                                        userEmail
+                                      );
+                                      request.query(
+                                        "select * from user_points_dtls where user_points_dtls_email = @userEmail",
+                                        (err, result) => {
+                                          if (err) return res.send(err.message);
+                                          if (result.recordset.length > 0) {
+                                            const request = new sql.Request();
+                                            request.input(
+                                              "userEmail",
+                                              sql.VarChar,
+                                              userEmail
+                                            );
+                                            const previousRewardPoints =
+                                              result.recordset[0]
+                                                .user_points_dtls_closing_points;
+                                            const currentPoints = 100;
+                                            const totalRewardPoints =
+                                              previousRewardPoints +
+                                              currentPoints;
+                                            request.input(
+                                              "previousRewardPoints",
+                                              sql.Int,
+                                              previousRewardPoints
+                                            );
+                                            request.input(
+                                              "totalRewardPoints",
+                                              sql.Int,
+                                              totalRewardPoints
+                                            );
+                                            const sqlUpdate =
+                                              "UPDATE user_points_dtls SET user_points_dtls_closing_points = @totalRewardPoints,user_points_dtls_last_points = @previousRewardPoints WHERE user_points_dtls_email = @userEmail";
+                                            request.query(
+                                              sqlUpdate,
+                                              (err, result) => {
+                                                if (err)
+                                                  return (
+                                                    res.send({
+                                                      error: err.message,
+                                                    }),
+                                                    console.log(
+                                                      err.message +
+                                                        "form here 7"
+                                                    )
+                                                  );
+                                                if (result) {
+                                                  sql.connect(config, (err) => {
+                                                    if (err)
+                                                      return res.send(
+                                                        err.message
+                                                      );
+                                                    const request =
+                                                      new sql.Request();
+                                                    request.input(
+                                                      "bookingId",
+                                                      sql.Int,
+                                                      bookingId
                                                     );
-                                                  const request =
-                                                    new sql.Request();
-                                                  request.query(
-                                                    "insert into trainee_feedback_dtls (trainee_feedback_booking_id,trainee_fullname,mentor_fullname,trainee_feedback_user_email,trainee_feedback_mentor_email,trainee_feedback_useful,trainee_feedback_structure,trainee_feedback_relevant,trainee_feedback_clear,trainee_feedback_teaching,trainee_feedback_material,trainee_feedback_ad_time,trainee_feedback_learn_wp,trainee_feedback_aspects,trainee_feedback_improve_mentor,trainee_feedback_overall_exp,trainee_feedback_cr_date) VALUES('" +
-                                                      bookingId +
-                                                      "','" +
-                                                      userFullName +
-                                                      "','" +
-                                                      mentorFullname +
-                                                      "','" +
-                                                      userEmail +
-                                                      "','" +
-                                                      mentorEmail +
-                                                      "','" +
-                                                      question1 +
-                                                      "','" +
-                                                      question2 +
-                                                      "','" +
-                                                      question3 +
-                                                      "','" +
-                                                      question4 +
-                                                      "','" +
-                                                      question5 +
-                                                      "','" +
-                                                      question6 +
-                                                      "','" +
-                                                      question7 +
-                                                      "','" +
-                                                      question8 +
-                                                      "','" +
-                                                      question9 +
-                                                      "','" +
-                                                      question10 +
-                                                      "','" +
-                                                      question11 +
-                                                      "','" +
-                                                      new Date()
-                                                        .toISOString()
-                                                        .substring(0, 10) +
-                                                      "' )",
-                                                    (err, success) => {
-                                                      if (err) {
-                                                        return (
-                                                          res.send({
-                                                            error: err.message,
-                                                          }),
-                                                          console.log(
-                                                            err.message
-                                                          )
-                                                        );
-                                                      }
-                                                      if (success) {
-                                                        sgMail.setApiKey(
-                                                          process.env
-                                                            .SENDGRID_API_KEY
-                                                        );
-                                                        const msg =
-                                                          traineeFeedbackEmail(
-                                                            userEmail,
-                                                            userFullName
-                                                          );
-                                                        sgMail
-                                                          .send(msg)
-                                                          .then(() => {
-                                                            return res.send({
-                                                              success:
-                                                                "Thanks for your valuable feedback",
-                                                            });
-                                                          })
-                                                          .catch((error) => {
-                                                            return res.send({
+                                                    request.query(
+                                                      "select * from trainee_feedback_dtls where trainee_feedback_booking_id = @bookingId",
+                                                      (err, result) => {
+                                                        if (err)
+                                                          return (
+                                                            res.send({
                                                               error:
-                                                                "There was an error while submitting the feedback",
-                                                            });
+                                                                err.message,
+                                                            }),
+                                                            console.log(
+                                                              err.message +
+                                                                "form here 6"
+                                                            )
+                                                          );
+                                                        if (
+                                                          result.recordset
+                                                            .length > 0
+                                                        ) {
+                                                          return res.send({
+                                                            error:
+                                                              "You have all ready submitted the feedback",
                                                           });
+                                                        } else {
+                                                          sql.connect(
+                                                            config,
+                                                            async (err) => {
+                                                              if (err)
+                                                                return (
+                                                                  res.send({
+                                                                    error:
+                                                                      err.message,
+                                                                  }),
+                                                                  console.log(
+                                                                    err.message +
+                                                                      "form here 5"
+                                                                  )
+                                                                );
+                                                              const request =
+                                                                new sql.Request();
+                                                              request.query(
+                                                                "insert into trainee_feedback_dtls (trainee_feedback_booking_id,trainee_fullname,mentor_fullname,trainee_feedback_user_email,trainee_feedback_mentor_email,trainee_feedback_useful,trainee_feedback_structure,trainee_feedback_relevant,trainee_feedback_clear,trainee_feedback_teaching,trainee_feedback_material,trainee_feedback_ad_time,trainee_feedback_learn_wp,trainee_feedback_aspects,trainee_feedback_improve_mentor,trainee_feedback_overall_exp,trainee_feedback_cr_date) VALUES('" +
+                                                                  bookingId +
+                                                                  "','" +
+                                                                  userFullName +
+                                                                  "','" +
+                                                                  mentorFullname +
+                                                                  "','" +
+                                                                  userEmail +
+                                                                  "','" +
+                                                                  mentorEmail +
+                                                                  "','" +
+                                                                  question1 +
+                                                                  "','" +
+                                                                  question2 +
+                                                                  "','" +
+                                                                  question3 +
+                                                                  "','" +
+                                                                  question4 +
+                                                                  "','" +
+                                                                  question5 +
+                                                                  "','" +
+                                                                  question6 +
+                                                                  "','" +
+                                                                  question7 +
+                                                                  "','" +
+                                                                  question8 +
+                                                                  "','" +
+                                                                  question9 +
+                                                                  "','" +
+                                                                  question10 +
+                                                                  "','" +
+                                                                  question11 +
+                                                                  "','" +
+                                                                  new Date()
+                                                                    .toISOString()
+                                                                    .substring(
+                                                                      0,
+                                                                      10
+                                                                    ) +
+                                                                  "' )",
+                                                                (
+                                                                  err,
+                                                                  success
+                                                                ) => {
+                                                                  if (err) {
+                                                                    return (
+                                                                      res.send({
+                                                                        error:
+                                                                          err.message,
+                                                                      }),
+                                                                      console.log(
+                                                                        err.message
+                                                                      )
+                                                                    );
+                                                                  }
+                                                                  if (success) {
+                                                                    sgMail.setApiKey(
+                                                                      process
+                                                                        .env
+                                                                        .SENDGRID_API_KEY
+                                                                    );
+                                                                    const msg =
+                                                                      traineeFeedbackEmail(
+                                                                        userEmail,
+                                                                        userFullName
+                                                                      );
+                                                                    sgMail
+                                                                      .send(msg)
+                                                                      .then(
+                                                                        () => {
+                                                                          return res.send(
+                                                                            {
+                                                                              success:
+                                                                                "Thanks for your valuable feedback",
+                                                                            }
+                                                                          );
+                                                                        }
+                                                                      )
+                                                                      .catch(
+                                                                        (
+                                                                          error
+                                                                        ) => {
+                                                                          return res.send(
+                                                                            {
+                                                                              error:
+                                                                                "There was an error while submitting the feedback",
+                                                                            }
+                                                                          );
+                                                                        }
+                                                                      );
+                                                                  }
+                                                                }
+                                                              );
+                                                            }
+                                                          );
+                                                        }
                                                       }
-                                                    }
+                                                    );
+                                                  });
+                                                }
+                                              }
+                                            );
+                                          } else {
+                                            const request = new sql.Request();
+                                            const lastPoints = 100;
+                                            request.query(
+                                              "insert into user_points_dtls (user_points_dtls_email,user_points_dtls_fullname,user_points_dtls_role,user_points_dtls_last_points,user_points_dtls_closing_points,user_points_dtls_cr_date) VALUES('" +
+                                                userEmail +
+                                                "','" +
+                                                userFullName +
+                                                "','" +
+                                                "trainee" +
+                                                "','" +
+                                                lastPoints +
+                                                "','" +
+                                                lastPoints +
+                                                "','" +
+                                                timestamp +
+                                                "' )",
+                                              (err, success) => {
+                                                if (err) {
+                                                  return (
+                                                    res.send({
+                                                      error: err.message,
+                                                    }),
+                                                    console.log(
+                                                      err.message +
+                                                        "form here 3"
+                                                    )
                                                   );
                                                 }
-                                              );
-                                            }
+                                                if (success) {
+                                                  sql.connect(config, (err) => {
+                                                    if (err)
+                                                      return res.send(
+                                                        err.message
+                                                      );
+                                                    const request =
+                                                      new sql.Request();
+                                                    request.input(
+                                                      "bookingId",
+                                                      sql.Int,
+                                                      bookingId
+                                                    );
+                                                    request.query(
+                                                      "select * from trainee_feedback_dtls where trainee_feedback_booking_id = @bookingId",
+                                                      (err, result) => {
+                                                        if (err)
+                                                          return (
+                                                            res.send({
+                                                              error:
+                                                                err.message,
+                                                            }),
+                                                            console.log(
+                                                              err.message +
+                                                                "form here 2"
+                                                            )
+                                                          );
+                                                        if (
+                                                          result.recordset
+                                                            .length > 0
+                                                        ) {
+                                                          return res.send({
+                                                            error:
+                                                              "You have all ready submitted the feedback",
+                                                          });
+                                                        } else {
+                                                          sql.connect(
+                                                            config,
+                                                            async (err) => {
+                                                              if (err)
+                                                                res.send(
+                                                                  err.message
+                                                                );
+                                                              const request =
+                                                                new sql.Request();
+                                                              request.query(
+                                                                "insert into trainee_feedback_dtls (trainee_feedback_booking_id,trainee_fullname,mentor_fullname,trainee_feedback_user_email,trainee_feedback_mentor_email,trainee_feedback_useful,trainee_feedback_structure,trainee_feedback_relevant,trainee_feedback_clear,trainee_feedback_teaching,trainee_feedback_material,trainee_feedback_ad_time,trainee_feedback_learn_wp,trainee_feedback_aspects,trainee_feedback_improve_mentor,trainee_feedback_overall_exp,trainee_feedback_cr_date) VALUES('" +
+                                                                  bookingId +
+                                                                  "','" +
+                                                                  userFullName +
+                                                                  "','" +
+                                                                  mentorFullname +
+                                                                  "','" +
+                                                                  userEmail +
+                                                                  "','" +
+                                                                  mentorEmail +
+                                                                  "','" +
+                                                                  question1 +
+                                                                  "','" +
+                                                                  question2 +
+                                                                  "','" +
+                                                                  question3 +
+                                                                  "','" +
+                                                                  question4 +
+                                                                  "','" +
+                                                                  question5 +
+                                                                  "','" +
+                                                                  question6 +
+                                                                  "','" +
+                                                                  question7 +
+                                                                  "','" +
+                                                                  question8 +
+                                                                  "','" +
+                                                                  question9 +
+                                                                  "','" +
+                                                                  question10 +
+                                                                  "','" +
+                                                                  question11 +
+                                                                  "','" +
+                                                                  new Date()
+                                                                    .toISOString()
+                                                                    .substring(
+                                                                      0,
+                                                                      10
+                                                                    ) +
+                                                                  "' )",
+                                                                (
+                                                                  err,
+                                                                  success
+                                                                ) => {
+                                                                  if (err) {
+                                                                    return (
+                                                                      res.send({
+                                                                        error:
+                                                                          err.message,
+                                                                      }),
+                                                                      console.log(
+                                                                        err.message +
+                                                                          "form here 1"
+                                                                      )
+                                                                    );
+                                                                  }
+                                                                  if (success) {
+                                                                    sgMail.setApiKey(
+                                                                      process
+                                                                        .env
+                                                                        .SENDGRID_API_KEY
+                                                                    );
+                                                                    const msg =
+                                                                      traineeFeedbackEmail(
+                                                                        userEmail,
+                                                                        userFullName
+                                                                      );
+                                                                    sgMail
+                                                                      .send(msg)
+                                                                      .then(
+                                                                        () => {
+                                                                          return res.send(
+                                                                            {
+                                                                              success:
+                                                                                "Thanks for your valuable feedback",
+                                                                            }
+                                                                          );
+                                                                        }
+                                                                      )
+                                                                      .catch(
+                                                                        (
+                                                                          error
+                                                                        ) => {
+                                                                          return res.send(
+                                                                            {
+                                                                              error:
+                                                                                "There was an error while submitting the feedback",
+                                                                            }
+                                                                          );
+                                                                        }
+                                                                      );
+                                                                  }
+                                                                }
+                                                              );
+                                                            }
+                                                          );
+                                                        }
+                                                      }
+                                                    );
+                                                  });
+                                                }
+                                              }
+                                            );
                                           }
-                                        );
-                                      });
+                                        }
+                                      );
                                     }
                                   });
                                 } else {
                                   const request = new sql.Request();
-                                  const lastPoints = 100;
+                                  const lastPoints =
+                                    (rewardPoints / 5) * question11;
                                   request.query(
                                     "insert into user_points_dtls (user_points_dtls_email,user_points_dtls_fullname,user_points_dtls_role,user_points_dtls_last_points,user_points_dtls_closing_points,user_points_dtls_cr_date) VALUES('" +
-                                      userEmail +
+                                      mentorEmail +
                                       "','" +
-                                      userFullName +
+                                      mentorFullName +
                                       "','" +
-                                      "trainee" +
+                                      "mentor" +
                                       "','" +
                                       lastPoints +
                                       "','" +
@@ -356,358 +534,246 @@ export async function insertFeedBackController(req, res) {
                                       "' )",
                                     (err, success) => {
                                       if (err) {
-                                        return (
-                                          res.send({
-                                            error: err.message,
-                                          }),
-                                          console.log(
-                                            err.message + "form here 3"
-                                          )
-                                        );
+                                        return res.send({
+                                          error: err.message,
+                                        });
                                       }
                                       if (success) {
-                                        sql.connect(config, (err) => {
-                                          if (err) return res.send(err.message);
-                                          const request = new sql.Request();
-                                          request.input(
-                                            "bookingId",
-                                            sql.Int,
-                                            bookingId
-                                          );
-                                          request.query(
-                                            "select * from trainee_feedback_dtls where trainee_feedback_booking_id = @bookingId",
-                                            (err, result) => {
-                                              if (err)
-                                                return (
-                                                  res.send({
-                                                    error: err.message,
-                                                  }),
-                                                  console.log(
-                                                    err.message + "form here 2"
-                                                  )
-                                                );
-                                              if (result.recordset.length > 0) {
-                                                return res.send({
-                                                  error:
-                                                    "You have all ready submitted the feedback",
-                                                });
-                                              } else {
-                                                sql.connect(
-                                                  config,
-                                                  async (err) => {
+                                        request.input(
+                                          "userEmail",
+                                          sql.VarChar,
+                                          userEmail
+                                        );
+                                        request.query(
+                                          "select * from user_points_dtls where user_points_dtls_email = @userEmail",
+                                          (err, result) => {
+                                            if (err)
+                                              return res.send(err.message);
+                                            if (result.recordset.length > 0) {
+                                              const request = new sql.Request();
+                                              request.input(
+                                                "userEmail",
+                                                sql.VarChar,
+                                                userEmail
+                                              );
+                                              const previousRewardPoints =
+                                                result.recordset[0]
+                                                  .user_points_dtls_closing_points;
+                                              const currentPoints = 100;
+                                              const totalRewardPoints =
+                                                previousRewardPoints +
+                                                currentPoints;
+                                              request.input(
+                                                "previousRewardPoints",
+                                                sql.Int,
+                                                previousRewardPoints
+                                              );
+                                              request.input(
+                                                "totalRewardPoints",
+                                                sql.Int,
+                                                totalRewardPoints
+                                              );
+                                              const sqlUpdate =
+                                                "UPDATE user_points_dtls SET user_points_dtls_closing_points = @totalRewardPoints,user_points_dtls_last_points = @previousRewardPoints WHERE user_points_dtls_email = @userEmail";
+                                              request.query(
+                                                sqlUpdate,
+                                                (err, result) => {
+                                                  if (result) {
                                                     if (err)
-                                                      res.send(err.message);
-                                                    const request =
-                                                      new sql.Request();
-                                                    request.query(
-                                                      "insert into trainee_feedback_dtls (trainee_feedback_booking_id,trainee_fullname,mentor_fullname,trainee_feedback_user_email,trainee_feedback_mentor_email,trainee_feedback_useful,trainee_feedback_structure,trainee_feedback_relevant,trainee_feedback_clear,trainee_feedback_teaching,trainee_feedback_material,trainee_feedback_ad_time,trainee_feedback_learn_wp,trainee_feedback_aspects,trainee_feedback_improve_mentor,trainee_feedback_overall_exp,trainee_feedback_cr_date) VALUES('" +
-                                                        bookingId +
-                                                        "','" +
-                                                        userFullName +
-                                                        "','" +
-                                                        mentorFullname +
-                                                        "','" +
-                                                        userEmail +
-                                                        "','" +
-                                                        mentorEmail +
-                                                        "','" +
-                                                        question1 +
-                                                        "','" +
-                                                        question2 +
-                                                        "','" +
-                                                        question3 +
-                                                        "','" +
-                                                        question4 +
-                                                        "','" +
-                                                        question5 +
-                                                        "','" +
-                                                        question6 +
-                                                        "','" +
-                                                        question7 +
-                                                        "','" +
-                                                        question8 +
-                                                        "','" +
-                                                        question9 +
-                                                        "','" +
-                                                        question10 +
-                                                        "','" +
-                                                        question11 +
-                                                        "','" +
-                                                        new Date()
-                                                          .toISOString()
-                                                          .substring(0, 10) +
-                                                        "' )",
-                                                      (err, success) => {
-                                                        if (err) {
-                                                          return (
-                                                            res.send({
-                                                              error:
-                                                                err.message,
-                                                            }),
-                                                            console.log(
-                                                              err.message +
-                                                                "form here 1"
-                                                            )
+                                                      return res.send({
+                                                        error: err.message,
+                                                      });
+                                                    if (result) {
+                                                    }
+                                                  }
+                                                }
+                                              );
+                                            } else {
+                                              const request = new sql.Request();
+                                              const lastPoints = 100;
+                                              request.query(
+                                                "insert into user_points_dtls (user_points_dtls_email,user_points_dtls_fullname,user_points_dtls_role,user_points_dtls_last_points,user_points_dtls_closing_points,user_points_dtls_cr_date) VALUES('" +
+                                                  userEmail +
+                                                  "','" +
+                                                  userFullName +
+                                                  "','" +
+                                                  "trainee" +
+                                                  "','" +
+                                                  lastPoints +
+                                                  "','" +
+                                                  lastPoints +
+                                                  "','" +
+                                                  timestamp +
+                                                  "' )",
+                                                (err, success) => {
+                                                  if (err) {
+                                                    return res.send({
+                                                      error: err.message,
+                                                    });
+                                                  }
+                                                  if (success) {
+                                                    sql.connect(
+                                                      config,
+                                                      (err) => {
+                                                        if (err)
+                                                          return res.send(
+                                                            err.message
                                                           );
-                                                        }
-                                                        if (success) {
-                                                          sgMail.setApiKey(
-                                                            process.env
-                                                              .SENDGRID_API_KEY
-                                                          );
-                                                          const msg =
-                                                            traineeFeedbackEmail(
-                                                              userEmail,
-                                                              userFullName
-                                                            );
-                                                          sgMail
-                                                            .send(msg)
-                                                            .then(() => {
-                                                              return res.send({
-                                                                success:
-                                                                  "Thanks for your valuable feedback",
-                                                              });
-                                                            })
-                                                            .catch((error) => {
+                                                        const request =
+                                                          new sql.Request();
+                                                        request.input(
+                                                          "bookingId",
+                                                          sql.Int,
+                                                          bookingId
+                                                        );
+                                                        request.query(
+                                                          "select * from trainee_feedback_dtls where trainee_feedback_booking_id = @bookingId",
+                                                          (err, result) => {
+                                                            if (err)
+                                                              return res.send(
+                                                                err.message
+                                                              );
+                                                            if (
+                                                              result.recordset
+                                                                .length > 0
+                                                            ) {
                                                               return res.send({
                                                                 error:
-                                                                  "There was an error while submitting the feedback",
+                                                                  "You have all ready submitted the feedback",
                                                               });
-                                                            });
-                                                        }
+                                                            } else {
+                                                              console.log(
+                                                                "Hello!"
+                                                              );
+                                                              sql.connect(
+                                                                config,
+                                                                async (err) => {
+                                                                  if (err)
+                                                                    res.send(
+                                                                      err.message
+                                                                    );
+                                                                  const request =
+                                                                    new sql.Request();
+                                                                  request.query(
+                                                                    "insert into trainee_feedback_dtls (trainee_feedback_booking_id,trainee_fullname,mentor_fullname,trainee_feedback_user_email,trainee_feedback_mentor_email,trainee_feedback_useful,trainee_feedback_structure,trainee_feedback_relevant,trainee_feedback_clear,trainee_feedback_teaching,trainee_feedback_material,trainee_feedback_ad_time,trainee_feedback_learn_wp,trainee_feedback_aspects,trainee_feedback_improve_mentor,trainee_feedback_overall_exp,trainee_feedback_cr_date) VALUES('" +
+                                                                      bookingId +
+                                                                      "','" +
+                                                                      userFullName +
+                                                                      "','" +
+                                                                      mentorFullname +
+                                                                      "','" +
+                                                                      userEmail +
+                                                                      "','" +
+                                                                      mentorEmail +
+                                                                      "','" +
+                                                                      question1 +
+                                                                      "','" +
+                                                                      question2 +
+                                                                      "','" +
+                                                                      question3 +
+                                                                      "','" +
+                                                                      question4 +
+                                                                      "','" +
+                                                                      question5 +
+                                                                      "','" +
+                                                                      question6 +
+                                                                      "','" +
+                                                                      question7 +
+                                                                      "','" +
+                                                                      question8 +
+                                                                      "','" +
+                                                                      question9 +
+                                                                      "','" +
+                                                                      question10 +
+                                                                      "','" +
+                                                                      question11 +
+                                                                      "','" +
+                                                                      new Date()
+                                                                        .toISOString()
+                                                                        .substring(
+                                                                          0,
+                                                                          10
+                                                                        ) +
+                                                                      "' )",
+                                                                    (
+                                                                      err,
+                                                                      success
+                                                                    ) => {
+                                                                      if (err) {
+                                                                        return res.send(
+                                                                          {
+                                                                            error:
+                                                                              err.message,
+                                                                          }
+                                                                        );
+                                                                      }
+                                                                      if (
+                                                                        success
+                                                                      ) {
+                                                                        sgMail.setApiKey(
+                                                                          process
+                                                                            .env
+                                                                            .SENDGRID_API_KEY
+                                                                        );
+                                                                        const msg =
+                                                                          traineeFeedbackEmail(
+                                                                            userEmail,
+                                                                            userFullName
+                                                                          );
+                                                                        sgMail
+                                                                          .send(
+                                                                            msg
+                                                                          )
+                                                                          .then(
+                                                                            () => {
+                                                                              return res.send(
+                                                                                {
+                                                                                  success:
+                                                                                    "Thanks for your valuable feedback",
+                                                                                }
+                                                                              );
+                                                                            }
+                                                                          )
+                                                                          .catch(
+                                                                            (
+                                                                              error
+                                                                            ) => {
+                                                                              return res.send(
+                                                                                {
+                                                                                  error:
+                                                                                    "There was an error while submitting the feedback",
+                                                                                }
+                                                                              );
+                                                                            }
+                                                                          );
+                                                                      }
+                                                                    }
+                                                                  );
+                                                                }
+                                                              );
+                                                            }
+                                                          }
+                                                        );
                                                       }
                                                     );
                                                   }
-                                                );
-                                              }
+                                                }
+                                              );
                                             }
-                                          );
-                                        });
+                                          }
+                                        );
                                       }
                                     }
                                   );
                                 }
                               }
                             );
-                          }
-                        });
-                      } else {
-                        const request = new sql.Request();
-                        const lastPoints = (rewardPoints / 5) * question11;
-                        request.query(
-                          "insert into user_points_dtls (user_points_dtls_email,user_points_dtls_fullname,user_points_dtls_role,user_points_dtls_last_points,user_points_dtls_closing_points,user_points_dtls_cr_date) VALUES('" +
-                            mentorEmail +
-                            "','" +
-                            mentorFullName +
-                            "','" +
-                            "mentor" +
-                            "','" +
-                            lastPoints +
-                            "','" +
-                            lastPoints +
-                            "','" +
-                            timestamp +
-                            "' )",
-                          (err, success) => {
-                            if (err) {
-                              return res.send({ error: err.message });
-                            }
-                            if (success) {
-                              request.input(
-                                "userEmail",
-                                sql.VarChar,
-                                userEmail
-                              );
-                              request.query(
-                                "select * from user_points_dtls where user_points_dtls_email = @userEmail",
-                                (err, result) => {
-                                  if (err) return res.send(err.message);
-                                  if (result.recordset.length > 0) {
-                                    const request = new sql.Request();
-                                    request.input(
-                                      "userEmail",
-                                      sql.VarChar,
-                                      userEmail
-                                    );
-                                    const previousRewardPoints =
-                                      result.recordset[0]
-                                        .user_points_dtls_closing_points;
-                                    const currentPoints = 100;
-                                    const totalRewardPoints =
-                                      previousRewardPoints + currentPoints;
-                                    request.input(
-                                      "previousRewardPoints",
-                                      sql.Int,
-                                      previousRewardPoints
-                                    );
-                                    request.input(
-                                      "totalRewardPoints",
-                                      sql.Int,
-                                      totalRewardPoints
-                                    );
-                                    const sqlUpdate =
-                                      "UPDATE user_points_dtls SET user_points_dtls_closing_points = @totalRewardPoints,user_points_dtls_last_points = @previousRewardPoints WHERE user_points_dtls_email = @userEmail";
-                                    request.query(sqlUpdate, (err, result) => {
-                                      if (result) {
-                                        if (err)
-                                          return res.send({
-                                            error: err.message,
-                                          });
-                                        if (result) {
-                                        }
-                                      }
-                                    });
-                                  } else {
-                                    const request = new sql.Request();
-                                    const lastPoints = 100;
-                                    request.query(
-                                      "insert into user_points_dtls (user_points_dtls_email,user_points_dtls_fullname,user_points_dtls_role,user_points_dtls_last_points,user_points_dtls_closing_points,user_points_dtls_cr_date) VALUES('" +
-                                        userEmail +
-                                        "','" +
-                                        userFullName +
-                                        "','" +
-                                        "trainee" +
-                                        "','" +
-                                        lastPoints +
-                                        "','" +
-                                        lastPoints +
-                                        "','" +
-                                        timestamp +
-                                        "' )",
-                                      (err, success) => {
-                                        if (err) {
-                                          return res.send({
-                                            error: err.message,
-                                          });
-                                        }
-                                        if (success) {
-                                          sql.connect(config, (err) => {
-                                            if (err)
-                                              return res.send(err.message);
-                                            const request = new sql.Request();
-                                            request.input(
-                                              "bookingId",
-                                              sql.Int,
-                                              bookingId
-                                            );
-                                            request.query(
-                                              "select * from trainee_feedback_dtls where trainee_feedback_booking_id = @bookingId",
-                                              (err, result) => {
-                                                if (err)
-                                                  return res.send(err.message);
-                                                if (
-                                                  result.recordset.length > 0
-                                                ) {
-                                                  return res.send({
-                                                    error:
-                                                      "You have all ready submitted the feedback",
-                                                  });
-                                                } else {
-                                                  console.log("Hello!");
-                                                  sql.connect(
-                                                    config,
-                                                    async (err) => {
-                                                      if (err)
-                                                        res.send(err.message);
-                                                      const request =
-                                                        new sql.Request();
-                                                      request.query(
-                                                        "insert into trainee_feedback_dtls (trainee_feedback_booking_id,trainee_fullname,mentor_fullname,trainee_feedback_user_email,trainee_feedback_mentor_email,trainee_feedback_useful,trainee_feedback_structure,trainee_feedback_relevant,trainee_feedback_clear,trainee_feedback_teaching,trainee_feedback_material,trainee_feedback_ad_time,trainee_feedback_learn_wp,trainee_feedback_aspects,trainee_feedback_improve_mentor,trainee_feedback_overall_exp,trainee_feedback_cr_date) VALUES('" +
-                                                          bookingId +
-                                                          "','" +
-                                                          userFullName +
-                                                          "','" +
-                                                          mentorFullname +
-                                                          "','" +
-                                                          userEmail +
-                                                          "','" +
-                                                          mentorEmail +
-                                                          "','" +
-                                                          question1 +
-                                                          "','" +
-                                                          question2 +
-                                                          "','" +
-                                                          question3 +
-                                                          "','" +
-                                                          question4 +
-                                                          "','" +
-                                                          question5 +
-                                                          "','" +
-                                                          question6 +
-                                                          "','" +
-                                                          question7 +
-                                                          "','" +
-                                                          question8 +
-                                                          "','" +
-                                                          question9 +
-                                                          "','" +
-                                                          question10 +
-                                                          "','" +
-                                                          question11 +
-                                                          "','" +
-                                                          new Date()
-                                                            .toISOString()
-                                                            .substring(0, 10) +
-                                                          "' )",
-                                                        (err, success) => {
-                                                          if (err) {
-                                                            return res.send({
-                                                              error:
-                                                                err.message,
-                                                            });
-                                                          }
-                                                          if (success) {
-                                                            sgMail.setApiKey(
-                                                              process.env
-                                                                .SENDGRID_API_KEY
-                                                            );
-                                                            const msg =
-                                                              traineeFeedbackEmail(
-                                                                userEmail,
-                                                                userFullName
-                                                              );
-                                                            sgMail
-                                                              .send(msg)
-                                                              .then(() => {
-                                                                return res.send(
-                                                                  {
-                                                                    success:
-                                                                      "Thanks for your valuable feedback",
-                                                                  }
-                                                                );
-                                                              })
-                                                              .catch(
-                                                                (error) => {
-                                                                  return res.send(
-                                                                    {
-                                                                      error:
-                                                                        "There was an error while submitting the feedback",
-                                                                    }
-                                                                  );
-                                                                }
-                                                              );
-                                                          }
-                                                        }
-                                                      );
-                                                    }
-                                                  );
-                                                }
-                                              }
-                                            );
-                                          });
-                                        }
-                                      }
-                                    );
-                                  }
-                                }
-                              );
-                            }
-                          }
-                        );
-                      }
+                          });
+                        }
+                      });
                     }
-                  );
-                });
+                  }
+                );
               }
             });
           } else {

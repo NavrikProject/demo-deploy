@@ -367,7 +367,7 @@ export const mentorBankDetailsEmailTemplate = (email, username) => {
   return {
     to: `${email}`, // Change to your recipient
     from: "no-reply@practilearn.com", // Change to your verified sender
-    subject: "Appointment date changed successfully",
+    subject: "Bank account details added successfully",
     html: `
   <section>
       <div
@@ -734,6 +734,83 @@ export const mentorCancelledRefundEmailTemplate = (traineeEmail, username) => {
           to help.
         </p>
         <p>We’ll be in touch soon!</p>
+        <p>Thanks, Practiwiz</p>
+        <img
+          width="300px"
+          height="100px"
+          src="https://res.cloudinary.com/droa7dncb/image/upload/v1665987569/practiwiz-logo3_xifxbc.png"
+          alt="Logo"
+        />
+      </div>
+    </section>
+    `,
+  };
+};
+
+export const mentorJoinedSessionEmail = (
+  traineeEmail,
+  username,
+  mentorName,
+  date,
+  slotTime,
+  url
+) => {
+  return {
+    to: `${traineeEmail}`, // Change to your recipient
+    from: "no-reply@practilearn.com", // Change to your verified sender
+    subject: `Join the mentor session`,
+    html: `
+<section>
+      <div
+        style="
+          font-size: 19px;
+          font-family: poppins;
+          max-width: 700px;
+          margin: auto;
+          padding: 50px 20px;
+        "
+      >
+        <h2
+          style="
+            text-transform: uppercase;
+            color: teal;
+            text-align: center;
+            padding-bottom: 30px;
+          "
+        >
+          Welcome to the Practiwiz Training Programme
+        </h2>
+        <p>Hi <b>${username}</b>,</p>
+        <p>
+          Your's mentor session with <b>${mentorName}</b> on
+          <b>${date}</b> and time is <b>${slotTime}</b>. The mentor has joined the session waiting for you to join in the session.
+        </p>
+        <button
+          style="
+            background-color: #085cca;
+            border: none;
+            color: white;
+            padding: 10px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 7px;
+          "
+        >
+          <a
+            style="text-decoration: none; font-size: 17px; color: white"
+            href="${url}"
+            >Join Now</a
+          >
+        </button>
+        <p>or if it doesn't work try the link below</p>
+        <p>${url}</p>
+        <p>if you are facing any issue while joining please contact through email.</p>
+        <p>
+          If you have any questions, reply back to this email and we'll be happy
+          to help.
+        </p>
         <p>Thanks, Practiwiz</p>
         <img
           width="300px"

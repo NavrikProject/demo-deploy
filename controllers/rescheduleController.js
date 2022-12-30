@@ -85,7 +85,7 @@ function checkTheDateAndStatusChangeOfTrainee(req, res) {
                                   mentorName,
                                   bookingDate,
                                   slotTime,
-                                  "http://localhost:3000/trainee/profile/my-sessions"
+                                  "https://www.practiwiz.com/trainee/profile/my-sessions"
                                 );
                                 sgMail
                                   .send(msg)
@@ -97,8 +97,7 @@ function checkTheDateAndStatusChangeOfTrainee(req, res) {
                                   })
                                   .catch((error) => {
                                     return console.log({
-                                      error:
-                                        "There is some error while sending",
+                                      error: error,
                                     });
                                   });
                               }
@@ -115,7 +114,7 @@ function checkTheDateAndStatusChangeOfTrainee(req, res) {
                             sql.Int,
                             totalSessions
                           );
-                          request.input("traineeId", sql.VarChar, traineeId);
+                          request.input("traineeId", sql.Int, traineeId);
                           request.query(
                             "UPDATE trainee_dtls SET trainee_unattended_sessions = @totalSessions WHERE trainee_id = @traineeId",
                             (err, response) => {
@@ -132,7 +131,7 @@ function checkTheDateAndStatusChangeOfTrainee(req, res) {
                                   mentorName,
                                   bookingDate,
                                   slotTime,
-                                  "http://localhost:3000/trainee/profile/my-sessions"
+                                  "https://www.practiwiz.com/trainee/profile/my-sessions"
                                 );
                                 sgMail
                                   .send(msg)
@@ -219,7 +218,7 @@ function checkTheDateAndStatusChangeOfMentor(req, res) {
                             sql.Int,
                             totalSessions
                           );
-                          request.input("mentorId", sql.VarChar, mentorId);
+                          request.input("mentorId", sql.Int, mentorId);
                           request.query(
                             "UPDATE mentor_dtls SET mentor_unattended_sessions = @totalSessions WHERE mentor_dtls_id = @mentorId",
                             (err, response) => {
@@ -313,7 +312,7 @@ function checkTheDateAndStatusChangeOfTraineeANdMentor(req, res) {
                   if (result) {
                     request.input("mentorEmail", sql.VarChar, mentorEmail);
                     request.query(
-                      "select * from mentor_dtls where mentor_email = @mentorEmail and mentor_approved = 'Yes' ",
+                      "select * from mentor_dtls where mentor_email = @mentorEmail",
                       (err, result) => {
                         if (err) return console.log(err.message);
                         if (result.recordset.length > 0) {
@@ -326,7 +325,7 @@ function checkTheDateAndStatusChangeOfTraineeANdMentor(req, res) {
                             sql.Int,
                             mentorTotalSessions
                           );
-                          request.input("mentorId", sql.VarChar, mentorId);
+                          request.input("mentorId", sql.Int, mentorId);
                           request.query(
                             "UPDATE mentor_dtls SET mentor_unattended_sessions = @mentorTotalSessions WHERE mentor_dtls_id = @mentorId",
                             (err, response) => {
@@ -366,7 +365,7 @@ function checkTheDateAndStatusChangeOfTraineeANdMentor(req, res) {
                                                 mentorName,
                                                 bookingDate,
                                                 slotTime,
-                                                "http://localhost:3000/trainee/profile/my-sessions"
+                                                "https://www.practiwiz.com/trainee/profile/my-sessions"
                                               );
                                             sgMail
                                               .send(msg)
@@ -394,7 +393,7 @@ function checkTheDateAndStatusChangeOfTraineeANdMentor(req, res) {
                                       const traineeTotalSessions = sessions + 1;
                                       request.input(
                                         "traineeId",
-                                        sql.VarChar,
+                                        sql.Int,
                                         traineeId
                                       );
                                       request.input(
@@ -464,4 +463,5 @@ setInterval(() => {
   checkTheDateAndStatusChangeOfTrainee();
   checkTheDateAndStatusChangeOfMentor();
   checkTheDateAndStatusChangeOfTraineeANdMentor();
+  console.log("logging reschedule function");
 }, 60000);

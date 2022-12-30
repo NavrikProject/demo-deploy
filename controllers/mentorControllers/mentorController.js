@@ -9,6 +9,7 @@ import bcrypt from "bcrypt";
 import Razorpay from "razorpay";
 import jwt from "jsonwebtoken";
 import rp from "request-promise";
+import axios from "axios";
 import {
   appointmentBookedMentorEmailTemplate,
   appointmentBookedTraineeEmailTemplate,
@@ -17,14 +18,9 @@ import {
   mentorBankDetailsEmailTemplate,
   mentorDisApproveEmail,
 } from "../../middleware/mentorEmailTemplates.js";
-
-const containerName = "navrikimage";
+import { BlockBlobClient } from "@azure/storage-blob";
 
 dotenv.config();
-
-const blobService = azureStorage.createBlobService(
-  process.env.AZURE_STORAGE_CONNECTION_STRING
-);
 
 // to join as a mentor
 export async function fillAdditionalMentorDetails(req, res) {
@@ -250,7 +246,6 @@ export async function getMentorByFiltering(req, res) {
   let skill = req.query.skill;
   let area = req.query.area;
   let availability = req.query.availability;
-  console.log(category, skill, area, availability);
   try {
     if (category && !skill && !availability && !area) {
       sql.connect(config, (err) => {
@@ -359,7 +354,7 @@ export async function getAllMentorApprovedDetails(req, res) {
       const request = new sql.Request();
       request.input("mentorApproved", sql.VarChar, mentorApproved);
       request.query(
-        "select * from mentor_dtls WHERE mentor_approved = @mentorApproved",
+        "select * from mentor_dtls WHERE mentor_approved = @mentorApproved order by mentor_dtls_id DESC",
         (err, result) => {
           if (err) return res.send(err.message);
           if (result.recordset.length > 0) {
@@ -569,144 +564,143 @@ export async function createMentorAppointment(req, res, next) {
   } = req.body;
   const { selected, questions } = req.body.data;
   const timeSlot = from + " " + "to" + " " + to;
-
   try {
-    var options = {
-      method: "POST",
-      uri: "https://api.zoom.us/v2/users/me/meetings",
-      body: {
-        topic: "Appointment booking",
-        type: 1,
+    const result = await axios.post(
+      "https://api.zoom.us/v2/users/me/meetings",
+      {
+        topic: `Discussion with ${username}`,
+        type: 2,
         start_time: new Date(date),
-        contact_email: userEmail,
-        registrants_email_notification: true,
-        calendar_type: 2,
-        recurrence: {
-          end_date_time: new Date(date),
-          end_times: 7,
-          monthly_day: 1,
-          monthly_week: 1,
-          monthly_week_day: 1,
-          repeat_interval: 1,
-          type: 1,
-          weekly_days: "1",
-        },
+        duration: 20,
+        timezone: "India",
+        password: "1234567",
+        agenda: `We will discuss about the ${questions + " " + selected}`,
         settings: {
-          host_video: "true",
-          participant_video: "true",
+          host_video: true,
+          participant_video: true,
+          cn_meeting: false,
+          in_meeting: true,
+          join_before_host: false,
+          mute_upon_entry: false,
+          watermark: false,
+          use_pmi: false,
+          approval_type: 2,
+          audio: "both",
+          auto_recording: "local",
+          enforce_login: false,
+          registrants_email_notification: true,
+          waiting_room: true,
+          allow_multiple_devices: true,
+          email: userEmail,
         },
       },
-      auth: {
-        bearer: token,
-      },
-      headers: {
-        "User-Agent": "Zoom-api-Jwt-Request",
-        "content-type": "application/json",
-      },
-      json: true, //Parse the JSON string in the response
-    };
-    rp(options)
-      .then(function (response) {
-        let mentorHostUrl = response.start_url;
-        let traineeJoinUrl = response.join_url;
-        sql.connect(config, async (err) => {
-          if (err) res.send(err.message);
-          const request = new sql.Request();
-          let amountPaid = "Paid";
-          request.query(
-            "insert into booking_appointments_dtls (mentor_dtls_id,mentor_email,mentor_name,user_email,user_fullname,booking_mentor_date,booking_date,booking_starts_time,booking_end_time,booking_time,mentor_amount,mentor_options,mentor_questions,mentor_razorpay_payment_id,mentor_razorpay_order_id,mentor_razorpay_signature,mentor_host_url,trainee_join_url,mentor_amount_paid_status) VALUES('" +
-              mentorId +
-              "','" +
-              mentorEmail +
-              "','" +
-              mentorName +
-              "','" +
-              userEmail +
-              "','" +
-              username +
-              "','" +
-              date +
-              "','" +
-              new Date().toISOString().substring(0, 10) +
-              "','" +
-              from +
-              "','" +
-              to +
-              "','" +
-              timeSlot +
-              "','" +
-              amount / 100 +
-              "','" +
-              selected +
-              "','" +
-              questions +
-              "','" +
-              razorpayPaymentId +
-              "','" +
-              razorpayOrderId +
-              "','" +
-              razorpaySignature +
-              "','" +
-              mentorHostUrl +
-              "','" +
-              traineeJoinUrl +
-              "','" +
-              amountPaid +
-              "' )",
-            (err, success) => {
-              if (err) {
-                return res.send({ error: err.message });
-              }
-              if (success) {
-                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-                const msg = appointmentBookedTraineeEmailTemplate(
-                  userEmail,
-                  username,
-                  mentorName,
-                  new Date(date).toDateString(),
-                  timeSlot
-                );
-                sgMail
-                  .send(msg)
-                  .then(() => {
-                    const msg = appointmentBookedMentorEmailTemplate(
-                      mentorEmail,
-                      mentorName,
-                      username,
-                      new Date(date).toDateString(),
-                      timeSlot
-                    );
-                    sgMail
-                      .send(msg)
-                      .then(() => {
-                        res.send({
-                          success:
-                            "Successfully appointment is booked and mentor will be available on the same day with respective time",
-                        });
-                      })
-                      .catch((error) => {
-                        res.send({
-                          error:
-                            "There was an error while booking the appointment",
-                        });
-                      });
-                  })
-                  .catch((error) => {
-                    res.send({
-                      error: "There was an error while booking the appointment",
-                    });
-                  });
-              }
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+          "User-Agent": "Zoom-api-Jwt-Request",
+          "content-type": "application/json",
+        },
+      }
+    );
+    if (result) {
+      let mentorHostUrl = result.data.start_url;
+      let traineeJoinUrl = result.data.join_url;
+      sql.connect(config, async (err) => {
+        if (err) res.send(err.message);
+        const request = new sql.Request();
+        let amountPaid = "Paid";
+        request.query(
+          "insert into booking_appointments_dtls (mentor_dtls_id,mentor_email,mentor_name,user_email,user_fullname,booking_mentor_date,booking_date,booking_starts_time,booking_end_time,booking_time,mentor_amount,mentor_options,mentor_questions,mentor_razorpay_payment_id,mentor_razorpay_order_id,mentor_razorpay_signature,mentor_host_url,trainee_join_url,mentor_amount_paid_status) VALUES('" +
+            mentorId +
+            "','" +
+            mentorEmail +
+            "','" +
+            mentorName +
+            "','" +
+            userEmail +
+            "','" +
+            username +
+            "','" +
+            date +
+            "','" +
+            new Date().toISOString().substring(0, 10) +
+            "','" +
+            from +
+            "','" +
+            to +
+            "','" +
+            timeSlot +
+            "','" +
+            amount / 100 +
+            "','" +
+            selected +
+            "','" +
+            questions +
+            "','" +
+            razorpayPaymentId +
+            "','" +
+            razorpayOrderId +
+            "','" +
+            razorpaySignature +
+            "','" +
+            mentorHostUrl +
+            "','" +
+            traineeJoinUrl +
+            "','" +
+            amountPaid +
+            "' )",
+          (err, success) => {
+            if (err) {
+              return res.send({ error: err.message });
             }
-          );
-        });
-      })
-      .catch(function (err) {
-        // API call failed...
-        return res.send({ error: err.message });
+            if (success) {
+              sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+              const msg = appointmentBookedTraineeEmailTemplate(
+                userEmail,
+                username,
+                mentorName,
+                new Date(date).toDateString(),
+                timeSlot
+              );
+              sgMail
+                .send(msg)
+                .then(() => {
+                  const msg = appointmentBookedMentorEmailTemplate(
+                    mentorEmail,
+                    mentorName,
+                    username,
+                    new Date(date).toDateString(),
+                    timeSlot
+                  );
+                  sgMail
+                    .send(msg)
+                    .then(() => {
+                      res.send({
+                        success:
+                          "Successfully appointment is booked and mentor will be available on the same day with respective time",
+                      });
+                    })
+                    .catch((error) => {
+                      res.send({
+                        error:
+                          "There was an error while booking the appointment",
+                      });
+                    });
+                })
+                .catch((error) => {
+                  res.send({
+                    error: "There was an error while booking the appointment",
+                  });
+                });
+            }
+          }
+        );
       });
+    }
   } catch (error) {
-    return res.send({ error: error.message });
+    res.send({
+      error: "There was an error while booking the appointment",
+    });
   }
 }
 
@@ -1048,143 +1042,163 @@ export async function registerMentorWithAdditionalDtls(req, res) {
   let hashedPassword = await bcrypt.hash(password, saltRounds);
   const lowEmail = email.toLowerCase();
   try {
-    sql.connect(config, async (err) => {
-      if (err) {
-        return res.send(err.message);
-      }
-      const request = new sql.Request();
-      request.input("email", sql.VarChar, lowEmail);
-      request.query(
-        "select * from users_dtls where user_email = @email",
-        (err, result) => {
-          if (err) return res.send(err.message);
-          if (result.recordset.length > 0) {
-            return res.send({
-              error:
-                "This email address is already in use, Please use another email address",
-            });
-          } else {
-            sql.connect(config, async (err) => {
-              if (err) res.send(err.message);
-              var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-              const type = "mentor";
-              const request = new sql.Request();
-              request.query(
-                "insert into users_dtls (user_email,user_pwd,user_logindate,user_logintime,user_firstname,user_lastname,user_phone_number,user_creation,user_type) VALUES('" +
-                  email +
-                  "','" +
-                  hashedPassword +
-                  "','" +
-                  timestamp +
-                  "','" +
-                  timestamp +
-                  "','" +
-                  firstName +
-                  "','" +
-                  lastName +
-                  "','" +
-                  phoneNumber +
-                  "','" +
-                  timestamp +
-                  "','" +
-                  type +
-                  "' )",
-                (err, success) => {
-                  if (err) {
-                    return res.send({ error: err.message });
-                  }
-                  if (success) {
-                    sql.connect(config, async (err) => {
-                      let startDate = new Date().toISOString().substring(0, 10);
-                      let endDate = addMonths(new Date(startDate), 3);
-                      endDate = endDate.toISOString().substring(0, 10);
-                      if (err) res.send(err.message);
-                      const request = new sql.Request();
-                      request.query(
-                        "insert into mentor_dtls (mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_otherSkills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_phone_number,mentor_website,mentor_linkedin_profile, mentor_sessions_conducted,mentor_image) VALUES('" +
-                          email +
-                          "','" +
-                          firstName +
-                          "','" +
-                          lastName +
-                          "','" +
-                          startDate +
-                          "','" +
-                          endDate +
-                          "','" +
-                          mentorAvailability +
-                          "','" +
-                          startTime +
-                          "','" +
-                          endTime +
-                          "','" +
-                          timestamp +
-                          "','" +
-                          experience +
-                          "','" +
-                          skills +
-                          "','" +
-                          otherSkills +
-                          "','" +
-                          mentorshipArea +
-                          "','" +
-                          speciality +
-                          "','" +
-                          bio +
-                          "','" +
-                          currentRole +
-                          "','" +
-                          previousRole +
-                          "','" +
-                          firm +
-                          "','" +
-                          phoneNumber +
-                          "','" +
-                          website +
-                          "','" +
-                          linkedInProfile +
-                          "','" +
-                          0 +
-                          "','" +
-                          imageFileName +
-                          "')",
-                        (err, success) => {
-                          if (err) {
-                            return res.send({ error: err.message });
-                          }
-                          if (success) {
-                            sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-                            const msg = mentorApplicationEmail(
-                              email,
-                              firstName + " " + lastName
-                            );
-                            sgMail
-                              .send(msg)
-                              .then(() => {
-                                return res.send({
-                                  success:
-                                    "Successfully submitted the mentor we will get back to you once, We review your application.",
-                                });
-                              })
-                              .catch((error) => {
-                                return res.send({
-                                  error:
-                                    "There was an error while submitting the details please try again later",
-                                });
-                              });
-                          }
-                        }
-                      );
-                    });
-                  }
-                }
-              );
-            });
+    const blobName = new Date().getTime() + "-" + req.files.image.name;
+    const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/mentorprofilepictures/${blobName}`;
+    const blobService = new BlockBlobClient(
+      process.env.AZURE_STORAGE_CONNECTION_STRING,
+      "practiwizcontainer/mentorprofilepictures",
+      blobName
+    );
+    const stream = intoStream(req.files.image.data);
+    const streamLength = req.files.image.data.length;
+    blobService
+      .uploadStream(stream, streamLength)
+      .then((response) => {
+        sql.connect(config, async (err) => {
+          if (err) {
+            return res.send(err.message);
           }
-        }
-      );
-    });
+          const request = new sql.Request();
+          request.input("email", sql.VarChar, lowEmail);
+          request.query(
+            "select * from users_dtls where user_email = @email",
+            (err, result) => {
+              if (err) return res.send(err.message);
+              if (result.recordset.length > 0) {
+                return res.send({
+                  error:
+                    "This email address is already in use, Please use another email address",
+                });
+              } else {
+                sql.connect(config, async (err) => {
+                  if (err) res.send(err.message);
+                  var timestamp = moment(Date.now()).format(
+                    "YYYY-MM-DD HH:mm:ss"
+                  );
+                  const type = "mentor";
+                  const request = new sql.Request();
+                  request.query(
+                    "insert into users_dtls (user_email,user_pwd,user_logindate,user_logintime,user_firstname,user_lastname,user_phone_number,user_creation,user_type) VALUES('" +
+                      email +
+                      "','" +
+                      hashedPassword +
+                      "','" +
+                      timestamp +
+                      "','" +
+                      timestamp +
+                      "','" +
+                      firstName +
+                      "','" +
+                      lastName +
+                      "','" +
+                      phoneNumber +
+                      "','" +
+                      timestamp +
+                      "','" +
+                      type +
+                      "' )",
+                    (err, success) => {
+                      if (err) {
+                        return res.send({ error: err.message });
+                      }
+                      if (success) {
+                        sql.connect(config, async (err) => {
+                          let startDate = new Date()
+                            .toISOString()
+                            .substring(0, 10);
+                          let endDate = addMonths(new Date(startDate), 3);
+                          endDate = endDate.toISOString().substring(0, 10);
+                          if (err) res.send(err.message);
+                          const request = new sql.Request();
+                          request.query(
+                            "insert into mentor_dtls (mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_otherSkills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_phone_number,mentor_website,mentor_linkedin_profile, mentor_sessions_conducted,mentor_image) VALUES('" +
+                              email +
+                              "','" +
+                              firstName +
+                              "','" +
+                              lastName +
+                              "','" +
+                              startDate +
+                              "','" +
+                              endDate +
+                              "','" +
+                              mentorAvailability +
+                              "','" +
+                              startTime +
+                              "','" +
+                              endTime +
+                              "','" +
+                              timestamp +
+                              "','" +
+                              experience +
+                              "','" +
+                              skills +
+                              "','" +
+                              otherSkills +
+                              "','" +
+                              mentorshipArea +
+                              "','" +
+                              speciality +
+                              "','" +
+                              bio +
+                              "','" +
+                              currentRole +
+                              "','" +
+                              previousRole +
+                              "','" +
+                              firm +
+                              "','" +
+                              phoneNumber +
+                              "','" +
+                              website +
+                              "','" +
+                              linkedInProfile +
+                              "','" +
+                              0 +
+                              "','" +
+                              filename +
+                              "')",
+                            (err, success) => {
+                              if (err) {
+                                return res.send({ error: err.message });
+                              }
+                              if (success) {
+                                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                                const msg = mentorApplicationEmail(
+                                  email,
+                                  firstName + " " + lastName
+                                );
+                                sgMail
+                                  .send(msg)
+                                  .then(() => {
+                                    return res.send({
+                                      success:
+                                        "Successfully submitted the mentor we will get back to you once, We review your application.",
+                                    });
+                                  })
+                                  .catch((error) => {
+                                    return res.send({
+                                      error:
+                                        "There was an error while submitting the details please try again later",
+                                    });
+                                  });
+                              }
+                            }
+                          );
+                        });
+                      }
+                    }
+                  );
+                });
+              }
+            }
+          );
+        });
+      })
+      .catch((err) => {
+        return res.send({ error: "There was an error uploading" });
+      });
   } catch (error) {
-    console.log(err.message);
+    return res.send({ error: "There was an error uploading" });
   }
 }

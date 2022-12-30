@@ -32,7 +32,7 @@ router.put("/account/:id", verifyToken, updateTraineeAccountDetails);
 router.put("/image/upload/:id", verifyToken, uploadUserImage);
 
 // get user image details
-router.get("/details/get/:id", verifyToken, getTraineeAllDetails);
+router.post("/details/get/:id", verifyToken, getTraineeAllDetails);
 
 // deleting the user account
 router.delete("/delete/:id", verifyTokenAndAuthorization, async (req, res) => {

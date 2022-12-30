@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js "
+    "start": "nodemon index.js "
   },
   "keywords": [],
   "author": "Mahesh",
@@ -13,6 +13,8 @@
   "dependencies": {
     "@azure/storage-blob": "^12.11.0",
     "@sendgrid/mail": "^7.6.1",
+    "@zoomus/websdk": "^2.9.5",
+    "axios": "^1.2.1",
     "azure-storage": "^2.10.7",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.6",

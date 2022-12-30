@@ -1,17 +1,13 @@
 import sql from "mssql";
 import config from "../../config/dbconfig.js";
 import sgMail from "@sendgrid/mail";
-import azureStorage from "azure-storage";
+import { BlockBlobClient } from "@azure/storage-blob";
 import intoStream from "into-stream";
 import dotenv from "dotenv";
 import { traineeProfileUpdateEmailTemplate } from "../../middleware/traineeEmailTemplates.js";
 
-const containerName = "navrikimage";
-
 dotenv.config();
-const blobService = azureStorage.createBlobService(
-  process.env.AZURE_STORAGE_CONNECTION_STRING
-);
+
 // inserting the data to the trainee details from profile && working accurately
 export async function createTraineeProfile(req, res, next) {
   const id = req.params.id;
@@ -21,7 +17,6 @@ export async function createTraineeProfile(req, res, next) {
   const profession = req.body.profession;
   const experience = req.body.experience;
   const address = req.body.address;
-  const imageFileName = req.body.imageFileName;
   try {
     sql.connect(config, (err) => {
       if (err) return res.send(err.message);
@@ -32,79 +27,46 @@ export async function createTraineeProfile(req, res, next) {
         (err, result) => {
           if (err) return res.send(err.message);
           if (result.recordset.length > 0) {
-            const email = result.recordset[0].user_email;
-            const fullname =
-              result.recordset[0].user_firstname +
-              " " +
-              result.recordset[0].user_lastname;
-            sql.connect(config, (err) => {
-              if (err) return res.send(err.message);
-              const request = new sql.Request();
-              request.input("email", sql.VarChar, email);
-              request.query(
-                "SELECT * FROM trainee_dtls WHERE trainee_email = @email",
-                (err, result) => {
+            const blobName = new Date().getTime() + "-" + req.files.image.name;
+            const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/traineeprofilepictures/${blobName}`;
+            const blobService = new BlockBlobClient(
+              process.env.AZURE_STORAGE_CONNECTION_STRING,
+              "practiwizcontainer/traineeprofilepictures",
+              blobName
+            );
+            const stream = intoStream(req.files.image.data);
+            const streamLength = req.files.image.data.length;
+            blobService
+              .uploadStream(stream, streamLength)
+              .then((response) => {
+                const email = result.recordset[0].user_email;
+                const fullname =
+                  result.recordset[0].user_firstname +
+                  " " +
+                  result.recordset[0].user_lastname;
+                sql.connect(config, (err) => {
                   if (err) return res.send(err.message);
-                  if (result.recordset.length > 0) {
-                    request.input("mobile", sql.VarChar, mobile);
-                    request.input("dob", sql.VarChar, dob);
-                    request.input("imageFileName", sql.VarChar, imageFileName);
-                    request.input("address", sql.VarChar, address);
-                    request.input("experience", sql.Int, experience);
-                    request.input("graduate", sql.VarChar, graduate);
-                    request.input("profession", sql.VarChar, profession);
-                    const sqlUpdate =
-                      "update trainee_dtls set trainee_mobile = @mobile , trainee_dob= @dob,trainee_image = @imageFileName, trainee_address = @address, trainee_experience = @experience, trainee_graduate = @graduate, trainee_profession = @profession where trainee_email = @email";
-                    request.query(sqlUpdate, (err, result) => {
-                      if (err)
-                        return res.send({
-                          err: "There was an error processing the request",
-                        });
-                      if (result) {
-                        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-                        const msg = traineeProfileUpdateEmailTemplate(
-                          email,
-                          fullname,
-                          "profile"
-                        );
-                        sgMail
-                          .send(msg)
-                          .then(() => {
+                  const request = new sql.Request();
+                  request.input("email", sql.VarChar, email);
+                  request.query(
+                    "SELECT * FROM trainee_dtls WHERE trainee_email = @email",
+                    (err, result) => {
+                      if (err) return res.send(err.message);
+                      if (result.recordset.length > 0) {
+                        request.input("mobile", sql.VarChar, mobile);
+                        request.input("dob", sql.VarChar, dob);
+                        request.input("imageFileName", sql.VarChar, filename);
+                        request.input("address", sql.VarChar, address);
+                        request.input("experience", sql.Int, experience);
+                        request.input("graduate", sql.VarChar, graduate);
+                        request.input("profession", sql.VarChar, profession);
+                        const sqlUpdate =
+                          "update trainee_dtls set trainee_mobile = @mobile , trainee_dob= @dob,trainee_image = @imageFileName, trainee_address = @address, trainee_experience = @experience, trainee_graduate = @graduate, trainee_profession = @profession where trainee_email = @email";
+                        request.query(sqlUpdate, (err, result) => {
+                          if (err)
                             return res.send({
-                              success: "Profile details are saved successfully",
+                              err: "There was an error processing the request",
                             });
-                          })
-                          .catch((error) => {
-                            return res.send({
-                              error: "There is some error while saving",
-                            });
-                          });
-                      }
-                    });
-                  } else {
-                    sql.connect(config, (err) => {
-                      if (err) return res.send({ error: err.message });
-                      const request = new sql.Request();
-                      request.query(
-                        "INSERT INTO trainee_dtls (trainee_email, trainee_mobile, trainee_dob,trainee_image,trainee_address,trainee_experience,trainee_graduate, trainee_profession) VALUES('" +
-                          email +
-                          "','" +
-                          mobile +
-                          "','" +
-                          dob +
-                          "','" +
-                          imageFileName +
-                          "','" +
-                          address +
-                          "', '" +
-                          experience +
-                          "','" +
-                          graduate +
-                          "', '" +
-                          profession +
-                          "' )",
-                        (err, result) => {
-                          if (err) return res.send(err.message);
                           if (result) {
                             sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                             const msg = traineeProfileUpdateEmailTemplate(
@@ -125,18 +87,70 @@ export async function createTraineeProfile(req, res, next) {
                                   error: "There is some error while saving",
                                 });
                               });
-                          } else {
-                            return res.send({
-                              error: "There is some error while saving",
-                            });
                           }
-                        }
-                      );
-                    });
-                  }
-                }
-              );
-            });
+                        });
+                      } else {
+                        sql.connect(config, (err) => {
+                          if (err) return res.send({ error: err.message });
+                          const request = new sql.Request();
+                          request.query(
+                            "INSERT INTO trainee_dtls (trainee_email, trainee_mobile, trainee_dob,trainee_image,trainee_address,trainee_experience,trainee_graduate, trainee_profession) VALUES('" +
+                              email +
+                              "','" +
+                              mobile +
+                              "','" +
+                              dob +
+                              "','" +
+                              filename +
+                              "','" +
+                              address +
+                              "', '" +
+                              experience +
+                              "','" +
+                              graduate +
+                              "', '" +
+                              profession +
+                              "' )",
+                            (err, result) => {
+                              if (err) return res.send(err.message);
+                              if (result) {
+                                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                                const msg = traineeProfileUpdateEmailTemplate(
+                                  email,
+                                  fullname,
+                                  "profile"
+                                );
+                                sgMail
+                                  .send(msg)
+                                  .then(() => {
+                                    return res.send({
+                                      success:
+                                        "Profile details are saved successfully",
+                                    });
+                                  })
+                                  .catch((error) => {
+                                    return res.send({
+                                      error: "There is some error while saving",
+                                    });
+                                  });
+                              } else {
+                                return res.send({
+                                  error: "There is some error while saving",
+                                });
+                              }
+                            }
+                          );
+                        });
+                      }
+                    }
+                  );
+                });
+              })
+              .catch((err) => {
+                return res.send({
+                  error: "There was an error uploading",
+                });
+              });
           }
         }
       );
@@ -144,22 +158,6 @@ export async function createTraineeProfile(req, res, next) {
   } catch (error) {
     res.send(error.message);
   }
-
-  // blobService.createBlockBlobFromStream(
-  //   containerName,
-  //   blobName,
-  //   stream,
-  //   streamLength,
-  //   (err) => {
-  //     if (err) {
-  //       res.status(500);
-  //       res.send({ error: "Error Occurred" });
-  //       return;
-  //     }
-  //     if (!err) {
-  //     }
-  //   }
-  // );
 }
 
 // showing the form the profile form working && working accurately
@@ -226,9 +224,9 @@ export function getTraineeAllDetails(req, res) {
                 (err, result) => {
                   if (err) return res.send(err.message);
                   if (result.recordset.length > 0) {
-                    return res.send(result.recordset);
+                    return res.send({ success: result.recordset });
                   } else {
-                    return;
+                    return res.send({ error: "" });
                   }
                 }
               );
@@ -379,10 +377,6 @@ export async function uploadUserImage(req, res) {
   if (!req.files) {
     return res.send({ error: "Please select a file to upload" });
   }
-  const blobName = new Date().getTime() + "-" + req.files.image.name;
-  let fileName = `https://navrik.blob.core.windows.net/navrikimage/${blobName}`;
-  const stream = intoStream(req.files.image.data);
-  const streamLength = req.files.image.data.length;
   try {
     sql.connect(config, (error) => {
       if (error) {
@@ -407,43 +401,47 @@ export async function uploadUserImage(req, res) {
                 (err, result) => {
                   if (err) res.send(err);
                   if (result.recordset.length > 0) {
-                    blobService.createBlockBlobFromStream(
-                      containerName,
-                      blobName,
-                      stream,
-                      streamLength,
-                      (err) => {
-                        if (err) {
-                          res.status(500);
-                          res.send({ error: "Error Occurred" });
-                          return;
-                        }
-                        if (!err) {
-                          sql.connect(config, (err) => {
-                            if (err) res.send(err.message);
-                            const request = new sql.Request();
-                            request.input("email", sql.VarChar, email);
-                            request.input("fileName", sql.VarChar, fileName);
-                            request.query(
-                              "UPDATE trainee_dtls SET trainee_image = @fileName WHERE trainee_email = @email ",
-                              (err, response) => {
-                                if (err) {
-                                  return res.send({
-                                    error: "No user found",
-                                  });
-                                }
-                                if (response) {
-                                  return res.send({
-                                    upload:
-                                      "Profile picture updated successfully",
-                                  });
-                                }
-                              }
-                            );
-                          });
-                        }
-                      }
+                    const blobName =
+                      new Date().getTime() + "-" + req.files.image.name;
+                    const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/traineeprofilepictures/${blobName}`;
+                    const blobService = new BlockBlobClient(
+                      process.env.AZURE_STORAGE_CONNECTION_STRING,
+                      "practiwizcontainer/traineeprofilepictures",
+                      blobName
                     );
+                    const stream = intoStream(req.files.image.data);
+                    const streamLength = req.files.image.data.length;
+                    blobService
+                      .uploadStream(stream, streamLength)
+                      .then((response) => {
+                        sql.connect(config, (err) => {
+                          if (err) res.send(err.message);
+                          const request = new sql.Request();
+                          request.input("email", sql.VarChar, email);
+                          request.input("fileName", sql.VarChar, filename);
+                          request.query(
+                            "UPDATE trainee_dtls SET trainee_image = @fileName WHERE trainee_email = @email ",
+                            (err, response) => {
+                              if (err) {
+                                return res.send({
+                                  error: "No user found",
+                                });
+                              }
+                              if (response) {
+                                return res.send({
+                                  upload:
+                                    "Profile picture updated successfully",
+                                });
+                              }
+                            }
+                          );
+                        });
+                      })
+                      .catch((err) => {
+                        return res.send({
+                          error: "There was an error uploading",
+                        });
+                      });
                   } else {
                     res.send("Please update the trainee details 2");
                   }
