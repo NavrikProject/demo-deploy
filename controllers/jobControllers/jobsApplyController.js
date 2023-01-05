@@ -500,103 +500,102 @@ export async function applyJobWithUpdateJobPost(req, res, next) {
   };
   loopOptions();
   let skillsStringSet = skillsSet.toString();
-  const blobName = new Date().getTime() + "-" + req.files.image.name;
-  const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/jobseekerresumes/${blobName}`;
-  const blobService = new BlockBlobClient(
-    process.env.AZURE_STORAGE_CONNECTION_STRING,
-    "practiwizcontainer/jobseekerresumes",
-    blobName
-  );
-  const stream = intoStream(req.files.image.data);
-  const streamLength = req.files.image.data.length;
-  blobService
-    .uploadStream(stream, streamLength)
-    .then((response) => {
-      sql.connect(config, (err) => {
+
+  sql.connect(config, (err) => {
+    if (err) return res.send({ error: err.message });
+    const request = new sql.Request();
+    request.input("uniqueId", sql.VarChar, jobPostUniqueId);
+    request.input("jobSeekerEmail", sql.VarChar, jobSeekerEmail);
+    request.input("userDtlsId", sql.Int, userDtlsId);
+
+    request.input("fullname", sql.VarChar, fullname);
+    request.input("phoneNumber", sql.VarChar, phoneNumber);
+    request.input("currency", sql.VarChar, currency);
+    request.input("location", sql.VarChar, location);
+    request.input("state", sql.VarChar, state);
+    request.input("city", sql.VarChar, city);
+    request.input("country", sql.VarChar, country);
+    request.input("timestamp", sql.DateTime2, timestamp);
+
+    request.input("collegeName", sql.VarChar, collegeName);
+    request.input("universityName", sql.VarChar, universityName);
+    request.input("startingYear", sql.VarChar, startingYear);
+    request.input("endingYear", sql.VarChar, endingYear);
+    request.input("completedYear", sql.Date, completedYear);
+    request.input("percentage", sql.VarChar, percentage);
+    request.input("skillsStringSet", sql.Text, skillsStringSet);
+
+    request.input("currentCompanyName", sql.VarChar, currentCompanyName);
+    request.input("currentDesignation", sql.VarChar, currentDesignation);
+    request.input("currentCompanySalary", sql.VarChar, currentCompanySalary);
+    request.input("expectedSalary", sql.VarChar, expectedSalary);
+    request.input("companyLocation", sql.VarChar, companyLocation);
+    request.input("companyState", sql.VarChar, companyState);
+    request.input("experience", sql.Int, experience);
+    request.input("companyCity", sql.VarChar, companyCity);
+    request.input("companyCountry", sql.VarChar, companyCountry);
+
+    request.query(
+      "select * from job_post_master where apply_job_master_unique_id = @uniqueId and apply_job_master_email = @jobSeekerEmail ",
+      (err, result) => {
         if (err) return res.send({ error: err.message });
-        const request = new sql.Request();
-        request.input("uniqueId", sql.VarChar, jobPostUniqueId);
-        request.input("jobSeekerEmail", sql.VarChar, jobSeekerEmail);
-        request.input("userDtlsId", sql.Int, userDtlsId);
-
-        request.input("fullname", sql.VarChar, fullname);
-        request.input("phoneNumber", sql.VarChar, phoneNumber);
-        request.input("currency", sql.VarChar, currency);
-        request.input("location", sql.VarChar, location);
-        request.input("state", sql.VarChar, state);
-        request.input("city", sql.VarChar, city);
-        request.input("country", sql.VarChar, country);
-        request.input("timestamp", sql.DateTime2, timestamp);
-
-        request.input("collegeName", sql.VarChar, collegeName);
-        request.input("universityName", sql.VarChar, universityName);
-        request.input("startingYear", sql.VarChar, startingYear);
-        request.input("endingYear", sql.VarChar, endingYear);
-        request.input("completedYear", sql.Date, completedYear);
-        request.input("percentage", sql.VarChar, percentage);
-        request.input("filename", sql.Text, filename);
-        request.input("skillsStringSet", sql.Text, skillsStringSet);
-
-        request.input("currentCompanyName", sql.VarChar, currentCompanyName);
-        request.input("currentDesignation", sql.VarChar, currentDesignation);
-        request.input(
-          "currentCompanySalary",
-          sql.VarChar,
-          currentCompanySalary
-        );
-        request.input("expectedSalary", sql.VarChar, expectedSalary);
-        request.input("companyLocation", sql.VarChar, companyLocation);
-        request.input("companyState", sql.VarChar, companyState);
-        request.input("experience", sql.Int, experience);
-        request.input("companyCity", sql.VarChar, companyCity);
-        request.input("companyCountry", sql.VarChar, companyCountry);
-
-        request.query(
-          "select * from job_post_master where apply_job_master_unique_id = @uniqueId and apply_job_master_email = @jobSeekerEmail ",
-          (err, result) => {
-            if (err) return res.send({ error: err.message });
-            if (result.recordset.length > 0) {
-              return res.send({
-                error: "You have all ready applied for this job",
-              });
-            } else {
-              request.query(
-                "select a.job_seeker_profile_phone_number, a.job_seeker_profile_fullname, b.job_seeker_edu_resume from job_seeker_profile a, job_seeker_edu_dtls b where a.job_seeker_profile_email=b.job_seeker_edu_dtls_email and a.job_seeker_profile_email = @jobSeekerEmail ",
-                (err, result) => {
-                  if (err) return res.send({ error: err.message });
-                  if (result) {
-                    const phoneNumber =
-                      result.recordset[0].job_seeker_profile_phone_number;
-                    const fullname =
-                      result.recordset[0].job_seeker_profile_fullname;
-                    request.query(
-                      "insert into job_post_master (apply_job_master_post_dtls_id,apply_job_master_unique_id,apply_job_master_hiring_company_dtls_id,apply_job_master_user_dtls_id,apply_job_master_fullname,apply_job_master_email,apply_job_master_phone_number,apply_job_master_post_role,apply_job_master_resume,apply_job_master_cr_dt) VALUES('" +
-                        jobPostDtlsId +
-                        "','" +
-                        jobPostUniqueId +
-                        "','" +
-                        hiringCompanyDtlsId +
-                        "','" +
-                        userDtlsId +
-                        "','" +
-                        fullname +
-                        "','" +
-                        jobSeekerEmail +
-                        "','" +
-                        phoneNumber +
-                        "','" +
-                        jobRole +
-                        "','" +
-                        filename +
-                        "','" +
-                        timestamp +
-                        "' )",
-                      (err, success) => {
-                        if (err) {
-                          return res.send({ error: err.message });
-                        }
-                        if (success) {
-                          if (showUpdate === "yes") {
+        if (result.recordset.length > 0) {
+          return res.send({
+            error: "You have all ready applied for this job",
+          });
+        } else {
+          request.query(
+            "select a.job_seeker_profile_phone_number, a.job_seeker_profile_fullname, b.job_seeker_edu_resume from job_seeker_profile a, job_seeker_edu_dtls b where a.job_seeker_profile_email=b.job_seeker_edu_dtls_email and a.job_seeker_profile_email = @jobSeekerEmail ",
+            (err, result) => {
+              if (err) return res.send({ error: err.message });
+              if (result) {
+                const phoneNumber =
+                  result.recordset[0].job_seeker_profile_phone_number;
+                const fullname =
+                  result.recordset[0].job_seeker_profile_fullname;
+                const resumeUrl = result.recordset[0].job_seeker_edu_resume;
+                request.query(
+                  "insert into job_post_master (apply_job_master_post_dtls_id,apply_job_master_unique_id,apply_job_master_hiring_company_dtls_id,apply_job_master_user_dtls_id,apply_job_master_fullname,apply_job_master_email,apply_job_master_phone_number,apply_job_master_post_role,apply_job_master_resume,apply_job_master_cr_dt) VALUES('" +
+                    jobPostDtlsId +
+                    "','" +
+                    jobPostUniqueId +
+                    "','" +
+                    hiringCompanyDtlsId +
+                    "','" +
+                    userDtlsId +
+                    "','" +
+                    fullname +
+                    "','" +
+                    jobSeekerEmail +
+                    "','" +
+                    phoneNumber +
+                    "','" +
+                    jobRole +
+                    "','" +
+                    resumeUrl +
+                    "','" +
+                    timestamp +
+                    "' )",
+                  (err, success) => {
+                    if (err) {
+                      return res.send({ error: err.message });
+                    }
+                    if (success) {
+                      if (showUpdate === "yes") {
+                        const blobName =
+                          new Date().getTime() + "-" + req.files.image.name;
+                        const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/jobseekerresumes/${blobName}`;
+                        const blobService = new BlockBlobClient(
+                          process.env.AZURE_STORAGE_CONNECTION_STRING,
+                          "practiwizcontainer/jobseekerresumes",
+                          blobName
+                        );
+                        const stream = intoStream(req.files.image.data);
+                        const streamLength = req.files.image.data.length;
+                        blobService
+                          .uploadStream(stream, streamLength)
+                          .then((response) => {
+                            request.input("filename", sql.Text, filename);
                             const sqlProfileUpdate =
                               "UPDATE job_seeker_profile SET job_seeker_profile_fullname = @fullname, job_seeker_profile_phone_number = @phoneNumber,job_seeker_profile_currency = @currency,job_seeker_profile_location = @location,job_seeker_profile_city = @city,job_seeker_profile_state = @state,job_seeker_profile_country = @country,job_seeker_profile_cr_dt = @timeStamp WHERE job_seeker_user_dtls_id = @userDtlsId and job_seeker_profile_email = @jobSeekerEmail";
                             request.query(sqlProfileUpdate, (err, result) => {
@@ -667,53 +666,51 @@ export async function applyJobWithUpdateJobPost(req, res, next) {
                                 });
                               }
                             });
-                          } else {
-                            const msg = jobApplicationAppliedEmail(
-                              jobSeekerEmail,
-                              fullname,
-                              jobRole
-                            );
-                            sgMail
-                              .send(msg)
-                              .then(() => {
-                                return res.send({
-                                  success: "Successfully applied to the job",
-                                });
-                              })
-                              .catch((error) => {
-                                return res.send({
-                                  error:
-                                    "There is some error while applying the job",
-                                });
-                              });
-                          }
-                        } else {
-                          return res.send({
-                            error:
-                              "There was an error while applying the live class",
+                          })
+                          .catch((error) => {
+                            return res.send({
+                              error: "There was an error uploading the file",
+                            });
                           });
-                        }
+                      } else {
+                        const msg = jobApplicationAppliedEmail(
+                          jobSeekerEmail,
+                          fullname,
+                          jobRole
+                        );
+                        sgMail
+                          .send(msg)
+                          .then(() => {
+                            return res.send({
+                              success: "Successfully applied to the job",
+                            });
+                          })
+                          .catch((error) => {
+                            return res.send({
+                              error:
+                                "There is some error while applying the job",
+                            });
+                          });
                       }
-                    );
-                  } else {
-                    return res.send({
-                      error: "There was an error while applying for the job",
-                    });
+                    } else {
+                      return res.send({
+                        error:
+                          "There was an error while applying the live class",
+                      });
+                    }
                   }
-                }
-              );
+                );
+              } else {
+                return res.send({
+                  error: "There was an error while applying for the job",
+                });
+              }
             }
-          }
-        );
-      });
-    })
-    .catch((error) => {
-      return res.send({ error: "There was an error uploading the file" });
-    });
-  try {
-  } catch (error) {
-    res.send({ error: error.message });
-  }
+          );
+        }
+      }
+    );
+  });
 }
 
 export async function getAllViewResponseForJobPost(req, res, next) {

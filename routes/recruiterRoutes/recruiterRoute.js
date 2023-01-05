@@ -14,7 +14,7 @@ router.post("/add-company-details", addHiringCompanyDetails);
 router.get("/get-company-details/:id", getFirmAllDetails);
 
 router.post("/create-job-post/:id", createJobPost);
-router.get("/get/closed-positions", getAllClosedJobDetails);
-router.get("/get/open-positions", getAllOpenJobDetails);
+router.post("/get/closed-positions", getAllClosedJobDetails);
+router.post("/get/open-positions", getAllOpenJobDetails);
 router.put("/update/to-closed-position/:id", updateJobPostToClosedState);
 export default router;

@@ -953,7 +953,7 @@ export async function getAllUpcomingSessions(req, res, next) {
       request.input("userEmail", sql.VarChar, userEmail);
       request.input("upcoming", sql.VarChar, upcoming);
       request.query(
-        "select * from booking_appointments_dtls where user_email = @userEmail AND trainee_session_status = @upcoming ORDER BY booking_appt_id DESC",
+        "select * from booking_appointments_dtls where user_email = @userEmail ANd mentor_amount_paid_status = 'Paid' AND trainee_session_status = @upcoming ORDER BY booking_appt_id DESC",
         (err, result) => {
           if (err) return res.send(err.message);
           if (result.recordset.length > 0) {

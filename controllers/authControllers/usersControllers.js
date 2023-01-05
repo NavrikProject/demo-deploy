@@ -154,7 +154,7 @@ export async function getAllTraineeUsersData(req, res, next) {
     sql.connect(config, (err) => {
       const request = new sql.Request();
       request.query(
-        "SELECT * FROM users_dtls where user_type = 'trainee' ORDER BY user_dtls_id DESC",
+        "SELECT * FROM users_dtls where user_type = 'member' ORDER BY user_dtls_id DESC",
         (err, result) => {
           if (err) res.send(err.message);
           if (result.recordset.length > 0) {

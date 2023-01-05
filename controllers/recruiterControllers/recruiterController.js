@@ -265,16 +265,30 @@ export async function createJobPost(req, res, next) {
   }
 }
 export async function getAllClosedJobDetails(req, res) {
+  const { email } = req.body;
   try {
     sql.connect(config, (err) => {
       if (err) return res.send({ error: err.message });
       const request = new sql.Request();
+      request.input("email", sql.VarChar, email);
       request.query(
-        "select * from job_post_dtls where job_post_hiring_status ='recruited' and job_post_open_position_status = 'closed' order by job_post_dtls_id DESC ",
+        "select * from hiring_company_dtls where hiring_user_email =@email",
         (err, result) => {
           if (err) return res.send({ error: err.message });
           if (result.recordset.length > 0) {
-            return res.send({ success: result.recordset });
+            const hiringCompanyId = result.recordset[0].hiring_company_dtls_id;
+            request.input("hiringCompanyId", sql.Int, hiringCompanyId);
+            request.query(
+              "select * from job_post_dtls where job_post_hiring_status ='recruited' and job_post_open_position_status = 'closed' and hiring_company_dtls_id = @hiringCompanyId order by job_post_dtls_id DESC ",
+              (err, result) => {
+                if (err) return res.send({ error: err.message });
+                if (result.recordset.length > 0) {
+                  return res.send({ success: result.recordset });
+                } else {
+                  return res.send({ error: "Not found" });
+                }
+              }
+            );
           } else {
             return res.send({ error: "Not found" });
           }
@@ -287,16 +301,30 @@ export async function getAllClosedJobDetails(req, res) {
 }
 
 export async function getAllOpenJobDetails(req, res) {
+  const { email } = req.body;
   try {
     sql.connect(config, (err) => {
       if (err) return res.send({ error: err.message });
       const request = new sql.Request();
+      request.input("email", sql.VarChar, email);
       request.query(
-        "select * from job_post_dtls where job_post_hiring_status ='hiring' and job_post_open_position_status = 'open' order by job_post_dtls_id DESC ",
+        "select * from hiring_company_dtls where hiring_user_email =@email",
         (err, result) => {
           if (err) return res.send({ error: err.message });
           if (result.recordset.length > 0) {
-            return res.send({ success: result.recordset });
+            const hiringCompanyId = result.recordset[0].hiring_company_dtls_id;
+            request.input("hiringCompanyId", sql.Int, hiringCompanyId);
+            request.query(
+              "select * from job_post_dtls where job_post_hiring_status ='hiring' and job_post_open_position_status = 'open' and hiring_company_dtls_id = @hiringCompanyId order by job_post_dtls_id DESC ",
+              (err, result) => {
+                if (err) return res.send({ error: err.message });
+                if (result.recordset.length > 0) {
+                  return res.send({ success: result.recordset });
+                } else {
+                  return res.send({ error: "Not found" });
+                }
+              }
+            );
           } else {
             return res.send({ error: "Not found" });
           }
