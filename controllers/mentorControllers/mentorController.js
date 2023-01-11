@@ -773,7 +773,7 @@ export async function getIndividualMentorDetails(req, res) {
       request.input("firstName", sql.VarChar, firstName);
       request.input("lastName", sql.VarChar, lastName);
       const searchQuery =
-        "SELECT * FROM mentor_dtls WHERE mentor_firstname = @firstName AND mentor_lastname = @lastName";
+        "SELECT * FROM mentor_dtls WHERE mentor_firstname = @firstName AND mentor_lastname = @lastName and mentor_approved = 'Yes' ";
       request.query(searchQuery, (err, result) => {
         if (err) return res.send(err.message);
         if (result.recordset.length > 0) {

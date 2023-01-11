@@ -11,6 +11,7 @@ import jwt from "jsonwebtoken";
 import sql from "mssql";
 import config from "./config/dbConfig.js";
 import axios from "axios";
+import { Vonage } from "@vonage/server-sdk";
 // auth routes import
 import authRouter from "./routes/authRoutes/authRoute.js";
 import usersRoute from "./routes/authRoutes/usersRoute.js";
@@ -235,6 +236,25 @@ app.get("/send-email", (req, res) => {
 //     });
 // });
 
+app.get("/send-sms", async (req, res) => {
+  const vonage = new Vonage({
+    apiKey: "5c1f377e ",
+    apiSecret: "c0QXia5GPkpyAyYF",
+  });
+  const from = "Vonage APIs";
+  const to = "918466958669";
+  const text = "A text message sent using the Vonage SMS API";
+  await vonage.sms
+    .send({ to, from, text })
+    .then((resp) => {
+      console.log("Message sent successfully");
+      res.json(resp);
+    })
+    .catch((err) => {
+      console.log("There was an error sending the messages.");
+      console.error(err);
+    });
+});
 app.listen(port, (req, res) => {
   console.log("listening on port " + port);
 });

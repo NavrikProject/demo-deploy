@@ -100,7 +100,7 @@ export async function getBookingDatesOfOnlyMentor(req, res) {
       const request = new sql.Request();
       request.input("mentorEmail", sql.VarChar, mentorEmail);
       request.query(
-        "select * from booking_appointments_dtls where mentor_email = @mentorEmail",
+        "select * from booking_appointments_dtls where mentor_email = @mentorEmail and mentor_amount_paid_status = 'Paid' and mentor_session_status = 'upcoming' and trainee_session_status = 'upcoming' ",
         (err, result) => {
           if (err) return res.send(err.message);
           if (result.recordset.length > 0) {
@@ -140,7 +140,7 @@ export async function modifyBookingDate(req, res) {
   let bookingId = req.params.id;
   let date = req.body.date;
   let userEmail = req.body.userEmail;
-  date = new Date(new Date(date).setDate(new Date(date).getDate() + 1));
+  // date = new Date(new Date(date).setDate(new Date(date).getDate() + 1));
   try {
     const result = await axios.post(
       "https://api.zoom.us/v2/users/me/meetings",
@@ -324,7 +324,7 @@ export async function modifyAppointmentAndMakePayment(req, res, next) {
   let date = req.body.date;
   var amount = req.body.amount;
   amount = amount / 100;
-  date = new Date(new Date(date).setDate(new Date(date).getDate() + 1));
+  // date = new Date(new Date(date).setDate(new Date(date).getDate() + 1));
   let userEmail = req.body.userEmail;
   try {
     const result = await axios.post(
