@@ -1,7 +1,7 @@
 export const jobPostEmailTemplate = (email, username) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Job posted successfully`,
     html: `
   <section>
@@ -32,7 +32,7 @@ export const jobPostEmailTemplate = (email, username) => {
         <p>You can login to practiwiz and edit the job post.</p>
         <p>We look forward to serving you better!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -50,7 +50,7 @@ export const jobPostEmailTemplate = (email, username) => {
 export const jobApplicationAppliedEmail = (email, username, jobName) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: ` Confirming your job application`,
     html: `
   <section>
@@ -82,7 +82,7 @@ export const jobApplicationAppliedEmail = (email, username, jobName) => {
        <p>We wish you success in applying for the position.</p>
        <p>We look forward to hearing from you.</p>
        <p>
-         If you have any questions, reply back to this email and we'll be happy
+         If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
          to help.
        </p>
        <p>Best regards,</p>

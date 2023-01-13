@@ -1,7 +1,7 @@
 const sendEmail = (email, url, subject, txt) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `${subject}`,
     html: `<div style="max-width: 700px; margin:auto; border: 10px solid #ddd; padding: 50px 20px;   font-size: 110%;">
     <h2 style="text-align: center; text-transform: uppercase;color: teal;">Welcome to the PractiLearn Training Programme</h2>

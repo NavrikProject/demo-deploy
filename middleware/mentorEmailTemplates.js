@@ -1,7 +1,7 @@
 export const mentorApplicationEmail = (mentorEmail, username) => {
   return {
     to: `${mentorEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Thank you for your mentor application!",
     html: `
         <section>
@@ -38,7 +38,7 @@ export const mentorApplicationEmail = (mentorEmail, username) => {
         <p>Thank you for your interest,</p>
         <p>We look forward to seeing your progress with our service!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -58,7 +58,7 @@ export const mentorApplicationEmail = (mentorEmail, username) => {
 export const mentorApproveEmail = (mentorEmail, username) => {
   return {
     to: `${mentorEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Congratulations! You're our next mentor!",
     html: `
       <section>
@@ -110,7 +110,7 @@ export const mentorApproveEmail = (mentorEmail, username) => {
         </p>
         <p>Best of luck in your mentorship journey!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -129,7 +129,7 @@ export const mentorApproveEmail = (mentorEmail, username) => {
 export const mentorDisApproveEmail = (mentorEmail, username) => {
   return {
     to: `${mentorEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "We are sorry to inform you...",
     html: `
       <section>
@@ -177,7 +177,7 @@ export const mentorDisApproveEmail = (mentorEmail, username) => {
           being a part of our team!
         </p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -202,7 +202,7 @@ export const appointmentBookedTraineeEmailTemplate = (
 ) => {
   return {
     to: `${traineeEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Appointment booked successfully",
     html: `
   <section>
@@ -231,7 +231,7 @@ export const appointmentBookedTraineeEmailTemplate = (
           <b>${date}</b> and time is <b>${slotTime}</b>.
         </p>    
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -257,7 +257,7 @@ export const appointmentBookedMentorEmailTemplate = (
 ) => {
   return {
     to: `${mentorEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Appointment booked successfully",
     html: `
     <div
@@ -291,7 +291,7 @@ export const appointmentBookedMentorEmailTemplate = (
         </p>
         <p>We look forward to seeing your progress with our service!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -315,7 +315,7 @@ export const mentorBookingDateChangeEmailTemplate = (
 ) => {
   return {
     to: `${mentorEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Mentor Booking date changed successfully`,
     html: `
   <section>
@@ -347,7 +347,7 @@ export const mentorBookingDateChangeEmailTemplate = (
           check your emails for any other updates regarding your mentor booking.
         </p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>We’ll be in touch soon!</p>
@@ -366,7 +366,7 @@ export const mentorBookingDateChangeEmailTemplate = (
 export const mentorBankDetailsEmailTemplate = (email, username) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Bank account details added successfully",
     html: `
   <section>
@@ -406,7 +406,7 @@ export const mentorBankDetailsEmailTemplate = (email, username) => {
         </p>
         <p>We look forward to seeing your progress with our service!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>We’ll be in touch soon!</p>
@@ -426,7 +426,7 @@ export const mentorBankDetailsEmailTemplate = (email, username) => {
 export const emailActivationTemplate = (email, username, url) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Welcome to Practiwiz`,
     html: `
   <section>
@@ -479,7 +479,7 @@ export const emailActivationTemplate = (email, username, url) => {
         <p>${url}</p>
         <p>After 15 minutes this link will be expired.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -506,7 +506,7 @@ export const mentorBookingRemainderEmailTemplate = (
 ) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Remainder for the mentor session`,
     html: `
 <section>
@@ -557,7 +557,7 @@ export const mentorBookingRemainderEmailTemplate = (
         <p>or if it doesn't work try the link below</p>
         <p>if you are facing any issue while joining please contact through email.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -582,7 +582,7 @@ export const mentorRescheduleEmailSentTemplate = (
 ) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Reschedule your mentor session`,
     html: `
 <section>
@@ -635,7 +635,7 @@ export const mentorRescheduleEmailSentTemplate = (
         <p>You can only modify for only one time</p>
         <p>if you are facing any issue while joining please contact through email.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -660,7 +660,7 @@ export const mentorRescheduledUpdateEmailTemplate = (
 ) => {
   return {
     to: `${mentorEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Appointment date rescheduled",
     html: `
     <div
@@ -683,7 +683,7 @@ export const mentorRescheduledUpdateEmailTemplate = (
         <p>This time don't miss the session, you can not modify the appointment date or rescheduling of mentor session </p>
         <p>We look forward to seeing your progress with our service!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -700,7 +700,7 @@ export const mentorRescheduledUpdateEmailTemplate = (
 export const mentorCancelledRefundEmailTemplate = (traineeEmail, username) => {
   return {
     to: `${traineeEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Mentor cancelled booking refund",
     html: `
     <section>
@@ -730,7 +730,7 @@ export const mentorCancelledRefundEmailTemplate = (traineeEmail, username) => {
           us to do so in the future.
         </p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>We’ll be in touch soon!</p>
@@ -757,7 +757,7 @@ export const mentorJoinedSessionEmail = (
 ) => {
   return {
     to: `${traineeEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Join the mentor session`,
     html: `
 <section>
@@ -808,7 +808,7 @@ export const mentorJoinedSessionEmail = (
         <p>${url}</p>
         <p>if you are facing any issue while joining please contact through email.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>

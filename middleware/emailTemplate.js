@@ -1,7 +1,7 @@
 export const emailActivationTemplate = (email, subject, username, url, txt) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `${subject}`,
     html: `
    <div
@@ -48,7 +48,7 @@ export const emailActivationTemplate = (email, subject, username, url, txt) => {
         <div>${url}</div>
         <p>After 15 minutes this link will be expired.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -70,7 +70,7 @@ export const appointmentBookedTraineeEmailTemplate = (
 ) => {
   return {
     to: `${traineeEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Appointment booked successfully",
     html: `
     <div
@@ -92,7 +92,7 @@ export const appointmentBookedTraineeEmailTemplate = (
         </p>
         <p>We look forward to seeing your progress with our service!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -114,7 +114,7 @@ export const appointmentBookedMentorEmailTemplate = (
 ) => {
   return {
     to: `${mentorEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Appointment booked successfully",
     html: `
     <div
@@ -148,7 +148,7 @@ export const appointmentBookedMentorEmailTemplate = (
         </p>
         <p>We look forward to seeing your progress with our service!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -168,7 +168,7 @@ export const traineeFeedbackVideoUploadEmail = (
 ) => {
   return {
     to: `${traineeEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Upload video feedback",
     html: `
       <section>
@@ -206,7 +206,7 @@ export const traineeFeedbackVideoUploadEmail = (
       </ul>
       <p>Send your created video to this email address <b>support@practiwiz.com</b>, using <a href="https://wetransfer.com/" target="_blank">We Transfer</a>. After this you will receive certificate and course completion price along with the book. </p> 
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -226,7 +226,7 @@ export const traineeMentorAttendEmail = (
 ) => {
   return {
     to: `${traineeEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Attend Mentor Feedback",
     html: `
       <section>
@@ -260,7 +260,7 @@ export const traineeMentorAttendEmail = (
       <p>Here the redeem code for the mentor session is: <b>KSDLKGJL</b></p> 
       <p>You can find the mentors here <a href="https://www.practiwiz.com/mentors-club">Mentors Club</a></p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>

@@ -3,7 +3,6 @@ import config from "../../config/dbconfig.js";
 import sgMail from "@sendgrid/mail";
 import moment from "moment";
 import dotenv from "dotenv";
-import azureStorage from "azure-storage";
 import intoStream from "into-stream";
 import bcrypt from "bcrypt";
 import Razorpay from "razorpay";
@@ -495,41 +494,56 @@ export async function updateMentorDisapprove(req, res, next) {
 //create razor pay order
 export async function createMentorRazorPayOrder(req, res, next) {
   const { mentorId, date } = req.body;
+  let ChangedDate = new Date(
+    new Date(date).setDate(new Date(date).getDate() + 1)
+  );
   try {
     sql.connect(config, (err) => {
       if (err) {
         return res.send(err.message);
       }
       const request = new sql.Request();
-      request.input("date", sql.Date, date);
+      request.input("date", sql.Date, ChangedDate);
       request.input("mentorId", sql.Int, mentorId);
       request.query(
-        "select * from mentor_dtls where mentor_dtls_id = @mentorId",
+        "select * from booking_appointments_dtls where mentor_session_status = 'upcoming' and trainee_session_status = 'upcoming' and booking_mentor_date = @date and mentor_dtls_id = @mentorId ",
         (err, result) => {
-          if (err) return res.send(err.message);
+          if (err) return res.send({ error: err.message });
           if (result.recordset.length > 0) {
-            const mentorPrice = result.recordset[0].mentor_price;
-
-            const instance = new Razorpay({
-              key_id: process.env.RAZORPAY_KEY_ID,
-              key_secret: process.env.RAZORPAY_KEY_SECRET_STRING,
-            });
-            const options = {
-              amount: mentorPrice * 100,
-              currency: "INR",
-            };
-            instance.orders
-              .create(options)
-              .then((order) => {
-                res.send(order);
-              })
-              .catch((error) => {
-                return res.send({ error: error.message });
-              });
-          } else {
             return res.send({
-              error: "There is an error while creating the order",
+              error:
+                "Appointment is all ready booked on this choose another day.",
             });
+          } else {
+            request.query(
+              "select * from mentor_dtls where mentor_dtls_id = @mentorId",
+              (err, result) => {
+                if (err) return res.send(err.message);
+                if (result.recordset.length > 0) {
+                  const mentorPrice = result.recordset[0].mentor_price;
+                  const instance = new Razorpay({
+                    key_id: process.env.RAZORPAY_KEY_ID,
+                    key_secret: process.env.RAZORPAY_KEY_SECRET_STRING,
+                  });
+                  const options = {
+                    amount: mentorPrice * 100,
+                    currency: "INR",
+                  };
+                  instance.orders
+                    .create(options)
+                    .then((order) => {
+                      res.send(order);
+                    })
+                    .catch((error) => {
+                      return res.send({ error: error.message });
+                    });
+                } else {
+                  return res.send({
+                    error: "There is an error while booking the appointment",
+                  });
+                }
+              }
+            );
           }
         }
       );
@@ -606,7 +620,7 @@ export async function createMentorAppointment(req, res, next) {
       let mentorHostUrl = result.data.start_url;
       let traineeJoinUrl = result.data.join_url;
       sql.connect(config, async (err) => {
-        if (err) res.send(err.message);
+        if (err) res.send({ error: err.message });
         const request = new sql.Request();
         let amountPaid = "Paid";
         request.query(

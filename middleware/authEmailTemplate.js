@@ -2,7 +2,7 @@
 export const emailActivationTemplate = (email, username, url) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Email account activation`,
     html: `
   <section>
@@ -55,7 +55,7 @@ export const emailActivationTemplate = (email, username, url) => {
         <p>${url}</p>
         <p>After 15 minutes this link will be expired.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -74,7 +74,7 @@ export const emailActivationTemplate = (email, username, url) => {
 export const accountCreatedEmailTemplate = (email, username) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Account created successfully`,
     html: `
   <section>
@@ -105,7 +105,7 @@ export const accountCreatedEmailTemplate = (email, username) => {
         <p>You can login and explore our services at any time.</p>
         <p>We look forward to serving you better!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -124,7 +124,7 @@ export const accountCreatedEmailTemplate = (email, username) => {
 export const resetPasswordEmailTemplates = (email, username, url) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Reset your password`,
     html: `
  <section>
@@ -179,7 +179,7 @@ export const resetPasswordEmailTemplates = (email, username, url) => {
         <p>${url}</p>
         <p>After 15 minutes this link will be expired.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -198,7 +198,7 @@ export const resetPasswordEmailTemplates = (email, username, url) => {
 export const passwordUpdateEmailTemplate = (email, username) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Password changed successfully`,
     html: `
 <section>
@@ -253,7 +253,7 @@ export const passwordUpdateEmailTemplate = (email, username) => {
 export const adminApproveEmail = (adminEmail, username) => {
   return {
     to: `${adminEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Congratulations! You're our next admin!",
     html: `
       <section>
@@ -295,7 +295,7 @@ export const adminApproveEmail = (adminEmail, username) => {
           concerns that may arise.
         </p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -315,7 +315,7 @@ export const adminApproveEmail = (adminEmail, username) => {
 export const adminDisApproveEmail = (adminEmail, username) => {
   return {
     to: `${adminEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "We are sorry to inform you...",
     html: `
       <section>
@@ -359,7 +359,7 @@ export const adminDisApproveEmail = (adminEmail, username) => {
           being a part of our team!
         </p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>

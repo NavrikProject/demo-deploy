@@ -1,7 +1,7 @@
 export const trainerApplicationEmail = (trainerEmail, username) => {
   return {
     to: `${trainerEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Thank you for your application!",
     html: `
     <section>
@@ -38,7 +38,7 @@ export const trainerApplicationEmail = (trainerEmail, username) => {
         <p>Thank you for your interest,</p>
         <p>We look forward to seeing your progress with our service!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -57,7 +57,7 @@ export const trainerApplicationEmail = (trainerEmail, username) => {
 export const trainerApproveEmail = (trainerEmail, username) => {
   return {
     to: `${trainerEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Congratulations! You're our next trainer!",
     html: `
       <section>
@@ -105,7 +105,7 @@ export const trainerApproveEmail = (trainerEmail, username) => {
         </p>
         <p>Best of luck in your training journey!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -124,7 +124,7 @@ export const trainerApproveEmail = (trainerEmail, username) => {
 export const trainerDisApproveEmail = (trainerEmail, username) => {
   return {
     to: `${trainerEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "We are sorry to inform you...",
     html: `
       <section>
@@ -172,7 +172,7 @@ export const trainerDisApproveEmail = (trainerEmail, username) => {
           being a part of our team!
         </p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -191,7 +191,7 @@ export const trainerDisApproveEmail = (trainerEmail, username) => {
 export const trainerBankDetailsEmailTemplate = (email, username) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Bank details added successfully",
     html: `
   <section>
@@ -231,7 +231,7 @@ export const trainerBankDetailsEmailTemplate = (email, username) => {
         </p>
         <p>We look forward to seeing your progress with our service!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>We’ll be in touch soon!</p>
@@ -250,7 +250,7 @@ export const trainerBankDetailsEmailTemplate = (email, username) => {
 export const trainerProfileUpdateEmailTemplate = (email, username, details) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `${details} added successfully`,
     html: `
   <section>
@@ -280,7 +280,7 @@ export const trainerProfileUpdateEmailTemplate = (email, username, details) => {
           personal details or information with anybody else.
         </p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>We’ll be in touch soon!</p>
@@ -308,7 +308,7 @@ export const instructorLiveClassRemainderEmailTemplate = (
 ) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Remainder for the live class`,
     html: `
 <section>
@@ -360,7 +360,7 @@ export const instructorLiveClassRemainderEmailTemplate = (
         <p>${url}</p>
         <p>if you are facing any issue while joining please contact through email.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -385,7 +385,7 @@ export const instructorLiveClassRemainderStartedEmailTemplate = (
 ) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Remainder for the live class to host the meeting.`,
     html: `
 <section>
@@ -437,7 +437,7 @@ export const instructorLiveClassRemainderStartedEmailTemplate = (
         <p>${url}</p>
         <p>if you are facing any issue while joining please contact through email.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -462,7 +462,7 @@ export const instructorLiveClassBookingEmailTemplate = (
 ) => {
   return {
     to: `${email}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: `Live class has been scheduled.`,
     html: `
 <section>
@@ -494,7 +494,7 @@ export const instructorLiveClassBookingEmailTemplate = (
         <p>or if it doesn't work try the link below</p>
         <p>if you are facing any issue while joining please contact through email.</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>

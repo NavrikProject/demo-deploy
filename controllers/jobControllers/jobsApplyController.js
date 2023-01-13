@@ -76,7 +76,7 @@ export async function applyForJobPost(req, res, next) {
               if (err) return res.send({ error: err.message });
               if (result.recordset.length > 0) {
                 return res.send({
-                  error: "You have all ready applied for this job",
+                  error: "You have already applied for this job",
                 });
               } else {
                 request.query(
@@ -318,7 +318,7 @@ export async function applyJobWithExpDetails(req, res, next) {
           if (err) return res.send({ error: err.message });
           if (result.recordset.length > 0) {
             return res.send({
-              error: "You have all ready applied for this job",
+              error: "You have already applied for this job",
             });
           } else {
             request.query(
@@ -514,7 +514,7 @@ export async function applyJobWithUpdateJobPost(req, res, next) {
           if (err) return res.send({ error: err.message });
           if (result.recordset.length > 0) {
             return res.send({
-              error: "You have all ready applied for this job",
+              error: "You have already applied for this job",
             });
           } else {
             request.query(
@@ -813,7 +813,7 @@ export async function getJobAppliedStatus(req, res, next) {
           if (err) return res.send({ error: err.message });
           if (result.recordset.length > 0) {
             return res.send({
-              success: "You have all ready applied to this job",
+              success: "You have already applied to this job",
             });
           } else {
             return res.send({ error: "No you have not applied" });

@@ -1,7 +1,7 @@
 export const contributerApplicationEmail = (contributerEmail, username) => {
   return {
     to: `${contributerEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Contributer application!",
     html: `
     <section>
@@ -38,7 +38,7 @@ export const contributerApplicationEmail = (contributerEmail, username) => {
         <p>Thank you for your interest,</p>
         <p>We look forward to seeing your progress with our service!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -57,7 +57,7 @@ export const contributerApplicationEmail = (contributerEmail, username) => {
 export const contributerApproveEmail = (contributerEmail, username) => {
   return {
     to: `${contributerEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "Congratulations! You're our next contributer!",
     html: `
       <section>
@@ -105,7 +105,7 @@ export const contributerApproveEmail = (contributerEmail, username) => {
         </p>
         <p>Best of luck in your contributer ship journey!</p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
@@ -124,7 +124,7 @@ export const contributerApproveEmail = (contributerEmail, username) => {
 export const contributerDisApproveEmail = (contributerEmail, username) => {
   return {
     to: `${contributerEmail}`, // Change to your recipient
-    from: "no-reply@practilearn.com", // Change to your verified sender
+    from: "no-reply@practiwiz.com", // Change to your verified sender
     subject: "We are sorry to inform you...",
     html: `
       <section>
@@ -172,7 +172,7 @@ export const contributerDisApproveEmail = (contributerEmail, username) => {
           being a part of our team!
         </p>
         <p>
-          If you have any questions, reply back to this email and we'll be happy
+          If you have any questions, send an email to wecare@practiwiz.com  and we'll be happy
           to help.
         </p>
         <p>Thanks, Practiwiz</p>
