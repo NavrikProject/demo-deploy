@@ -238,14 +238,15 @@ export async function login(req, res) {
                 });
               } else {
                 return res.json({
-                  wrong: "Sorry you entered incorrect password",
+                  wrong: "Sorry you have entered incorrect password",
                 });
               }
             }
           );
         } else {
           return res.json({
-            notFound: "There is no account with that email address, user type!",
+            notFound:
+              "There is no account with that email address, user type, Please sign up! ",
           });
         }
       }

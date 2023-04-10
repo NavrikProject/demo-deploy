@@ -10,7 +10,6 @@ export async function updateMentorProfileImage(req, res) {
   if (!req.files) {
     return res.send({ error: "Please select a file to upload" });
   }
-  console.log(id);
   try {
     sql.connect(config, (error) => {
       if (error) {

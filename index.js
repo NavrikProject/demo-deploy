@@ -17,19 +17,19 @@ import authRouter from "./routes/authRoutes/authRoute.js";
 import usersRoute from "./routes/authRoutes/usersRoute.js";
 
 // trainer routes import
-import trainerRoute from "./routes/trainerRoutes/trainerRoute.js";
-import trainerProfileRoute from "./routes/trainerRoutes/trainerProfileRoute.js";
-import trainerEarningsRoute from "./routes/trainerRoutes/trainerEarningRoute.js";
+//import trainerRoute from "./routes/trainerRoutes/trainerRoute.js";
+//import trainerProfileRoute from "./routes/trainerRoutes/trainerProfileRoute.js";
+//import trainerEarningsRoute from "./routes/trainerRoutes/trainerEarningRoute.js";
 
 //trainee routes import
 import traineeProfileRoute from "./routes/traineeRoutes/traineeProfileRoute.js";
 import TraineeBookingProfileRoute from "./routes/traineeRoutes/traineeBookingProfileRoute.js";
-import traineeCourseRoute from "./routes/traineeRoutes/traineeCourseRoute.js";
-import traineeCourseProgressRoute from "./routes/traineeRoutes/traineeCourseProgressRoute.js";
+//import traineeCourseRoute from "./routes/traineeRoutes/traineeCourseRoute.js";
+//import traineeCourseProgressRoute from "./routes/traineeRoutes/traineeCourseProgressRoute.js";
 import AdminTraineeCourseRoute from "./routes/AdminTraineeCourseRoutes/AdminTraineeCourseRoutes.js";
 // course routes import
 import courseRoute from "./routes/courseRoutes/courseRoute.js";
-import courseRegdRoute from "./routes/courseRoutes/courseRegdRoute.js";
+//import courseRegdRoute from "./routes/courseRoutes/courseRegdRoute.js";
 import corporateCourseRoute from "./routes/courseRoutes/corpCourseRoute.js";
 
 // jobs applications import
@@ -41,9 +41,10 @@ import jobSeekerRoute from "./routes/jobSeekerRoutes/jobSeekerRoutes.js";
 import mentorRoute from "./routes/mentorRoutes/mentorRoute.js";
 import mentorBookingRoute from "./routes/mentorRoutes/MentorBookingRoute.js";
 import mentorProfileRoute from "./routes/mentorRoutes/mentorProfileRoute.js";
+import mentorRegisterRoute from "./routes/mentorRoutes/mentorRegisterRoute.js";
 
 import FeedbackRoute from "./routes/feedbackRoutes/feedbackRoute.js";
-import ContributersRoute from "./routes/contributerRoutes/contributersRoute.js";
+//import ContributersRoute from "./routes/contributerRoutes/contributersRoute.js";
 import googleRoute from "./routes/googleRoute.js";
 import notificationRoute from "./routes/notificationRoute.js";
 import rescheduleRoute from "./routes/rescheduleRoute.js";
@@ -92,25 +93,27 @@ app.use("/api/users", usersRoute);
 // trainee routes
 app.use("/api/trainee/profile/booking", TraineeBookingProfileRoute);
 app.use("/api/member/profile", traineeProfileRoute);
-app.use("/api/trainee/courses", traineeCourseRoute);
-app.use("/api/trainee/courses/progress", traineeCourseProgressRoute);
+//app.use("/api/trainee/courses", traineeCourseRoute);
+//app.use("/api/trainee/courses/progress", traineeCourseProgressRoute);
 
 // admin routes
 app.use("/api/admin", AdminTraineeCourseRoute);
 //trainer routers
-app.use("/api/trainer/earnings", trainerEarningsRoute);
-app.use("/api/trainer/profile", trainerProfileRoute);
-app.use("/api/trainer", trainerRoute);
+//app.use("/api/trainer/earnings", trainerEarningsRoute);
+//app.use("/api/trainer/profile", trainerProfileRoute);
+//app.use("/api/trainer", trainerRoute);
 
 //mentor routes
 app.use("/api/mentor/bookings", mentorBookingRoute);
 app.use("/api/mentor", mentorRoute);
 app.use("/api/mentor/profile", mentorProfileRoute);
+app.use("/api/mentor/register", mentorRegisterRoute);
+
 //contributers routes
-app.use("/api/contributers", ContributersRoute);
+//app.use("/api/contributers", ContributersRoute);
 
 // courses routes
-app.use("/api/courses/new", courseRegdRoute);
+//app.use("/api/courses/new", courseRegdRoute);
 app.use("/api/courses", courseRoute);
 app.use("/api/corporate", corporateCourseRoute);
 
@@ -136,6 +139,19 @@ app.use("/api/reschedule", rescheduleRoute);
 app.get("/", (req, res) => {
   const time = new Date().getTime();
   const date = new Date().toDateString();
+  // sql.connect(config, (err) => {
+  //   if (err) return res.send(err.message);
+  //   const request = new sql.Request();
+  //   request.query(
+  //     "select user_email from users_dtls where user_email ='keeprememberall@gmail.com'",
+  //     (err, result) => {
+  //       if (err) return res.send(err.message);
+  //       if (result) {
+  //         res.json({ success: result.recordset });
+  //       }
+  //     }
+  //   );
+  // });
   return res.send({
     success: `The server is working fine on the date ${date} and ${time}`,
   });

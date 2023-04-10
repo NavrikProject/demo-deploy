@@ -1,8 +1,8 @@
-import express from "express";
-let router = express.Router();
+// import express from "express";
+// let router = express.Router();
 
-import { getTransactionalDetails } from "../../controllers/trainerControllers/trainerEarningCtrl.js";
+// import { getTransactionalDetails } from "../../controllers/trainerControllers/trainerEarningCtrl.js";
 
-router.get("/account/get/:id", getTransactionalDetails);
+// router.get("/account/get/:id", getTransactionalDetails);
 
-export default router;
+// export default router;

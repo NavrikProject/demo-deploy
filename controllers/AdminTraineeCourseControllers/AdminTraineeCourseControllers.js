@@ -318,430 +318,431 @@ export async function getTraineeCompletedLiveClassDetailsInAdmin(req, res) {
     return res.send({ error: " " });
   }
 }
-function updateLiveInstructorClassToComplete(req, res) {
-  try {
-    sql.connect(config, (err) => {
-      if (err) return console.log({ error: err.message });
-      const request = new sql.Request();
-      request.query(
-        "select * from trainee_courses_dtls where trainee_course_status = '7' or trainee_course_status = '9' or trainee_course_status = '11'",
-        (err, results) => {
-          if (err) return console.log({ error: err.message });
-          if (results?.recordset.length > 0) {
-            results.recordset.forEach((result) => {
-              const traineeCourseStatus = result.trainee_course_status;
-              const traineeCourseId = result.trainee_course_id;
-              request.input(
-                "traineeCourseStatus",
-                sql.Int,
-                traineeCourseStatus
-              );
-              request.input("traineeCourseId", sql.Int, traineeCourseId);
-              request.query(
-                "select * from instructor_live_classes_dtls where instructor_live_class_status = @traineeCourseStatus and trainee_course_id = @traineeCourseId and instructor_live_class_completed_status = 'pending'",
-                (err, result) => {
-                  if (err) return console.error({ error: err.message });
-                  if (result.recordset.length > 0) {
-                    const liveClassDtlsId =
-                      result.recordset[0].instructor_live_classes_dtls_id;
-                    request.input("liveClassDtlsId", sql.Int, liveClassDtlsId);
-                    request.query(
-                      "update instructor_live_classes_dtls set instructor_live_class_completed_status= 'completed' where instructor_live_classes_dtls_id = @liveClassDtlsId and trainee_course_id = @traineeCourseId",
-                      (err, result) => {
-                        if (err) return res.send({ error: err.message });
-                        if (result) {
-                          return console.log(
-                            "Live classes updated successfully"
-                          );
-                        } else {
-                          return console.log("There was an error updating");
-                        }
-                      }
-                    );
-                  } else {
-                    return console.error({
-                      error: "Not found from live class",
-                    });
-                  }
-                }
-              );
-            });
-          } else {
-            console.log("not found from  trainee course");
-          }
-        }
-      );
-    });
-  } catch (error) {
-    return console.error({ error: "Not found" });
-  }
-}
-setInterval(() => {
-  updateLiveInstructorClassToComplete();
-}, 60000);
+// function updateLiveInstructorClassToComplete(req, res) {
+//   try {
+//     sql.connect(config, (err) => {
+//       if (err) return console.log({ error: err.message });
+//       const request = new sql.Request();
+//       request.query(
+//         "select * from trainee_courses_dtls where trainee_course_status = '7' or trainee_course_status = '9' or trainee_course_status = '11'",
+//         (err, results) => {
+//           if (err) return console.log({ error: err.message });
+//           if (results?.recordset.length > 0) {
+//             results.recordset.forEach((result) => {
+//               const traineeCourseStatus = result.trainee_course_status;
+//               const traineeCourseId = result.trainee_course_id;
+//               request.input(
+//                 "traineeCourseStatus",
+//                 sql.Int,
+//                 traineeCourseStatus
+//               );
+//               request.input("traineeCourseId", sql.Int, traineeCourseId);
+//               request.query(
+//                 "select * from instructor_live_classes_dtls where instructor_live_class_status = @traineeCourseStatus and trainee_course_id = @traineeCourseId and instructor_live_class_completed_status = 'pending'",
+//                 (err, result) => {
+//                   if (err) return console.error({ error: err.message });
+//                   if (result.recordset.length > 0) {
+//                     const liveClassDtlsId =
+//                       result.recordset[0].instructor_live_classes_dtls_id;
+//                     request.input("liveClassDtlsId", sql.Int, liveClassDtlsId);
+//                     request.query(
+//                       "update instructor_live_classes_dtls set instructor_live_class_completed_status= 'completed' where instructor_live_classes_dtls_id = @liveClassDtlsId and trainee_course_id = @traineeCourseId",
+//                       (err, result) => {
+//                         if (err) return res.send({ error: err.message });
+//                         if (result) {
+//                           return console.log(
+//                             "Live classes updated successfully"
+//                           );
+//                         } else {
+//                           return console.log("There was an error updating");
+//                         }
+//                       }
+//                     );
+//                   } else {
+//                     return console.error({
+//                       error: "Not found from live class",
+//                     });
+//                   }
+//                 }
+//               );
+//             });
+//           } else {
+//             console.log("not found from  trainee course");
+//           }
+//         }
+//       );
+//     });
+//   } catch (error) {
+//     return console.error({ error: "Not found" });
+//   }
+// }
+// setInterval(() => {
+//   updateLiveInstructorClassToComplete();
+//   console.log("From the update live instrctor live class complete");
+// }, 60000);
 
-// remainder will be sent on before 10 minutes to trainee function
+// // remainder will be sent on before 10 minutes to trainee function
 
-function sentEmailLiveClassRemainderToTraineeBefore10Min(req, res) {
-  try {
-    sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
-      const request = new sql.Request();
-      request.query(
-        "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
-        (err, result) => {
-          result?.recordset.forEach((res) => {
-            let traineeEmail = res.trainee_email;
-            let traineeJoinUrl = res.trainee_join_url;
-            let instructorName = res.instructor_fullname;
-            let instructorEmail = res.instructor_email;
-            let instructorHostUrl = res.instructor_host_url;
-            let traineeName = res.trainee_fullname;
-            let slotTime =
-              res.instructor_live_class_start_time +
-              " to " +
-              res.instructor_live_class_end_time;
-            let year = new Date(res.instructor_live_class_date).getFullYear();
-            let month = new Date(res.instructor_live_class_date).getMonth();
-            let day = new Date(res.instructor_live_class_date).getDate();
-            let hour = res.instructor_live_class_start_time.split(":")[0];
-            let min = res.instructor_live_class_start_time.split(":")[1];
-            if (min === "00") {
-              var date = new Date(year, month, day, hour, min, 0);
-              date.setHours(date.getHours() - 5);
-              //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
-              date.setMinutes(date.getMinutes() - 40); //for 5 minutes before
-              console.log(new Date(date).getUTCMinutes() + " 10 minutes email");
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
-                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-                const msg = traineeLiveClassRemainderEmailTemplate(
-                  traineeEmail,
-                  traineeName,
-                  instructorName,
-                  new Date(date).toDateString(),
-                  slotTime,
-                  "10",
-                  traineeJoinUrl
-                );
-                sgMail
-                  .send(msg)
-                  .then(() => {
-                    const msg = instructorLiveClassRemainderEmailTemplate(
-                      instructorEmail,
-                      instructorName,
-                      traineeName,
-                      new Date(date).toDateString(),
-                      slotTime,
-                      "10",
-                      instructorHostUrl
-                    );
-                    sgMail
-                      .send(msg)
-                      .then(() => {
-                        console.log("Email Sent before 10 minutes");
-                      })
-                      .catch((error) => {
-                        console.log(error.message);
-                      });
-                  })
-                  .catch((error) => {
-                    console.log(error.message);
-                  });
-              }
-            }
-          });
-        }
-      );
-    });
-  } catch (error) {
-    console.log(error.message);
-  }
-}
-function sentEmailLiveClassRemainderToTraineeBefore5Min(req, res) {
-  try {
-    sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
-      const request = new sql.Request();
-      request.query(
-        "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
-        (err, result) => {
-          result?.recordset.forEach((res) => {
-            let traineeEmail = res.trainee_email;
-            let traineeJoinUrl = res.trainee_join_url;
-            let instructorName = res.instructor_fullname;
-            let instructorEmail = res.instructor_email;
-            let instructorHostUrl = res.instructor_host_url;
-            let traineeName = res.trainee_fullname;
-            let slotTime =
-              res.instructor_live_class_start_time +
-              " to " +
-              res.instructor_live_class_end_time;
-            let year = new Date(res.instructor_live_class_date).getFullYear();
-            let month = new Date(res.instructor_live_class_date).getMonth();
-            let day = new Date(res.instructor_live_class_date).getDate();
-            let hour = res.instructor_live_class_start_time.split(":")[0];
-            let min = res.instructor_live_class_start_time.split(":")[1];
-            if (min === "00") {
-              var date = new Date(year, month, day, hour, min, 0);
-              date.setHours(date.getHours() - 5);
-              //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
-              date.setMinutes(date.getMinutes() - 35); //for 5 minutes before
-              console.log(date);
-              console.log(new Date());
-              console.log(new Date(date).getUTCMinutes() + "5 minutes email");
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
-                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-                const msg = traineeLiveClassRemainderEmailTemplate(
-                  traineeEmail,
-                  traineeName,
-                  instructorName,
-                  new Date(date).toDateString(),
-                  slotTime,
-                  "5",
-                  traineeJoinUrl
-                );
-                sgMail
-                  .send(msg)
-                  .then(() => {
-                    const msg = instructorLiveClassRemainderEmailTemplate(
-                      instructorEmail,
-                      instructorName,
-                      traineeName,
-                      new Date(date).toDateString(),
-                      slotTime,
-                      "5",
-                      instructorHostUrl
-                    );
-                    sgMail
-                      .send(msg)
-                      .then(() => {
-                        console.log("Email Sent before 5 minutes");
-                      })
-                      .catch((error) => {
-                        console.log(error.message);
-                      });
-                  })
-                  .catch((error) => {
-                    console.log(error.message);
-                  });
-              }
-            }
-          });
-        }
-      );
-    });
-  } catch (error) {
-    console.log(error.message);
-  }
-}
+// function sentEmailLiveClassRemainderToTraineeBefore10Min(req, res) {
+//   try {
+//     sql.connect(config, (err) => {
+//       if (err) return res.send(err.message);
+//       const request = new sql.Request();
+//       request.query(
+//         "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
+//         (err, result) => {
+//           result?.recordset.forEach((res) => {
+//             let traineeEmail = res.trainee_email;
+//             let traineeJoinUrl = res.trainee_join_url;
+//             let instructorName = res.instructor_fullname;
+//             let instructorEmail = res.instructor_email;
+//             let instructorHostUrl = res.instructor_host_url;
+//             let traineeName = res.trainee_fullname;
+//             let slotTime =
+//               res.instructor_live_class_start_time +
+//               " to " +
+//               res.instructor_live_class_end_time;
+//             let year = new Date(res.instructor_live_class_date).getFullYear();
+//             let month = new Date(res.instructor_live_class_date).getMonth();
+//             let day = new Date(res.instructor_live_class_date).getDate();
+//             let hour = res.instructor_live_class_start_time.split(":")[0];
+//             let min = res.instructor_live_class_start_time.split(":")[1];
+//             if (min === "00") {
+//               var date = new Date(year, month, day, hour, min, 0);
+//               date.setHours(date.getHours() - 5);
+//               //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+//               date.setMinutes(date.getMinutes() - 40); //for 5 minutes before
+//               console.log(new Date(date).getUTCMinutes() + " 10 minutes email");
+//               if (
+//                 new Date(date).getUTCFullYear() ===
+//                   new Date().getUTCFullYear() &&
+//                 new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+//                 new Date(date).getUTCDate() === new Date().getUTCDate() &&
+//                 new Date(date).getUTCHours() === new Date().getUTCHours() &&
+//                 new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+//               ) {
+//                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+//                 const msg = traineeLiveClassRemainderEmailTemplate(
+//                   traineeEmail,
+//                   traineeName,
+//                   instructorName,
+//                   new Date(date).toDateString(),
+//                   slotTime,
+//                   "10",
+//                   traineeJoinUrl
+//                 );
+//                 sgMail
+//                   .send(msg)
+//                   .then(() => {
+//                     const msg = instructorLiveClassRemainderEmailTemplate(
+//                       instructorEmail,
+//                       instructorName,
+//                       traineeName,
+//                       new Date(date).toDateString(),
+//                       slotTime,
+//                       "10",
+//                       instructorHostUrl
+//                     );
+//                     sgMail
+//                       .send(msg)
+//                       .then(() => {
+//                         console.log("Email Sent before 10 minutes");
+//                       })
+//                       .catch((error) => {
+//                         console.log(error.message);
+//                       });
+//                   })
+//                   .catch((error) => {
+//                     console.log(error.message);
+//                   });
+//               }
+//             }
+//           });
+//         }
+//       );
+//     });
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// }
+// function sentEmailLiveClassRemainderToTraineeBefore5Min(req, res) {
+//   try {
+//     sql.connect(config, (err) => {
+//       if (err) return res.send(err.message);
+//       const request = new sql.Request();
+//       request.query(
+//         "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
+//         (err, result) => {
+//           result?.recordset.forEach((res) => {
+//             let traineeEmail = res.trainee_email;
+//             let traineeJoinUrl = res.trainee_join_url;
+//             let instructorName = res.instructor_fullname;
+//             let instructorEmail = res.instructor_email;
+//             let instructorHostUrl = res.instructor_host_url;
+//             let traineeName = res.trainee_fullname;
+//             let slotTime =
+//               res.instructor_live_class_start_time +
+//               " to " +
+//               res.instructor_live_class_end_time;
+//             let year = new Date(res.instructor_live_class_date).getFullYear();
+//             let month = new Date(res.instructor_live_class_date).getMonth();
+//             let day = new Date(res.instructor_live_class_date).getDate();
+//             let hour = res.instructor_live_class_start_time.split(":")[0];
+//             let min = res.instructor_live_class_start_time.split(":")[1];
+//             if (min === "00") {
+//               var date = new Date(year, month, day, hour, min, 0);
+//               date.setHours(date.getHours() - 5);
+//               //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+//               date.setMinutes(date.getMinutes() - 35); //for 5 minutes before
+//               console.log(date);
+//               console.log(new Date());
+//               console.log(new Date(date).getUTCMinutes() + "5 minutes email");
+//               if (
+//                 new Date(date).getUTCFullYear() ===
+//                   new Date().getUTCFullYear() &&
+//                 new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+//                 new Date(date).getUTCDate() === new Date().getUTCDate() &&
+//                 new Date(date).getUTCHours() === new Date().getUTCHours() &&
+//                 new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+//               ) {
+//                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+//                 const msg = traineeLiveClassRemainderEmailTemplate(
+//                   traineeEmail,
+//                   traineeName,
+//                   instructorName,
+//                   new Date(date).toDateString(),
+//                   slotTime,
+//                   "5",
+//                   traineeJoinUrl
+//                 );
+//                 sgMail
+//                   .send(msg)
+//                   .then(() => {
+//                     const msg = instructorLiveClassRemainderEmailTemplate(
+//                       instructorEmail,
+//                       instructorName,
+//                       traineeName,
+//                       new Date(date).toDateString(),
+//                       slotTime,
+//                       "5",
+//                       instructorHostUrl
+//                     );
+//                     sgMail
+//                       .send(msg)
+//                       .then(() => {
+//                         console.log("Email Sent before 5 minutes");
+//                       })
+//                       .catch((error) => {
+//                         console.log(error.message);
+//                       });
+//                   })
+//                   .catch((error) => {
+//                     console.log(error.message);
+//                   });
+//               }
+//             }
+//           });
+//         }
+//       );
+//     });
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// }
 
-function sentEmailLiveClassRemainderToTraineeToStart(req, res) {
-  try {
-    sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
-      const request = new sql.Request();
-      request.query(
-        "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
-        (err, result) => {
-          result?.recordset.forEach((res) => {
-            let traineeEmail = res.trainee_email;
-            let traineeJoinUrl = res.trainee_join_url;
-            let instructorName = res.instructor_fullname;
-            let instructorEmail = res.instructor_email;
-            let instructorHostUrl = res.instructor_host_url;
-            let traineeName = res.trainee_fullname;
-            let slotTime =
-              res.instructor_live_class_start_time +
-              " to " +
-              res.instructor_live_class_end_time;
-            let year = new Date(res.instructor_live_class_date).getFullYear();
-            let month = new Date(res.instructor_live_class_date).getMonth();
-            let day = new Date(res.instructor_live_class_date).getDate();
-            let hour = res.instructor_live_class_start_time.split(":")[0];
-            let min = res.instructor_live_class_start_time.split(":")[1];
-            const date = new Date(year, month, day, hour, min, 0);
-            if (min === "00") {
-              date.setHours(date.getHours() - 5);
-              //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
-              date.setMinutes(date.getMinutes() - 30); //for 5 minutes before
-              console.log(new Date(date).getUTCMinutes() + " start minutes");
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
-                sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-                const msg = traineeLiveClassRemainderStartedEmailTemplate(
-                  traineeEmail,
-                  traineeName,
-                  instructorName,
-                  new Date(date).toDateString(),
-                  slotTime,
-                  traineeJoinUrl
-                );
-                sgMail
-                  .send(msg)
-                  .then(() => {
-                    const msg =
-                      instructorLiveClassRemainderStartedEmailTemplate(
-                        instructorEmail,
-                        instructorName,
-                        traineeName,
-                        new Date(date).toDateString(),
-                        slotTime,
-                        instructorHostUrl
-                      );
-                    sgMail
-                      .send(msg)
-                      .then(() => {
-                        console.log("Email Sent before 0 minutes");
-                      })
-                      .catch((error) => {
-                        console.log(error.message);
-                      });
-                  })
-                  .catch((error) => {
-                    console.log(error.message);
-                  });
-              }
-            } else {
-              console.log("not found");
-            }
-          });
-        }
-      );
-    });
-  } catch (error) {
-    console.log(error.message);
-  }
-}
+// function sentEmailLiveClassRemainderToTraineeToStart(req, res) {
+//   try {
+//     sql.connect(config, (err) => {
+//       if (err) return res.send(err.message);
+//       const request = new sql.Request();
+//       request.query(
+//         "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
+//         (err, result) => {
+//           result?.recordset.forEach((res) => {
+//             let traineeEmail = res.trainee_email;
+//             let traineeJoinUrl = res.trainee_join_url;
+//             let instructorName = res.instructor_fullname;
+//             let instructorEmail = res.instructor_email;
+//             let instructorHostUrl = res.instructor_host_url;
+//             let traineeName = res.trainee_fullname;
+//             let slotTime =
+//               res.instructor_live_class_start_time +
+//               " to " +
+//               res.instructor_live_class_end_time;
+//             let year = new Date(res.instructor_live_class_date).getFullYear();
+//             let month = new Date(res.instructor_live_class_date).getMonth();
+//             let day = new Date(res.instructor_live_class_date).getDate();
+//             let hour = res.instructor_live_class_start_time.split(":")[0];
+//             let min = res.instructor_live_class_start_time.split(":")[1];
+//             const date = new Date(year, month, day, hour, min, 0);
+//             if (min === "00") {
+//               date.setHours(date.getHours() - 5);
+//               //date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+//               date.setMinutes(date.getMinutes() - 30); //for 5 minutes before
+//               console.log(new Date(date).getUTCMinutes() + " start minutes");
+//               if (
+//                 new Date(date).getUTCFullYear() ===
+//                   new Date().getUTCFullYear() &&
+//                 new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
+//                 new Date(date).getUTCDate() === new Date().getUTCDate() &&
+//                 new Date(date).getUTCHours() === new Date().getUTCHours() &&
+//                 new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
+//               ) {
+//                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+//                 const msg = traineeLiveClassRemainderStartedEmailTemplate(
+//                   traineeEmail,
+//                   traineeName,
+//                   instructorName,
+//                   new Date(date).toDateString(),
+//                   slotTime,
+//                   traineeJoinUrl
+//                 );
+//                 sgMail
+//                   .send(msg)
+//                   .then(() => {
+//                     const msg =
+//                       instructorLiveClassRemainderStartedEmailTemplate(
+//                         instructorEmail,
+//                         instructorName,
+//                         traineeName,
+//                         new Date(date).toDateString(),
+//                         slotTime,
+//                         instructorHostUrl
+//                       );
+//                     sgMail
+//                       .send(msg)
+//                       .then(() => {
+//                         console.log("Email Sent before 0 minutes");
+//                       })
+//                       .catch((error) => {
+//                         console.log(error.message);
+//                       });
+//                   })
+//                   .catch((error) => {
+//                     console.log(error.message);
+//                   });
+//               }
+//             } else {
+//               console.log("not found");
+//             }
+//           });
+//         }
+//       );
+//     });
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// }
 
-const sentHello = () => {
-  sql.connect(config, (err) => {
-    if (err) return res.send(err.message);
-    const request = new sql.Request();
-    request.query(
-      "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
-      (err, result) => {
-        result?.recordset.forEach((res) => {
-          let year = new Date(res.instructor_live_class_date).getFullYear();
-          let month = new Date(res.instructor_live_class_date).getMonth();
-          let day = new Date(res.instructor_live_class_date).getDate();
-          var hour = res.instructor_live_class_start_time.split(":")[0];
-          var min = res.instructor_live_class_start_time.split(":")[1];
-          min = parseInt(min);
-          var date = new Date(year, month, day, hour, min, 0);
-          console.log(
-            new Date().getUTCFullYear(date) + " year",
-            new Date().getUTCMonth(date) + " month",
-            new Date().getUTCDate(date) + " date ",
-            new Date().getUTCHours(date) + " Hours",
-            new Date().getUTCMinutes(date) +
-              " minutes" +
-              " before updating the hours and minutes 1"
-          );
-          console.log(
-            new Date().getFullYear(date) + " year",
-            new Date().getMonth(date) + " month",
-            new Date().getDate(date) + " date ",
-            new Date().getHours(date) + " Hours",
-            new Date().getMinutes(date) +
-              " minutes" +
-              " before updating the hours and minutes without utc 2"
-          );
-          date.setHours(date.getHours() - 5);
-          date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
-          console.log(date + "changed minutes and hours date");
-          console.log(
-            new Date().getUTCFullYear(date) + " year",
-            new Date().getUTCMonth(date) + " month",
-            new Date().getUTCDate(date) + " date ",
-            new Date().getUTCHours(date) + " Hours",
-            new Date().getUTCMinutes(date) +
-              " minutes" +
-              " after updating the hours and minutes 3"
-          );
-          console.log(
-            new Date().getFullYear(date) + " year",
-            new Date().getMonth(date) + " month",
-            new Date().getDate(date) + " date ",
-            new Date().getHours(date) + " Hours",
-            new Date().getMinutes(date) +
-              " minutes" +
-              " after updating the hours and minutes 4 normal date"
-          );
-          console.log(
-            new Date().getUTCFullYear() + " year",
-            new Date().getUTCMonth() + " month",
-            new Date().getUTCDate() + " date ",
-            new Date().getUTCHours() + " Hours",
-            new Date().getUTCMinutes() + " minutes" + " from the new date 4"
-          );
-          console.log(
-            new Date().getFullYear() + " year",
-            new Date().getMonth() + " month",
-            new Date().getDate() + " date ",
-            new Date().getHours() + " Hours",
-            new Date().getMinutes() + " minutes" + " from the new date normal 6"
-          );
-          //date.setMinutes(date.getMinutes() - 35); //for 5 minutes before
-          schedule.scheduleJob(date, function () {
-            console.log("email sent before 10 minutes");
-          });
-          // console.log(new Date());
-          // console.log(
-          //   new Date(new Date(year, month, day, hour, 50, 0)).toUTCString()
-          // );
+// const sentHello = () => {
+//   sql.connect(config, (err) => {
+//     if (err) return res.send(err.message);
+//     const request = new sql.Request();
+//     request.query(
+//       "select * from instructor_live_classes_dtls where instructor_live_class_completed_status = 'pending'",
+//       (err, result) => {
+//         result?.recordset.forEach((res) => {
+//           let year = new Date(res.instructor_live_class_date).getFullYear();
+//           let month = new Date(res.instructor_live_class_date).getMonth();
+//           let day = new Date(res.instructor_live_class_date).getDate();
+//           var hour = res.instructor_live_class_start_time.split(":")[0];
+//           var min = res.instructor_live_class_start_time.split(":")[1];
+//           min = parseInt(min);
+//           var date = new Date(year, month, day, hour, min, 0);
+//           console.log(
+//             new Date().getUTCFullYear(date) + " year",
+//             new Date().getUTCMonth(date) + " month",
+//             new Date().getUTCDate(date) + " date ",
+//             new Date().getUTCHours(date) + " Hours",
+//             new Date().getUTCMinutes(date) +
+//               " minutes" +
+//               " before updating the hours and minutes 1"
+//           );
+//           console.log(
+//             new Date().getFullYear(date) + " year",
+//             new Date().getMonth(date) + " month",
+//             new Date().getDate(date) + " date ",
+//             new Date().getHours(date) + " Hours",
+//             new Date().getMinutes(date) +
+//               " minutes" +
+//               " before updating the hours and minutes without utc 2"
+//           );
+//           date.setHours(date.getHours() - 5);
+//           date.setMinutes(date.getMinutes() - 30); //for 10 minutes before
+//           console.log(date + "changed minutes and hours date");
+//           console.log(
+//             new Date().getUTCFullYear(date) + " year",
+//             new Date().getUTCMonth(date) + " month",
+//             new Date().getUTCDate(date) + " date ",
+//             new Date().getUTCHours(date) + " Hours",
+//             new Date().getUTCMinutes(date) +
+//               " minutes" +
+//               " after updating the hours and minutes 3"
+//           );
+//           console.log(
+//             new Date().getFullYear(date) + " year",
+//             new Date().getMonth(date) + " month",
+//             new Date().getDate(date) + " date ",
+//             new Date().getHours(date) + " Hours",
+//             new Date().getMinutes(date) +
+//               " minutes" +
+//               " after updating the hours and minutes 4 normal date"
+//           );
+//           console.log(
+//             new Date().getUTCFullYear() + " year",
+//             new Date().getUTCMonth() + " month",
+//             new Date().getUTCDate() + " date ",
+//             new Date().getUTCHours() + " Hours",
+//             new Date().getUTCMinutes() + " minutes" + " from the new date 4"
+//           );
+//           console.log(
+//             new Date().getFullYear() + " year",
+//             new Date().getMonth() + " month",
+//             new Date().getDate() + " date ",
+//             new Date().getHours() + " Hours",
+//             new Date().getMinutes() + " minutes" + " from the new date normal 6"
+//           );
+//           //date.setMinutes(date.getMinutes() - 35); //for 5 minutes before
+//           schedule.scheduleJob(date, function () {
+//             console.log("email sent before 10 minutes");
+//           });
+//           // console.log(new Date());
+//           // console.log(
+//           //   new Date(new Date(year, month, day, hour, 50, 0)).toUTCString()
+//           // );
 
-          // console.log(
-          //   new Date(new Date(year, month, day, hour, 50, 0)).toUTCHours() +
-          //     " Hours"
-          // );
-          // console.log(
-          //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCMinutes() +
-          //     " minutes"
-          // );
-          // console.log(
-          //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCDate() +
-          //     " date"
-          // );
-          // console.log(
-          //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCMonth() +
-          //     " month"
-          // );
-          // console.log(
-          //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCFullYear() +
-          //     " year"
-          // );
-        });
-      }
-    );
-  });
-};
+//           // console.log(
+//           //   new Date(new Date(year, month, day, hour, 50, 0)).toUTCHours() +
+//           //     " Hours"
+//           // );
+//           // console.log(
+//           //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCMinutes() +
+//           //     " minutes"
+//           // );
+//           // console.log(
+//           //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCDate() +
+//           //     " date"
+//           // );
+//           // console.log(
+//           //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCMonth() +
+//           //     " month"
+//           // );
+//           // console.log(
+//           //   new Date(new Date(year, month, day, hour, 50, 0)).getUTCFullYear() +
+//           //     " year"
+//           // );
+//         });
+//       }
+//     );
+//   });
+// };
 
-setInterval(() => {
-  sentEmailLiveClassRemainderToTraineeBefore10Min();
-  sentEmailLiveClassRemainderToTraineeBefore5Min();
-  sentEmailLiveClassRemainderToTraineeToStart();
-  console.log("Logging from every 1 minutes from the remainders");
-}, 60000);
+// setInterval(() => {
+//   sentEmailLiveClassRemainderToTraineeBefore10Min();
+//   sentEmailLiveClassRemainderToTraineeBefore5Min();
+//   sentEmailLiveClassRemainderToTraineeToStart();
+//   console.log("Logging from every 1 minutes from the remainders");
+// }, 60000);
 function convertDateToUTC(date) {
   return new Date(
     date.getUTCFullYear(),

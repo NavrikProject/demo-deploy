@@ -10,7 +10,6 @@ import {
   getBookingDates,
   createMentorRazorPayOrder,
   getIndividualMentorDetails,
-  fillAdditionalMentorDetails,
   getMentorProfileDetails,
   addBankAccountDetailsOfMentor,
   getMentorByFiltering,
@@ -20,7 +19,7 @@ import { verifyTokenAndAuthorization } from "../../middleware/verifyToken.js";
 let router = routers.Router();
 
 //to register for a new mentor route
-router.post("/register/additional-details", fillAdditionalMentorDetails);
+// router.post("/register/additional-details", fillAdditionalMentorDetails);
 
 router.post("/register/all-details", registerMentorWithAdditionalDtls);
 // get all mentor details in profile pages

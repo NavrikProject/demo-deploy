@@ -463,5 +463,4 @@ setInterval(() => {
   checkTheDateAndStatusChangeOfTrainee();
   checkTheDateAndStatusChangeOfMentor();
   checkTheDateAndStatusChangeOfTraineeANdMentor();
-  console.log("logging reschedule function");
-}, 60000);
+}, 1000 * 60 * 60 * 24);

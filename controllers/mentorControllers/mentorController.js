@@ -7,7 +7,6 @@ import intoStream from "into-stream";
 import bcrypt from "bcrypt";
 import Razorpay from "razorpay";
 import jwt from "jsonwebtoken";
-import rp from "request-promise";
 import axios from "axios";
 import {
   appointmentBookedMentorEmailTemplate,
@@ -21,160 +20,160 @@ import { BlockBlobClient } from "@azure/storage-blob";
 
 dotenv.config();
 
-// to join as a mentor
-export async function fillAdditionalMentorDetails(req, res) {
-  let {
-    email,
-    firstname,
-    lastname,
-    bio,
-    experience,
-    skills,
-    otherSkills,
-    firm,
-    currentRole,
-    previousRole,
-    specialty,
-    mentorAvailability,
-    startTime,
-    endTime,
-    mentorshipArea,
-    website,
-    linkedInProfile,
-    phoneNumber,
-  } = req.body;
+// // to join as a mentor
+// export async function fillAdditionalMentorDetails(req, res) {
+//   let {
+//     email,
+//     firstname,
+//     lastname,
+//     bio,
+//     experience,
+//     skills,
+//     otherSkills,
+//     firm,
+//     currentRole,
+//     previousRole,
+//     specialty,
+//     mentorAvailability,
+//     startTime,
+//     endTime,
+//     mentorshipArea,
+//     website,
+//     linkedInProfile,
+//     phoneNumber,
+//   } = req.body;
 
-  firstname = firstname.toLowerCase();
-  lastname = lastname.toLowerCase();
-  if (
-    !experience &&
-    !skills &&
-    !specialty &&
-    !firstname &&
-    !lastname &&
-    !mentorshipArea &&
-    !startTime &&
-    !endTime &&
-    !req.files.image
-  ) {
-    return res.send({
-      error: "All details must be required",
-    });
-  }
-  const blobName = new Date().getTime() + "-" + req.files.image.name;
-  const lowEmail = email.toLowerCase();
+//   firstname = firstname.toLowerCase();
+//   lastname = lastname.toLowerCase();
+//   if (
+//     !experience &&
+//     !skills &&
+//     !specialty &&
+//     !firstname &&
+//     !lastname &&
+//     !mentorshipArea &&
+//     !startTime &&
+//     !endTime &&
+//     !req.files.image
+//   ) {
+//     return res.send({
+//       error: "All details must be required",
+//     });
+//   }
+//   const blobName = new Date().getTime() + "-" + req.files.image.name;
+//   const lowEmail = email.toLowerCase();
 
-  let fileName = `https://navrik.blob.core.windows.net/navrikimage/${blobName}`;
-  const stream = intoStream(req.files.image.data);
-  const streamLength = req.files.image.data.length;
+//   let fileName = `https://navrik.blob.core.windows.net/navrikimage/${blobName}`;
+//   const stream = intoStream(req.files.image.data);
+//   const streamLength = req.files.image.data.length;
 
-  try {
-    sql.connect(config, (err) => {
-      if (err) return res.send({ error: err.message });
-      const request = new sql.Request();
-      request.input("email", sql.VarChar, email);
-      request.query(
-        "select * from mentor_dtls where mentor_email = @email",
-        (err, result) => {
-          if (err)
-            return res.send({
-              error: "There was an error while submitting the application",
-            });
-          if (result.recordset.length > 0) {
-            return res.send({
-              success:
-                "You have all ready submitted the mentor application we will get back to you once, We review your application.",
-            });
-          } else {
-            sql.connect(config, async (err) => {
-              let startDate = new Date().toISOString().substring(0, 10);
-              let endDate = addMonths(new Date(startDate), 3);
-              var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
-              endDate = endDate.toISOString().substring(0, 10);
-              if (err) res.send(err.message);
-              const request = new sql.Request();
-              request.query(
-                "insert into mentor_dtls(mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_otherSkills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_phone_number,mentor_website,mentor_linkedin_profile,mentor_image) VALUES('" +
-                  lowEmail +
-                  "','" +
-                  firstname +
-                  "','" +
-                  lastname +
-                  "','" +
-                  startDate +
-                  "','" +
-                  endDate +
-                  "','" +
-                  mentorAvailability +
-                  "','" +
-                  startTime +
-                  "','" +
-                  endTime +
-                  "','" +
-                  timestamp +
-                  "','" +
-                  experience +
-                  "','" +
-                  skills +
-                  "','" +
-                  otherSkills +
-                  "','" +
-                  mentorshipArea +
-                  "','" +
-                  specialty +
-                  "','" +
-                  bio +
-                  "','" +
-                  currentRole +
-                  "','" +
-                  previousRole +
-                  "','" +
-                  firm +
-                  "','" +
-                  phoneNumber +
-                  "','" +
-                  website +
-                  "','" +
-                  linkedInProfile +
-                  "','" +
-                  fileName +
-                  "')",
-                (err, success) => {
-                  if (err) {
-                    return res.send({ error: err.message });
-                  }
-                  if (success) {
-                    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-                    const msg = mentorApplicationEmail(
-                      email,
-                      firstname + " " + lastname
-                    );
-                    sgMail
-                      .send(msg)
-                      .then(() => {
-                        return res.send({
-                          success:
-                            "Successfully submitted the mentor we will get back to you once, We review your application.",
-                        });
-                      })
-                      .catch((error) => {
-                        return res.send({
-                          error:
-                            "There was an error while submitting the details please try again later",
-                        });
-                      });
-                  }
-                }
-              );
-            });
-          }
-        }
-      );
-    });
-  } catch (error) {
-    return res.send({ error: error.message });
-  }
-}
+//   try {
+//     sql.connect(config, (err) => {
+//       if (err) return res.send({ error: err.message });
+//       const request = new sql.Request();
+//       request.input("email", sql.VarChar, email);
+//       request.query(
+//         "select * from mentor_dtls where mentor_email = @email",
+//         (err, result) => {
+//           if (err)
+//             return res.send({
+//               error: "There was an error while submitting the application",
+//             });
+//           if (result.recordset.length > 0) {
+//             return res.send({
+//               success:
+//                 "You have all ready submitted the mentor application we will get back to you once, We review your application.",
+//             });
+//           } else {
+//             sql.connect(config, async (err) => {
+//               let startDate = new Date().toISOString().substring(0, 10);
+//               let endDate = addMonths(new Date(startDate), 3);
+//               var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
+//               endDate = endDate.toISOString().substring(0, 10);
+//               if (err) res.send(err.message);
+//               const request = new sql.Request();
+//               request.query(
+//                 "insert into mentor_dtls(mentor_email,mentor_firstname,mentor_lastname,mentor_available_start_date,mentor_available_end_date,mentor_availability,mentor_availability_start_time,mentor_availability_end_time,mentor_creation,mentor_experience,mentor_skills,mentor_otherSkills,mentor_mentorship_area,mentor_speciality,mentor_bio,mentor_current_role,mentor_previous_role,mentor_firm,mentor_phone_number,mentor_website,mentor_linkedin_profile,mentor_image) VALUES('" +
+//                   lowEmail +
+//                   "','" +
+//                   firstname +
+//                   "','" +
+//                   lastname +
+//                   "','" +
+//                   startDate +
+//                   "','" +
+//                   endDate +
+//                   "','" +
+//                   mentorAvailability +
+//                   "','" +
+//                   startTime +
+//                   "','" +
+//                   endTime +
+//                   "','" +
+//                   timestamp +
+//                   "','" +
+//                   experience +
+//                   "','" +
+//                   skills +
+//                   "','" +
+//                   otherSkills +
+//                   "','" +
+//                   mentorshipArea +
+//                   "','" +
+//                   specialty +
+//                   "','" +
+//                   bio +
+//                   "','" +
+//                   currentRole +
+//                   "','" +
+//                   previousRole +
+//                   "','" +
+//                   firm +
+//                   "','" +
+//                   phoneNumber +
+//                   "','" +
+//                   website +
+//                   "','" +
+//                   linkedInProfile +
+//                   "','" +
+//                   fileName +
+//                   "')",
+//                 (err, success) => {
+//                   if (err) {
+//                     return res.send({ error: err.message });
+//                   }
+//                   if (success) {
+//                     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+//                     const msg = mentorApplicationEmail(
+//                       email,
+//                       firstname + " " + lastname
+//                     );
+//                     sgMail
+//                       .send(msg)
+//                       .then(() => {
+//                         return res.send({
+//                           success:
+//                             "Successfully submitted the mentor we will get back to you once, We review your application.",
+//                         });
+//                       })
+//                       .catch((error) => {
+//                         return res.send({
+//                           error:
+//                             "There was an error while submitting the details please try again later",
+//                         });
+//                       });
+//                   }
+//                 }
+//               );
+//             });
+//           }
+//         }
+//       );
+//     });
+//   } catch (error) {
+//     return res.send({ error: error.message });
+//   }
+// }
 
 // get mentor full details in profile page
 export async function getMentorProfileDetails(req, res, next) {
@@ -240,6 +239,7 @@ export async function getMentorBySearch(req, res) {
     res.send(error.message);
   }
 }
+// get mentor by approving with the filter
 export async function getMentorByFiltering(req, res) {
   let category = req.query.category;
   let skill = req.query.skill;
@@ -252,7 +252,7 @@ export async function getMentorByFiltering(req, res) {
         const request = new sql.Request();
         request.input("category", sql.VarChar, category);
         const searchQuery =
-          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category";
+          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category and mentor_approved = 'Yes' order by mentor_dtls_id DESC";
         request.query(searchQuery, (err, result) => {
           if (err) return res.send(err.message);
           if (result.recordset.length > 0) {
@@ -271,7 +271,7 @@ export async function getMentorByFiltering(req, res) {
         request.input("area", sql.VarChar, area);
         request.input("availability", sql.VarChar, availability);
         const searchQuery =
-          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category AND mentor_skills = @skill ";
+          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category AND mentor_skills = @skill  and mentor_approved = 'Yes' order by mentor_dtls_id DESC";
         request.query(searchQuery, (err, result) => {
           if (err) return res.send(err.message);
           if (result.recordset.length > 0) {
@@ -291,7 +291,7 @@ export async function getMentorByFiltering(req, res) {
         request.input("area", sql.VarChar, area);
         request.input("availability", sql.VarChar, availability);
         const searchQuery =
-          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category AND mentor_mentorship_area = @area AND mentor_skills = @skill ";
+          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category AND mentor_mentorship_area = @area AND mentor_skills = @skill and mentor_approved = 'Yes' order by mentor_dtls_id DESC  ";
         request.query(searchQuery, (err, result) => {
           if (err) return res.send(err.message);
           if (result.recordset.length > 0) {
@@ -310,7 +310,7 @@ export async function getMentorByFiltering(req, res) {
         request.input("area", sql.VarChar, area);
         request.input("availability", sql.VarChar, availability);
         const searchQuery =
-          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category AND mentor_mentorship_area = @area AND mentor_skills = @skill AND mentor_availability = @availability";
+          "SELECT * FROM mentor_dtls WHERE mentor_speciality = @category AND mentor_mentorship_area = @area AND mentor_skills = @skill AND mentor_availability = @availability and mentor_approved = 'Yes' order by mentor_dtls_id DESC";
         request.query(searchQuery, (err, result) => {
           if (err) return res.send(err.message);
           if (result.recordset.length > 0) {
@@ -1009,7 +1009,7 @@ function findTheDateRangeAndWeekdays(startDate, endDate) {
   return newDates;
 }
 
-// to join as a mentor
+// to join as a mentor with all details
 export async function registerMentorWithAdditionalDtls(req, res) {
   let {
     email,

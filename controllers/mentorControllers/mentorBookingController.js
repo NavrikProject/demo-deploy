@@ -5,10 +5,10 @@ import dotenv from "dotenv";
 import Razorpay from "razorpay";
 import jwt from "jsonwebtoken";
 import axios from "axios";
+import schedule from "node-schedule";
 import {
   traineeBookingRemainderEmailTemplate,
   traineeFeedbackEmail,
-  traineeRefundEmailTemplate,
   traineeRescheduledMentorUpdatedEmailTemplate,
 } from "../../middleware/traineeEmailTemplates.js";
 import {
@@ -797,14 +797,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
             date.setHours(date.getHours() - 5);
             date.setMinutes(date.getMinutes() - 40); //for 10 minutes before
             if (min === "00") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -840,17 +833,10 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
             if (min === "15") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -886,17 +872,10 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
             if (min === "30") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -932,17 +911,10 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
             if (min === "45") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -978,7 +950,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
           });
         }
@@ -1020,14 +992,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
             date.setHours(date.getHours() - 5);
             date.setMinutes(date.getMinutes() - 35); //for 10 minutes before
             if (min === "00") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1063,17 +1028,10 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
             if (min === "15") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1109,17 +1067,10 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
             if (min === "30") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1155,17 +1106,10 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
             if (min === "45") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1201,7 +1145,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
           });
         }
@@ -1243,14 +1187,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
             date.setHours(date.getHours() - 5);
             date.setMinutes(date.getMinutes() - 30);
             if (min === "00") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1286,17 +1223,10 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
             if (min === "15") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1332,17 +1262,10 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
             if (min === "30") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1378,17 +1301,10 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
             if (min === "45") {
-              if (
-                new Date(date).getUTCFullYear() ===
-                  new Date().getUTCFullYear() &&
-                new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-                new Date(date).getUTCDate() === new Date().getUTCDate() &&
-                new Date(date).getUTCHours() === new Date().getUTCHours() &&
-                new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-              ) {
+              schedule.scheduleJob(date, function () {
                 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                 const msg = mentorBookingRemainderEmailTemplate(
                   mentorEmail,
@@ -1424,7 +1340,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
                   .catch((error) => {
                     console.log(error.message);
                   });
-              }
+              });
             }
           });
         }
@@ -1459,13 +1375,7 @@ function sentEmailRemainderToFillFeedback(req, res) {
             var date = new Date(year, month, day, hour, min, 0);
             date.setHours(date.getHours() - 5);
             date.setMinutes(date.getMinutes() - 30);
-            if (
-              new Date(date).getUTCFullYear() === new Date().getUTCFullYear() &&
-              new Date(date).getUTCMonth() === new Date().getUTCMonth() &&
-              new Date(date).getUTCDate() === new Date().getUTCDate() &&
-              new Date(date).getUTCHours() === new Date().getUTCHours() &&
-              new Date(date).getUTCMinutes() === new Date().getUTCMinutes()
-            ) {
+            schedule.scheduleJob(date, function () {
               sgMail.setApiKey(process.env.SENDGRID_API_KEY);
               const msg = traineeFeedbackEmail(traineeEmail, username);
               sgMail
@@ -1476,17 +1386,15 @@ function sentEmailRemainderToFillFeedback(req, res) {
                 .catch((error) => {
                   console.log(error.message);
                 });
-            }
+            });
           });
         }
       );
     });
   } catch (error) {}
 }
-setInterval(() => {
-  // remainder will be sent on before 10 minutes function call
-  sentEmailRemainderToMentorAndTraineeBefore10Min();
-  sentEmailRemainderToMentorAndTraineeBefore5Min();
-  sentEmailRemainderToMentorAndTraineeToStart();
-  sentEmailRemainderToFillFeedback();
-}, 60000);
+// remainder will be sent on before 10 minutes function call
+sentEmailRemainderToMentorAndTraineeBefore10Min();
+sentEmailRemainderToMentorAndTraineeBefore5Min();
+sentEmailRemainderToFillFeedback();
+sentEmailRemainderToMentorAndTraineeToStart();
