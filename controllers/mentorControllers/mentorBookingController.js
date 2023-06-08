@@ -770,7 +770,7 @@ export async function rescheduleBookingDateOfMentor(req, res) {
 function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
+      if (err) return console.log(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const mentorSessionsStatus = "upcoming";
@@ -965,7 +965,7 @@ function sentEmailRemainderToMentorAndTraineeBefore10Min(req, res) {
 function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
+      if (err) return console.log(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const mentorSessionsStatus = "upcoming";
@@ -1160,7 +1160,7 @@ function sentEmailRemainderToMentorAndTraineeBefore5Min(req, res) {
 function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return res.send(err.message);
+      if (err) return console.log(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const mentorSessionsStatus = "upcoming";
@@ -1355,7 +1355,7 @@ function sentEmailRemainderToMentorAndTraineeToStart(req, res) {
 function sentEmailRemainderToFillFeedback(req, res) {
   try {
     sql.connect(config, (err) => {
-      if (err) return res?.send(err.message);
+      if (err) return console.log(err.message);
       const request = new sql.Request();
       const amountPaidStatus = "Paid";
       const traineeSessionStatus = "attended";
