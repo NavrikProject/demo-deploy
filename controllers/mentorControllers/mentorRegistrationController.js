@@ -135,7 +135,7 @@ export async function fillAdditionalMentorDetails(req, res) {
     });
   }
   const blobName = new Date().getTime() + "-" + req.files?.image.name;
-  const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/mentorprofilepictures/${blobName}`;
+  const filename = `https://practiwizstorage.blob.core.windows.net/practiwizcontainer/mentorprofilepictures/${blobName}`;
   try {
     sql.connect(config, (err) => {
       if (err) return res.send({ error: err.message });

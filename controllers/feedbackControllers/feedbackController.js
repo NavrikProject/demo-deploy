@@ -900,7 +900,7 @@ export async function uploadImage(req, res, next) {
   // try {
   //   const filePath = "<local-file-path>";
   //   const blobName = new Date().getTime() + "-" + req.files.image.name;
-  //   const blobUrl = `https://navrikimages.blob.core.windows.net/newcontainer/${blobName}`;
+  //   const blobUrl = `https://practiwizstorage.blob.core.windows.net/newcontainer/${blobName}`;
   //   const blockBlobClient = new BlockBlobClient(
   //     blobUrl,
   //     new StorageSharedKeyCredential("<accountName>", "<accountKey>")

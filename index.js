@@ -162,6 +162,7 @@ const payload = {
 };
 
 const token = jwt.sign(payload, process.env.ZOOM_APP_API_SECRET_KEY);
+
 app.get("/meetings", async (req, res) => {
   try {
     const email = "b.mahesh311296@gmail.com"; //host email id;
@@ -233,7 +234,7 @@ app.get("/send-email", (req, res) => {
 
 // app.post("/upload-image", async (req, res) => {
 //   const blobName = new Date().getTime() + "-" + req.files.image.name;
-//   const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/mentorprofilepictures/${blobName}`;
+//   const filename = `https://practiwizstorage.blob.core.windows.net/practiwizcontainer/mentorprofilepictures/${blobName}`;
 //   const blobService = new BlockBlobClient(
 //     process.env.AZURE_STORAGE_CONNECTION_STRING,
 //     "practiwizcontainer/mentorprofilepictures",
@@ -253,23 +254,23 @@ app.get("/send-email", (req, res) => {
 // });
 
 app.get("/send-sms", async (req, res) => {
-  const vonage = new Vonage({
-    apiKey: "5c1f377e ",
-    apiSecret: "c0QXia5GPkpyAyYF",
-  });
-  const from = "Vonage APIs";
-  const to = "918466958669";
-  const text = "A text message sent using the Vonage SMS API";
-  await vonage.sms
-    .send({ to, from, text })
-    .then((resp) => {
-      console.log("Message sent successfully");
-      res.json(resp);
-    })
-    .catch((err) => {
-      console.log("There was an error sending the messages.");
-      console.error(err);
-    });
+  // const vonage = new Vonage({
+  //   apiKey: "5c1f377e ",
+  //   apiSecret: "c0QXia5GPkpyAyYF",
+  // });
+  // const from = "Vonage APIs";
+  // const to = "918466958669";
+  // const text = "A text message sent using the Vonage SMS API";
+  // await vonage.sms
+  //   .send({ to, from, text })
+  //   .then((resp) => {
+  //     console.log("Message sent successfully");
+  //     res.json(resp);
+  //   })
+  //   .catch((err) => {
+  //     console.log("There was an error sending the messages.");
+  //     console.error(err);
+  //   });
 });
 app.listen(port, (req, res) => {
   console.log("listening on port " + port);

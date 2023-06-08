@@ -29,7 +29,7 @@ export async function addHiringCompanyDetails(req, res, next) {
   } = req.body;
   try {
     const blobName = new Date().getTime() + "-" + req.files.image.name;
-    const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/hiringcompanylogos/${blobName}`;
+    const filename = `https://practiwizstorage.blob.core.windows.net/practiwizcontainer/hiringcompanylogos/${blobName}`;
     const blobService = new BlockBlobClient(
       process.env.AZURE_STORAGE_CONNECTION_STRING,
       "practiwizcontainer/hiringcompanylogos",

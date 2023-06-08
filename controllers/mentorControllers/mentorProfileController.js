@@ -36,7 +36,7 @@ export async function updateMentorProfileImage(req, res) {
                   if (result.recordset.length > 0) {
                     const blobName =
                       new Date().getTime() + "-" + req.files.image.name;
-                    const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/mentorprofilepictures/${blobName}`;
+                    const filename = `https://practiwizstorage.blob.core.windows.net/practiwizcontainer/mentorprofilepictures/${blobName}`;
                     const blobService = new BlockBlobClient(
                       process.env.AZURE_STORAGE_CONNECTION_STRING,
                       "practiwizcontainer/mentorprofilepictures",

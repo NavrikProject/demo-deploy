@@ -54,7 +54,7 @@ export async function applyForJobPost(req, res, next) {
   loopOptions();
   try {
     const blobName = new Date().getTime() + "-" + req.files.image.name;
-    const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/jobseekerresumes/${blobName}`;
+    const filename = `https://practiwizstorage.blob.core.windows.net/practiwizcontainer/jobseekerresumes/${blobName}`;
     const blobService = new BlockBlobClient(
       process.env.AZURE_STORAGE_CONNECTION_STRING,
       "practiwizcontainer/jobseekerresumes",
@@ -639,7 +639,7 @@ export async function applyJobWithUpdateJobPost(req, res, next) {
                           );
                           const blobName =
                             new Date().getTime() + "-" + req.files.image.name;
-                          const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/jobseekerresumes/${blobName}`;
+                          const filename = `https://practiwizstorage.blob.core.windows.net/practiwizcontainer/jobseekerresumes/${blobName}`;
                           const blobService = new BlockBlobClient(
                             process.env.AZURE_STORAGE_CONNECTION_STRING,
                             "practiwizcontainer/jobseekerresumes",

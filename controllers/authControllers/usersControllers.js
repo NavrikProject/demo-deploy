@@ -14,7 +14,10 @@ export async function getAllTheUsersData(req, res, next) {
       request.query(
         "SELECT * FROM users_dtls ORDER BY user_dtls_id DESC",
         (err, result) => {
-          if (err) res.send(err.message);
+          if (err)
+            return res.send(
+              "There is something went wrong. Please try again later."
+            );
           if (result.recordset.length > 0) {
             res.send({ users: result.recordset });
           } else {
@@ -24,7 +27,7 @@ export async function getAllTheUsersData(req, res, next) {
       );
     });
   } catch (error) {
-    if (error) res.send(error.message);
+    return res.send("There is something went wrong. Please try again later.");
   }
 }
 
@@ -36,9 +39,12 @@ export async function updateAdminApprove(req, res, next) {
       const request = new sql.Request();
       request.input("id", sql.Int, paramsId);
       request.query(
-        "SELECT * FROM users_dtls WHERE  user_dtls_id = @id",
+        "SELECT user_dtls_id from users_dtls WHERE user_dtls_id = @id",
         (err, result) => {
-          if (err) res.send(err.message);
+          if (err)
+            return res.send(
+              "There is something went wrong. Please try again later."
+            );
           if (result.recordset.length > 0) {
             const admin = result.recordset[0].user_is_superadmin;
             const email = result.recordset[0].user_email;
@@ -55,7 +61,10 @@ export async function updateAdminApprove(req, res, next) {
               const sqlUpdate =
                 "UPDATE users_dtls SET user_is_superadmin =@admin WHERE user_dtls_id= @id ";
               request.query(sqlUpdate, (err, result) => {
-                if (err) return res.send(err.message);
+                if (err)
+                  return res.send(
+                    "There is something went wrong. Please try again later."
+                  );
                 if (result) {
                   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                   const msg = adminApproveEmail(email, fullname);
@@ -84,7 +93,7 @@ export async function updateAdminApprove(req, res, next) {
       );
     });
   } catch (error) {
-    if (error) res.send({ error: error.message });
+    return res.send("There is something went wrong. Please try again later.");
   }
 }
 
@@ -96,9 +105,12 @@ export async function updateAdminDisapprove(req, res, next) {
       const request = new sql.Request();
       request.input("id", sql.Int, paramsId);
       request.query(
-        "SELECT * FROM users_dtls WHERE  user_dtls_id = @id",
+        "SELECT user_dtls_id FROM users_dtls WHERE  user_dtls_id = @id",
         (err, result) => {
-          if (err) res.send(err.message);
+          if (err)
+            return res.send(
+              "There is something went wrong. Please try again later."
+            );
           if (result.recordset.length > 0) {
             const admin = result.recordset[0].user_is_superadmin;
             const email = result.recordset[0].user_email;
@@ -114,7 +126,10 @@ export async function updateAdminDisapprove(req, res, next) {
               const sqlUpdate =
                 "UPDATE users_dtls SET user_is_superadmin =@notAdmin WHERE user_dtls_id= @id ";
               request.query(sqlUpdate, (err, result) => {
-                if (err) return res.send(err.message);
+                if (err)
+                  return res.send(
+                    "There is something went wrong. Please try again later."
+                  );
                 if (result) {
                   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                   const msg = adminDisApproveEmail(email, fullname);
@@ -145,7 +160,7 @@ export async function updateAdminDisapprove(req, res, next) {
       );
     });
   } catch (error) {
-    if (error) res.send(error.message);
+    return res.send("There is something went wrong. Please try again later.");
   }
 }
 
@@ -154,9 +169,12 @@ export async function getAllTraineeUsersData(req, res, next) {
     sql.connect(config, (err) => {
       const request = new sql.Request();
       request.query(
-        "SELECT * FROM users_dtls where user_type = 'member' ORDER BY user_dtls_id DESC",
+        "SELECT user_type FROM users_dtls where user_type = 'member' ORDER BY user_dtls_id DESC",
         (err, result) => {
-          if (err) res.send(err.message);
+          if (err)
+            return res.send(
+              "There is something went wrong. Please try again later."
+            );
           if (result.recordset.length > 0) {
             let userData = [];
             result.recordset?.forEach((user) => {
@@ -177,6 +195,6 @@ export async function getAllTraineeUsersData(req, res, next) {
       );
     });
   } catch (error) {
-    if (error) res.send(error.message);
+    return res.send("There is something went wrong. Please try again later.");
   }
 }

@@ -1,5 +1,5 @@
 import sql from "mssql";
-import config from "../../config/dbconfig.js";
+import config from "../../config/dbConfig.js";
 import sgMail from "@sendgrid/mail";
 import dotenv from "dotenv";
 import Razorpay from "razorpay";

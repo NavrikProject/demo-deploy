@@ -28,7 +28,7 @@ export async function createTraineeProfile(req, res, next) {
           if (err) return res.send(err.message);
           if (result.recordset.length > 0) {
             const blobName = new Date().getTime() + "-" + req.files.image.name;
-            const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/traineeprofilepictures/${blobName}`;
+            const filename = `https://practiwizstorage.blob.core.windows.net/practiwizcontainer/traineeprofilepictures/${blobName}`;
             const blobService = new BlockBlobClient(
               process.env.AZURE_STORAGE_CONNECTION_STRING,
               "practiwizcontainer/traineeprofilepictures",
@@ -403,7 +403,7 @@ export async function uploadUserImage(req, res) {
                   if (result.recordset.length > 0) {
                     const blobName =
                       new Date().getTime() + "-" + req.files.image.name;
-                    const filename = `https://navrikimages.blob.core.windows.net/practiwizcontainer/traineeprofilepictures/${blobName}`;
+                    const filename = `https://practiwizstorage.blob.core.windows.net/practiwizcontainer/traineeprofilepictures/${blobName}`;
                     const blobService = new BlockBlobClient(
                       process.env.AZURE_STORAGE_CONNECTION_STRING,
                       "practiwizcontainer/traineeprofilepictures",

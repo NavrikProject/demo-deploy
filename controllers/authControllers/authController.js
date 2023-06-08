@@ -30,14 +30,17 @@ export async function emailRegister(req, res, next) {
   let hashedPassword = await bcrypt.hash(password, saltRounds);
   sql.connect(config, async (err) => {
     if (err) {
-      return res.send(err.message);
+      return res.send("There is something went wrong. Please try again later.");
     }
     const request = new sql.Request();
     request.input("email", sql.VarChar, lowEmail);
     request.query(
-      "select * from users_dtls where user_email = @email",
+      "select user_email from users_dtls where user_email = @email",
       (err, result) => {
-        if (err) return res.send(err.message);
+        if (err)
+          return res.send(
+            "There is something went wrong. Please try again later."
+          );
         if (result.recordset.length > 0) {
           return res.send({
             exists:
@@ -92,19 +95,23 @@ export async function emailAccountActivation(req, res) {
       process.env.JWT_EMAIL_ACTIVATION_KEY,
       (err, decodedToken) => {
         if (err) {
-          return res.send(err.status);
+          return res.send(
+            "There is something went wrong. Please try again later."
+          );
         } else {
           const { email, firstName, lastName, type, password, phoneNumber } =
             decodedToken;
           var timestamp = moment(Date.now()).format("YYYY-MM-DD HH:mm:ss");
           sql.connect(config, async (err) => {
             if (err) {
-              return res.send(err.message);
+              return res.send(
+                "There is something went wrong. Please try again later."
+              );
             }
             const request = new sql.Request();
             request.input("email", sql.VarChar, email);
             request.query(
-              `select * from users_dtls where user_email = @email`,
+              `select user_email from users_dtls where user_email = @email`,
               (err, result) => {
                 if (result.recordset.length > 0) {
                   return res.send({
@@ -136,7 +143,9 @@ export async function emailAccountActivation(req, res) {
                         "' )",
                       (err, success) => {
                         if (err) {
-                          return res.send({ error: err.message });
+                          return res.send(
+                            "There is something went wrong. Please try again later."
+                          );
                         }
                         if (success) {
                           sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -186,7 +195,7 @@ export async function login(req, res) {
   }
   sql.connect(config, async (err) => {
     if (err) {
-      res.send(err.message);
+      return res.send("There is something went wrong. Please try again later.");
     }
     const request = new sql.Request();
     request.input("email", sql.VarChar, lowEmail);
@@ -263,10 +272,12 @@ export async function forgotPassword(req, res) {
     const request = new sql.Request();
     request.input("email", sql.VarChar, lowEmail);
     request.query(
-      "select * from users_dtls where user_email = @email",
+      "select user_email from users_dtls where user_email = @email",
       (err, result) => {
         if (err) {
-          return res.send({ error: err.message });
+          return res.send(
+            "There is something went wrong. Please try again later."
+          );
         }
         if (result.recordset.length === 0) {
           res.send({
@@ -321,11 +332,14 @@ export async function resetPassword(req, res) {
       jwt.verify(token, process.env.JWT_FORGOT_PASSWORD_TOKEN, (err, user) => {
         if (!err) {
           sql.connect(config, async (err) => {
-            if (err) return res.send(err.message);
+            if (err)
+              return res.send(
+                "There is something went wrong. Please try again later."
+              );
             const request = new sql.Request();
             request.input("id", sql.Int, user.id);
             request.query(
-              "select * from users_dtls where user_dtls_id = @id",
+              "select user_dtls_id from users_dtls where user_dtls_id = @id",
               (err, result) => {
                 if (err) {
                   return res.send({ error: err.message });
@@ -350,7 +364,10 @@ export async function resetPassword(req, res) {
                     request.query(
                       "update users_dtls set user_pwd= @password where user_dtls_id= @id",
                       (err, response) => {
-                        if (err) return res.send(err.message);
+                        if (err)
+                          return res.send(
+                            "There is something went wrong. Please try again later."
+                          );
                         if (response) {
                           sgMail.setApiKey(process.env.SENDGRID_API_KEY);
                           const msg = passwordUpdateEmailTemplate(
@@ -391,7 +408,7 @@ export async function resetPassword(req, res) {
       return res.send({ token: "You are not authenticated" });
     }
   } catch (error) {
-    res.send(error.message);
+    return res.send("There is something went wrong. Please try again later.");
   }
 }
 // in profile part
@@ -410,9 +427,12 @@ export async function changePassword(req, res) {
       const request = new sql.Request();
       request.input("id", sql.Int, id);
       request.query(
-        "select * from users_dtls where user_dtls_id = @id",
+        "select user_dtls_id from users_dtls where user_dtls_id = @id",
         (err, result) => {
-          if (err) return res.send(err.message);
+          if (err)
+            return res.send(
+              "There is something went wrong. Please try again later."
+            );
           if (result.recordset.length > 0) {
             const username =
               result.recordset[0].user_firstname +
