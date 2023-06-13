@@ -45,7 +45,6 @@ export async function getTraineeInCompleteCourses(req, res) {
     return res.send({ error: "Not found" });
   }
 }
-
 export async function getAllTraineeCompleteCourses(req, res) {
   try {
     sql.connect(config, (err) => {
@@ -67,7 +66,6 @@ export async function getAllTraineeCompleteCourses(req, res) {
     return res.send({ error: "Not found" });
   }
 }
-
 export async function bookInstructorLiveClass(req, res) {
   const { date, startTime, traineeDtlsId, userEmail } = req.body;
   let hour = startTime?.split(":")[0];
